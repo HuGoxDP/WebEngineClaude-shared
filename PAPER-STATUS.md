@@ -90,7 +90,7 @@ These are exactly why the previous evaluation could not be defended:
 3. **Scene fingerprint in every row** — tris, GameObjects, textures, draw calls, shaders. A table
    must never again be orphaned from the scene it describes.
 
-## Two findings that constrain what the paper may claim
+## Three findings that constrain what the paper may claim
 
 **The skybox's real VRAM is not what the engine reports.** three.js converts an equirectangular
 `scene.background` into an *uncompressed* cube render target sized by the panorama's **height** —
@@ -116,6 +116,21 @@ when `ktx2=1`. That makes the two arms of the KTX2 A/B differ in a term the repo
 
 Watch the run itself at `ktx2=1`: ~416 MiB of skybox alone. If a run fails or thrashes on a 4 GB
 card, that is a finding, not a malfunction.
+
+**Benchscene1's floor has never rendered, on any build.** Found in ScenarioCreator during the
+freeze (`0.1.0-local.1787254037912`, and identical on the predecessor build — not a regression,
+not a benchmark bug). `Mesh.createPlane` winds its indices opposite to its stored normals, so it
+is back-face culled to nothing; `createCylinder`, `createCapsule` and `createTorus` share the
+defect on part of their geometry. Full detail: `.claude-shared/ENGINE-GAPS.md` G1,
+`ScenarioCreator/docs/ENGINE-GAPS.md` §4.
+
+**Consequence for the paper's text, not its numbers.** The scene's fill cost is not the fill cost
+"a grid of primitives over a floor plane" describes — the floor was never drawn and three of five
+meshes shade only their inner surface. Cross-build comparisons still stand, since the defect is
+identical on every measured build. Do not describe Scene 1's visual content more specifically
+than the numbers need; if a figure or caption shows the scene, expect a dark/hollow floor and say
+nothing that claims otherwise. Fixing this is out of scope before 24 August — it is exactly the
+kind of change the freeze exists to defer.
 
 ## Explicitly cut
 

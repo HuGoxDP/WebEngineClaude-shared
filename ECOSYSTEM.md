@@ -37,18 +37,21 @@ Nothing needs copying by hand. Verify which build is running with `BuildInfo.bui
 
 ## Reporting something the engine cannot do
 
-Do **not** work around it silently in a consumer. Write it up in that repo's list:
+Do **not** work around it silently in a consumer. Add a row to the shared index first —
+`.claude-shared/ENGINE-GAPS.md`, open vs. closed, one line each — then write the full entry
+(evidence, what's affected, workaround) in *your own* repo's list, using whichever of these
+already exists there:
 
 - `ScenarioCreator/docs/ENGINE-GAPS.md`
 - `testv/virtual-lab/docs/upstream/webenginets.md`
 - `WebEngineTS-Benchmarks/tasks/webenginets.md`
 
-Each entry needs evidence — a file, a line, a measurement — and a note on what the consumer does
-instead. The engine answers all three in `WebEngineTS/design/upstream-answers.md`.
+Each full entry needs evidence — a file, a line, a measurement — and a note on what the consumer
+does instead. The engine answers all three in `WebEngineTS/design/upstream-answers.md`.
 
-**Re-verify before reporting or acting.** Of the nine entries once on those lists, six were
-already fixed by the time they were re-checked. The lists describe the build they were written
-against, and that build is usually old.
+**Re-verify before reporting or acting.** Of the nine entries once spread across those lists, six
+were already fixed by the time they were re-checked. The lists describe the build they were
+written against, and that build is usually old.
 
 ## What changed in the engine
 
