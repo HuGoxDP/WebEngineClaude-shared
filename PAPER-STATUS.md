@@ -19,8 +19,8 @@ Article source: `WebEngineTS/ClaudeDocs/` — Section 5 is `evaluation2.tex`.
 | | |
 |---|---|
 | **P0-A matrix runner** | **Done.** `#matrix=<name>` in `run.ts` + `matrices.ts`: N reps × M configs unattended, a page reload per leg so static globals reset cleanly, drop-first, mean/stdDev/CV, scene fingerprint per row plus a `fingerprint_varies` flag. |
-| **Engine freeze** | **IN FORCE from 2026-08-20 19:27 UTC.** |
-| **Frozen build** | `0.1.0-local.1787254037912`, built `2026-08-20T19:27:19.485Z`, from engine commit `2baf724`. Every measurement must be against this stamp. |
+| **Engine freeze** | **RE-ARMED 2026-08-22 06:05 UTC**, after two rendering defects were fixed. Lifted deliberately on 22 Aug once it was confirmed no measurement existed to protect (`results/` held nothing newer than 3 August). |
+| **Frozen build** | `0.1.0-local.1787378753713`, built `2026-08-22T06:05:56.613Z`, from engine commit `ee7bb6e`. Every measurement must be against this stamp. The earlier `…7912` stamp is superseded — anything measured against it is not comparable. |
 | **Consumers** | All synced by `release:local`. WebEngineTSEditor/app skipped — no `node_modules/` yet. |
 | **Measurements** | Not started — the only thing left on the critical path. |
 | **Next action** | Run the evaluation matrix in WebEngineTS-Benchmarks; commit the CSVs. |
@@ -117,20 +117,21 @@ when `ktx2=1`. That makes the two arms of the KTX2 A/B differ in a term the repo
 Watch the run itself at `ktx2=1`: ~416 MiB of skybox alone. If a run fails or thrashes on a 4 GB
 card, that is a finding, not a malfunction.
 
-**Benchscene1's floor has never rendered, on any build.** Found in ScenarioCreator during the
-freeze (`0.1.0-local.1787254037912`, and identical on the predecessor build — not a regression,
-not a benchmark bug). `Mesh.createPlane` winds its indices opposite to its stored normals, so it
-is back-face culled to nothing; `createCylinder`, `createCapsule` and `createTorus` share the
-defect on part of their geometry. Full detail: `.claude-shared/ENGINE-GAPS.md` G1,
-`ScenarioCreator/docs/ENGINE-GAPS.md` §4.
+**Benchscene1's floor never rendered — now fixed, and this is why the build stamp changed.**
+`Mesh.createPlane` wound its indices opposite to its stored normals, so it was culled to nothing;
+`createCylinder`, `createCapsule` and `createTorus` shared the defect. Corrected 22 Aug
+(`ee7bb6e`). Separately, normal and metallic-roughness maps were being decoded as sRGB, and the
+KTX2 path disagreed with the image path — so the two arms of the KTX2 A/B differed in a shading
+input as well as a texture format. Also fixed. Detail: `.claude-shared/ENGINE-GAPS.md` G1 and G3.
 
-**Consequence for the paper's text, not its numbers.** The scene's fill cost is not the fill cost
-"a grid of primitives over a floor plane" describes — the floor was never drawn and three of five
-meshes shade only their inner surface. Cross-build comparisons still stand, since the defect is
-identical on every measured build. Do not describe Scene 1's visual content more specifically
-than the numbers need; if a figure or caption shows the scene, expect a dark/hollow floor and say
-nothing that claims otherwise. Fixing this is out of scope before 24 August — it is exactly the
-kind of change the freeze exists to defer.
+**Both change the numbers**, which is exactly why they were fixed before measuring rather than
+after. Scene 1 now draws its floor and three solid meshes instead of hollow shells, so its fill
+cost is higher and honestly described; Scene 2's two KTX2 arms now shade identically, so "the same
+scene with compressed textures" is finally true. **Measure only against
+`0.1.0-local.1787378753713`.**
+
+One consequence for the text: Scene 1 is now genuinely "a grid of primitives over a floor plane",
+so that description is safe to use — it was not before.
 
 ## Explicitly cut
 

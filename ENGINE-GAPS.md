@@ -12,18 +12,26 @@ were re-checked. The engine moves faster than any list describing it.
 
 | # | Gap | Found in | Found against | Detail |
 |---|---|---|---|---|
-| G1 | Four `Mesh.create*` primitives (`createCylinder`, `createCapsule`, `createTorus`, `createPlane`) emit indices wound opposite to their stored normals — back-face culled, renders hollow or invisible | ScenarioCreator | `0.1.0-local.1787254037912` (current frozen build — **not a regression**, same on `...1411`) | `ScenarioCreator/docs/ENGINE-GAPS.md` §4 |
 | G2 | Streamed asset path reports ~2.9× the texture VRAM of the ZIP path for the same scenario; not reproduced in `Resources` + source, root cause still above that layer | testv/virtual-lab | `0.1.0-local.1786569427449` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
 
-**G1 is why Benchscene1's floor plane has never rendered, in any measurement, on any build** — it's
-a `createPlane`. Three of its five object meshes (cylinder, capsule, torus) shade only their far
-inner surface. Not a benchmark bug and not build-dependent (verified identical on the frozen build
-and its predecessor), but any paper text calling the scene "a grid of primitives over a floor
-plane" describes something the renderer never produced. See `.claude-shared/PAPER-STATUS.md`.
+## Fixed 2026-08-20, after the freeze was lifted
 
-**Under the freeze (see PAPER-STATUS.md): write gaps up, do not fix them, even trivial ones.**
-Both G1 and G2 were found this way and correctly left alone — G1 in particular arrived *during*
-the freeze and stayed a documentation entry rather than a patch.
+The freeze was lifted deliberately once it was confirmed **no measurement had been taken yet** —
+`results/` held nothing newer than 3 August. Both of these change rendered output, so fixing them
+before measuring was the whole point; fixing them after would have invalidated the table.
+
+| # | Gap | Found in | Fix |
+|---|---|---|---|
+| G1 | Four `Mesh.create*` primitives wound opposite to their stored normals — back-face culled, hollow or invisible | ScenarioCreator | Winding corrected in `createPlane`, `createCylinder`'s side wall, `createCapsule`, `createTorus`. `createCapsule` also ordered its middle rings bottom-up between hemispheres ordered top-down, so one index grid stitched non-adjacent rings — fixed too. Pinned by `tests/PrimitiveWinding.test.ts`, which audits every builder without a renderer. |
+| G3 | Every texture from `Resources` tagged sRGB, so normal and metallic-roughness maps were decoded as colour — and the KTX2 path disagreed with the image path, moving a shading input between the two arms of a KTX2 A/B | ScenarioCreator | `StandardMaterial` slots declare their content: albedo and emission are colour, normal/metallic/occlusion/height are linear, matching `GLTFLoader`. Pinned by `tests/TextureColorSpace.test.ts`. |
+
+**Both change measured numbers.** G1 changes what is drawn and therefore fill cost; G3 changes
+shading inputs. Anything measured before `0.1.0-local.<the build after this>` is not comparable.
+See `PAPER-STATUS.md` for the current frozen stamp.
+
+**Under a freeze: write gaps up, do not fix them.** That rule held for as long as the freeze
+protected real data. It stops applying the moment there is no data to protect, and re-checking
+that is cheaper than assuming either way.
 
 ## Closed since 2026-08-19
 
