@@ -90,7 +90,7 @@ These are exactly why the previous evaluation could not be defended:
 3. **Scene fingerprint in every row** — tris, GameObjects, textures, draw calls, shaders. A table
    must never again be orphaned from the scene it describes.
 
-## Three findings that constrain what the paper may claim
+## Four findings that constrain what the paper may claim
 
 **The skybox's real VRAM is not what the engine reports.** three.js converts an equirectangular
 `scene.background` into an *uncompressed* cube render target sized by the panorama's **height** —
@@ -132,6 +132,23 @@ scene with compressed textures" is finally true. **Measure only against
 
 One consequence for the text: Scene 1 is now genuinely "a grid of primitives over a floor plane",
 so that description is safe to use — it was not before.
+
+**Scene 2's two KTX2 arms were still rendering different pictures — fixed 24 Aug, in content.**
+G3 made the arms *shade* identically; it did not make them the same image. The de-embedded colour
+map was being uploaded upside down: glTF's UV origin is top-left and `GLTFLoader` uploads
+`flipY = false`, but `Texture2D.fromArrayBuffer` keeps three.js's `flipY = true`. The KTX2 path
+was unaffected, because `CompressedTexture` forces `false`. So `ktx2=0` and `ktx2=1` differed by a
+**max channel Δ of 173** — a different image, not a different texture format. On this atlas (fur
+swatches packed against black gutters) the flip read as a dark, blotchy model rather than as an
+obvious flip, which is why it survived the entry-5 colour-space work.
+
+Corrected in `Benchscene2_complexmodel/scripts/Scenario.ts`; the arms now differ by **22**, which
+is UASTC transcode noise. **No engine change** — the freeze holds; written up as `G4` in
+`ENGINE-GAPS.md` and §6 of `ScenarioCreator/docs/ENGINE-GAPS.md`. The frozen stamp is unchanged,
+so nothing already measured is invalidated — but **any Scene 2 KTX2 run taken before 24 Aug
+compared two different scenes** and must be re-taken, and the sentence above about the arms
+shading identically only became true today. Verified against the shipping archive: `ktx2=0` now
+matches the pre-de-embedding render to a max Δ of 5 (JPEG q92 noise).
 
 ## Explicitly cut
 
