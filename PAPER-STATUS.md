@@ -45,6 +45,139 @@ table.
 Lifting the freeze is a decision, not a default: it happens when the CSVs behind Section 5 are
 committed.
 
+## Both machines are in — and one methodological finding outranks everything else
+
+Intel UHD (24 Aug) and RTX 3050 (25 Aug), same engine stamp, same archives. This *is* the
+cross-device comparison: two GPUs, no flag involved.
+
+### **38 of 58 configurations are VSync-bound. `mean_ms` measures the monitor, not the engine.**
+
+Intel sits at 60 Hz (≈16.2 ms), the RTX 3050 at 144 Hz (≈6.95 ms). On the 3050 **every**
+configuration is pinned except Scene 1 at N5000 — Scene 3's whole 3.1→3.7 ladder reads 7.03 …
+6.96 ms, a 1% spread that is the refresh rate and nothing else.
+
+**Consequences, and they are not optional:**
+
+- Do **not** present `mean_ms` for any pinned row. A table showing "the optimisation changed
+  nothing" where the scene never dropped below the refresh rate is not a null result, it is an
+  unmeasured one, and a reviewer who checks `fps ≈ 143` on every row will see it immediately.
+- Use **`cpu_ms`** (`Application.cpuFrameTime`, busy ms on the main thread) as the frame metric.
+  It is not VSync-bound and it exists for exactly this. `texVram_MB` and `first_render_ms` are
+  likewise unaffected.
+- **Scene 1 at N5000 is the only configuration below the cap on both machines**, so it is the one
+  place a wall-clock frame time may be quoted.
+- If a wall-clock frame number is wanted more widely, the runs must be repeated with VSync off
+  (`--disable-frame-rate-limit --disable-gpu-vsync`) or on a heavier scene. That is a re-run, not
+  a re-analysis.
+
+### The KTX2 interaction is a genuine cross-device result
+
+| | texture VRAM | `cpu_ms` | frame |
+|---|---|---|---|
+| Intel, `maxSize=0` | 208 → 69.3 MB | 0.886 → 0.895 | −0.7% |
+| Intel, `maxSize=2048` | 88 → 69.3 MB | 0.831 → **0.918** | **+14.0%** |
+| RTX 3050, `maxSize=0` | 208 → 69.3 MB | 0.793 → 0.809 | −0.2% |
+| RTX 3050, `maxSize=2048` | 88 → 69.3 MB | 0.797 → 0.802 | −0.2% |
+
+**The +14% appears on integrated graphics and not on discrete**, and the mechanism is the one
+predicted: at `ktx2=1` the cap cannot reach the panorama, so three.js derives a 6×4096²
+uncompressed cube render target (~384 MiB) instead of 6×1024² (~24 MiB). A discrete card with
+dedicated VRAM absorbs it; an integrated one sharing system memory does not.
+
+That is the strongest cross-device claim available here, and it needs no `gpu` flag — it is two
+machines. **Report it as the flag interaction on integrated hardware**, with the mechanism.
+
+### Scene 1 at N5000 is CPU-bound, which is why the discrete GPU barely helps
+
+| | frame | fps | `cpu_ms` |
+|---|---|---|---|
+| Intel | 26.28 ms | 38.0 | 23.87 |
+| RTX 3050 | 23.96 ms | 41.8 | 23.51 |
+
+The discrete card is **1.10×** faster, and the CPU times are within 1.5% of each other. At 3931
+draw calls the bottleneck is draw-call submission on the main thread, not the GPU. That is a
+publishable finding on its own and it motivates the engine's instancing and static-batching work
+(P1.4) far better than a synthetic argument would.
+
+### `gpu` is a no-op on both machines
+
+Every row on each machine reports that machine's only GPU, on both `low-power` and
+`high-performance`. The `crossdevice` matrix measures nothing on either box; delete the claim,
+keep the two-machine comparison.
+
+## Results — first full matrix, 24 August, Intel UHD
+
+29 configurations, all six matrices, against `0.1.0-local.…` built `2026-08-24T18:43:54.699Z`.
+CSVs in `WebEngineTS-Benchmarks/results/*_intel_20260824-*.csv`.
+
+**Quality gates.** `fingerprint_varies = 0` everywhere; drop-first applied (4/5, 9/10). Worst
+`mean_ms` CV is **3.9%** — the headline metric passes. `cpu_ms` CV exceeds 5% in 5 of 29
+configurations, all in Scene 1 at low object counts, where the quantity is 1–6 ms and near the
+timer's resolution. Report `mean_ms`; treat Scene 1's `cpu_ms` as indicative.
+
+**The `gpu` flag is a no-op on this machine.** Every one of the 29 rows reports the same
+`ANGLE (Intel, Intel(R) UHD Graphics …)`, including both arms of `crossdevice` and both arms of
+`ktx2scene`. `gpu=low-power` and `gpu=high-performance` selected the same silicon. **The
+`crossdevice` matrix therefore measures nothing** and must not be presented as a cross-device
+result. The real cross-device comparison is this Intel run against the RTX 3050 run — two
+machines, not two hints — and needs no flag at all.
+
+**KTX2 transcodes.** `texture_formats` reads `BC7:12` on every `ktx2=1` row and `RGBA8:12` on
+every `ktx2=0` row. E1's remaining acceptance condition is met on integrated hardware.
+
+### The KTX2 A/B, both axes
+
+| | texture VRAM | frame time |
+|---|---|---|
+| `maxSize=0` | 208.0 → 69.3 MB (**−138.7**) | −0.7% (noise) |
+| `maxSize=2048` | 88.0 → 69.3 MB (−18.7) | **+14.0%** |
+
+At `maxSize=0` KTX2 is a clean −67% of texture VRAM at no measurable frame cost. **Build the
+paper's KTX2 claim from this pair.**
+
+At `maxSize=2048` it costs 14% of frame time, and the mechanism is the one predicted: the cap does
+not reach a KTX2 texture, so the 8192×4096 panorama stays full size and three.js derives a
+6×4096² uncompressed cube render target from it instead of 6×1024². On integrated graphics
+sharing system memory that is visible in the frame. Note the *reported* VRAM still falls (−18.7 MB)
+because the planets' saving outweighs the skybox's growth — the earlier prediction of a reported
+*rise* was about the skybox in isolation and does not hold for the scene total. Report this row as
+the flag interaction, with the frame cost, not as a VRAM result.
+
+### Scene 3 incremental, 3.1 → 3.7
+
+**+2.3% overall** — the full stack is slower than the baseline. It is not a flat curve: 3.2
+(`maxSize`) takes −11.7%, and 3.5 (`ktx2`) gives back +13.6% for the reason above.
+
+**Do not present Table 3 as a cumulative ladder.** Present each optimisation against the metric it
+can move, which is what the roadmap always specified: KTX2 → texture VRAM, dirty transforms → CPU
+frame time, shader warmup → first-render cost. A ladder here would claim the engine gets slower
+the more optimisations are enabled, which is true of this stacking order and false as a statement
+about the optimisations.
+
+### Dirty transforms — the sweep pays off, in the phase it touches
+
+| N | Update `dirty=0` | `dirty=1` | speedup | Render `d0` → `d1` | frame `d0` → `d1` |
+|---|---|---|---|---|---|
+| 104 | 0.149 | 0.056 | 2.7× | 0.720 → 0.771 | 15.27 → 15.12 |
+| 504 | 0.628 | 0.183 | 3.4× | 1.915 → 2.253 | 16.93 → 16.95 |
+| 1004 | 1.085 | 0.230 | 4.7× | 4.247 → 4.945 | 18.65 → 18.53 |
+| 5004 | 3.780 | 1.037 | 3.6× | 18.599 → 21.994 | 26.28 → 26.54 |
+
+**Update gets 2.7–4.7× faster and the ratio widens with object count** — that is the scaling claim
+the sweep was run to make available, and it is real. **Total frame time does not move** (±5%),
+because the work moves into the pre-render flush rather than disappearing: every object in
+Benchscene1 rotates every frame, so every transform is dirty every frame and there is nothing for
+the dirty flag to skip.
+
+That is an honest and publishable result, and stronger than a speedup claim would have been: the
+optimisation is a *deferral*, and it pays only in proportion to how many transforms are static.
+Say so, and say that the benchmark scene is deliberately its worst case.
+
+### Shader warmup does nothing measurable
+
+Scene 3 3.5 → 3.6: first render 413 → 416 ms. Scene 2, all three `maxSize` values: no separation
+between `warm0` and `warm1`. Report it as a negative result with the numbers.
+
 ## The run plan — decided 20 August
 
 Four matrices exist (~120 runs, ~39 min at 60 Hz). Before starting, add:
@@ -142,13 +275,20 @@ was unaffected, because `CompressedTexture` forces `false`. So `ktx2=0` and `ktx
 swatches packed against black gutters) the flip read as a dark, blotchy model rather than as an
 obvious flip, which is why it survived the entry-5 colour-space work.
 
-Corrected in `Benchscene2_complexmodel/scripts/Scenario.ts`; the arms now differ by **22**, which
-is UASTC transcode noise. **No engine change** — the freeze holds; written up as `G4` in
-`ENGINE-GAPS.md` and §6 of `ScenarioCreator/docs/ENGINE-GAPS.md`. The frozen stamp is unchanged,
-so nothing already measured is invalidated — but **any Scene 2 KTX2 run taken before 24 Aug
-compared two different scenes** and must be re-taken, and the sentence above about the arms
-shading identically only became true today. Verified against the shipping archive: `ktx2=0` now
-matches the pre-de-embedding render to a max Δ of 5 (JPEG q92 noise).
+Corrected in `Benchscene2_complexmodel/scripts/Scenario.ts` — `albedo.flipVertically = false`, set
+unconditionally so both arms land in one orientation. The arms now differ by **22**, which is
+UASTC transcode noise. Written up as `G4` in `ENGINE-GAPS.md` and §6 of
+`ScenarioCreator/docs/ENGINE-GAPS.md`. **Any Scene 2 KTX2 run taken before 24 Aug compared two
+different scenes** and must be re-taken, and the sentence above about the arms shading identically
+only became true today. Verified against the shipping archive: `ktx2=0` matches the
+pre-de-embedding render to a max Δ of 5 (JPEG q92 noise).
+
+**Scene 2 is unaffected by the 24 Aug engine update.** `Texture.flipVertically` arrived in
+`0.1.0-local.1787597032574` (installed in ScenarioCreator 21:44) and the content workaround moved
+onto it, off the Three.js internals it had been reaching into. Rendered output did not move:
+the same archive on the old build and on the new one is **pixel-identical, max Δ 0**, on both arms
+of the A/B. So the two stamps are comparable *for this scene* — which is not a general claim about
+the update, only the one measured here.
 
 ## Explicitly cut
 
