@@ -70,6 +70,36 @@ configuration is pinned except Scene 1 at N5000 — Scene 3's whole 3.1→3.7 la
   (`--disable-frame-rate-limit --disable-gpu-vsync`) or on a heavier scene. That is a re-run, not
   a re-analysis.
 
+### Turning VSync off was tried on both machines. Do not repeat it.
+
+**Intel UHD: it breaks the measurement.** Median frame 0.50 ms, **max 2709 ms**, stdDev 110 ms
+against a mean of 5.21. `render` rose from 0.61 ms to 4.83 — the CPU is not computing, it is
+blocked waiting on the GPU. Unsynchronised, the engine pushes ~2000 fps into a card sharing system
+memory, the queue saturates and the browser stalls for seconds at a time. A mean over that
+distribution describes nothing. **Do not re-run Intel without VSync.**
+
+**RTX 3050: it works, and mostly measures the timer.** VSync did come off (2000–3000 fps), but
+Scene 2 and Scene 3 then render in 0.33–0.52 ms, where `mean_ms` CV runs 4–22%. Half a millisecond
+cannot be measured to 5% against scheduler noise. The scenes are simply too light for this card,
+and removing the frame cap does not fix that — only a heavier scene would.
+
+**One row is worth keeping from it.** Scene 1 at N5000 is heavy enough to measure either way, and
+without the cap it separates what VSync had hidden:
+
+| | frame | CV | `cpu_ms` |
+|---|---|---|---|
+| `dirty=0` | 18.70 ms | 4.2% | 18.34 |
+| `dirty=1` | 21.16 ms | 6.8% | 20.79 |
+
+**+13%** — dirty transforms make this scene *slower*, where the VSync-bound run showed +1.6% and
+called it noise. That agrees with the phase breakdown on Intel: the work moves from Update into
+the pre-render flush, and it does not move for free. Report it.
+
+**So the measurement condition is VSync on, and the metric is `cpu_ms`.** It is stable there
+(CV < 5% almost everywhere), it is what `Application.cpuFrameTime` exists for, and it is the same
+condition on both machines. Quote wall-clock only for Scene 1 at N5000. Keep the no-VSync
+directories: they are the evidence for the paragraph above and for why the condition was chosen.
+
 ### The KTX2 interaction is a genuine cross-device result
 
 | | texture VRAM | `cpu_ms` | frame |
