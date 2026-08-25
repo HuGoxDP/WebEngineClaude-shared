@@ -99,11 +99,20 @@ draw calls the bottleneck is draw-call submission on the main thread, not the GP
 publishable finding on its own and it motivates the engine's instancing and static-batching work
 (P1.4) far better than a synthetic argument would.
 
-### `gpu` is a no-op on both machines
+### The `gpu` flag is a label, not a control — the GPU is switched in Windows
 
-Every row on each machine reports that machine's only GPU, on both `low-power` and
-`high-performance`. The `crossdevice` matrix measures nothing on either box; delete the claim,
-keep the two-machine comparison.
+Confirmed by the operator: the card is selected in Windows' graphics settings per application,
+and `gpu=low-power` / `high-performance` were only ever tags on the run. Every row on each
+machine reports that machine's selected GPU under either value.
+
+**So `eff_powerPreference` in the CSVs is misleading and must not be cited.** It records what the
+flag asked for, which nothing acted on. The column that identifies the hardware is `gpu`, which
+carries the unmasked renderer string — cite that.
+
+The `crossdevice` matrix therefore adds nothing over the two directories: drop it, and let
+`results/laptop-intel/` vs `results/laptop-rtx3050/` be the comparison. Two machines, switched
+deliberately, is a stronger design than a hint the browser is free to ignore — it just has to be
+described as what it is.
 
 ## Results — first full matrix, 24 August, Intel UHD
 
