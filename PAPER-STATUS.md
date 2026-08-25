@@ -212,10 +212,21 @@ That is an honest and publishable result, and stronger than a speedup claim woul
 optimisation is a *deferral*, and it pays only in proportion to how many transforms are static.
 Say so, and say that the benchmark scene is deliberately its worst case.
 
-### Shader warmup does nothing measurable
+### Shader warmup — correction: it works, on the discrete card
 
-Scene 3 3.5 → 3.6: first render 413 → 416 ms. Scene 2, all three `maxSize` values: no separation
-between `warm0` and `warm1`. Report it as a negative result with the numbers.
+Called a null result on 24 August from Intel and Scene 3 alone. The 3050 run overturns that.
+
+Scene 2, `first_render_ms`: on the RTX 3050 all three `warm=1` configurations land on
+**157.0 ± 0.2 ms** while the three `warm=0` ones spread across 169.9 / 186.2 / 172.5. That is −11%
+on average, and the collapse of a 16 ms spread to 0.4 ms is the clearer half of it.
+`max_first10_ms` moves with it, 9.1 → 7.6.
+
+On Intel it does nothing: no systematic direction, every pair inside one standard deviation.
+Scene 3 shows nothing on either machine — its first render is dominated by asset loading, not
+shader compilation.
+
+So it is a **cross-device result, not a null one**: warmup pays where shader compilation is the
+cost, and on this integrated part it is not.
 
 ## The run plan — decided 20 August
 
