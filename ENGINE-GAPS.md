@@ -20,7 +20,8 @@ orientation through the public API instead of reaching into the Three.js texture
 rule violation and unblocks the measurement. The convention itself is **not** settled: KTX2 forces
 `flipY = false` and cannot do otherwise, so unifying means moving the whole engine — including all
 twelve primitive UV generators — to a top-left origin. That changes rendered output in content
-nobody looks at before it ships, so it waits until after the submission. Plan and staging:
+nobody looks at before it ships, so it needs the visual harness in
+`WebEngineTS/design/coordinate-check/` first. Plan and staging:
 `WebEngineTS/design/unity-coordinates-plan.md`.
 
 ## Closed
@@ -48,12 +49,9 @@ test are named here so a re-report can be answered without re-deriving anything.
 | Basis transcoder needs `'unsafe-eval'` | Not the engine's to fix — it ships no transcoder |
 
 **Anything that changes rendered output changes measured numbers.** G1, G3, the plane orientation
-and the second UV set all do. See `PAPER-STATUS.md` for the stamp every measurement must be taken
-against.
-
-**Under a freeze: write gaps up, do not fix them.** That held for as long as the freeze protected
-real data. It stops applying the moment there is nothing to protect — and re-checking whether
-there is costs less than assuming either way.
+and the second UV set all do — so a benchmark result is only comparable against another taken on
+the same engine build. Record the build stamp (`BuildInfo.version` / `builtAt`) with any run kept
+for comparison.
 
 ## How to use this file
 
@@ -63,5 +61,5 @@ there is costs less than assuming either way.
 3. Closing one: move the row to **Closed** with how it landed and which test pins it. Keep the
    detail entry in the originating file rather than deleting it — the reason content is shaped
    the way it is would otherwise have to be re-derived.
-4. **During the freeze** (`PAPER-STATUS.md`): add gaps freely, act on none that would change
-   engine behaviour.
+4. **If a measurement campaign is in flight**: add gaps freely, but hold any fix that would change
+   engine behaviour until it ends — landing one mid-run mixes two builds into one table.

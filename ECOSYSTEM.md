@@ -7,11 +7,11 @@ four sessions at once. Repo-specific detail belongs in that repo's own `CLAUDE.m
 
 | Repo | Owns | Path |
 |---|---|---|
-| **WebEngineTS** | The engine, its docs, and (temporarily) the thesis article in `ClaudeDocs/` | `WebstormProjects/WebEngineTS` |
+| **WebEngineTS** | The engine and its docs | `WebstormProjects/WebEngineTS` |
 | **ScenarioCreator** | Scenario *content* and the CLI that packages it into ZIPs | `WebstormProjects/ScenarioCreator` |
 | **WebEngineTSEditor** | The graphical scenario editor (`app/` Angular, `design/` mockup) | `WebstormProjects/WebEngineTSEditor` |
 | **testv/virtual-lab** | The student platform: catalog, backend, db, nginx, docker | `WebstormProjects/testv/virtual-lab` |
-| **WebEngineTS-Benchmarks** | The benchmark harness, paper scenes, RUNBOOK, recorded results | `WebstormProjects/WebEngineTS-Benchmarks` |
+| **WebEngineTS-Benchmarks** | The benchmark harness, scenes, RUNBOOK, recorded results | `WebstormProjects/WebEngineTS-Benchmarks` |
 
 ## The one rule that must not be broken
 
