@@ -32,15 +32,32 @@ speculative. The consumer with real users is the platform.
 
 ## 1. WebEngineTS — the engine
 
-### P0 — Verify the handedness fix against real content *(~1 day, cross-repo)*
-`Scene._contentRoot` changed what every scenario looks like. Tests and `design/coordinate-check/`
-both pass, but neither can tell whether an author compensated for the old mirror by hand; where
-they did, the content is now wrong the other way.
+### P0 — Verify the handedness fix against real content — **static analysis done 2026-09-04, visual pass outstanding**
 
-Order, worst consequence first: **DNA** (the helix must read right-handed — B-DNA), then
-**Molecules** and **Crystals** (stereochemistry, crystal handedness), then **Circuits** and
-**Mechanics** (right-hand rule), then the rest. Where a scenario reads mirrored, remove the
-compensation *in the content*, not in the engine.
+**No scenario compensated for the old mirror by hand.** Searched all ten for mirror/flip/handedness
+comments and negative scales: the only "mirror" hits are *optical* mirrors in Optics. So the fix
+makes previously-wrong content right, and breaks nothing.
+
+Three scenarios were rendering something factually wrong before, and are now correct — no content
+edit needed in any of them:
+
+| Scenario | Handedness-carrying claim | Before the fix |
+|---|---|---|
+| **DNA** | `nodeAt()` traces `(r·cos a, y, r·sin a)` with `a` and `y` both increasing. In the right-handed triple `(X, Z, Y)` that is `(a cos t, a sin t, b t)`, `b > 0`, torsion `> 0` ⇒ **right-handed**, correct B-DNA | rendered **left-handed** — the Z-form, wrong biology |
+| **solar-system** | `Orbiter` steps `x = cos θ`, `z = sin θ` with θ increasing. Viewed from north (right `+X`, up `+Z`) that is **counterclockwise** ⇒ prograde, correct | rendered **clockwise** — retrograde |
+| **Optics** | `Rays.ts` documents the standard sign convention: *"d — object distance, POSITIVE to the left of the element"* | drew the object on the **right**, light travelling right-to-left, contradicting its own rule |
+
+Not sensitive, checked and dismissed: **Molecules** (46 species, every one achiral — no stereocentre,
+so a mirror image superimposes), **Crystals** (8 structures, all centrosymmetric space groups —
+NaCl, CsCl, diamond, graphite, Cu, α-Fe, Mg, Ar; no quartz), **AtomStructure** and **GasTheory**
+(spherical / random). **Circuits** is DC only — no magnetic field, so no right-hand rule.
+**Mechanics** is an incline under vertical gravity with no cross products. **Kepler** is an abstract
+two-body demo where either orbital sense is valid. For those four the mirror changed layout, not
+meaning.
+
+**Still to do — the part static analysis cannot answer.** Load each scenario and look, specifically
+for: any text drawn as 3D geometry (it would read backwards), sprites and billboards, and shadow
+direction. Push the fixed engine to the consumers first with `npm run release:local`.
 
 ### P1 — Defects found but not fixed *(~1 day)*
 - **`LineRenderer.useWorldSpace` is a no-op.** Stored, never read; vertices are always local. The
