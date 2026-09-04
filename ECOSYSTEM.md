@@ -53,6 +53,18 @@ does instead. The engine answers all three in `WebEngineTS/design/upstream-answe
 were already fixed by the time they were re-checked. The lists describe the build they were
 written against, and that build is usually old.
 
+## Where plans and history live
+
+**One plan for every repo: [`PLAN.md`](PLAN.md).** New tasks go there, under their project — do not
+start a per-repo `PLAN.md`/`TODO.md` again. It replaced five scattered plans on 2026-09-04.
+
+**One changelog: [`CHANGELOG.md`](CHANGELOG.md)**, a section per project. The single exception is
+`WebEngineTS/CHANGELOG.md`, which stays because `package.json` ships it inside the npm tarball —
+that one is the engine's release notes, this one is the cross-project record.
+
+Neither is `@`-imported: they are read on demand, so they cost nothing per session. Deep design
+documents stay in their own repos and are indexed at the end of `PLAN.md`.
+
 ## What changed in the engine
 
 `WebEngineTS/CHANGELOG.md` — one section per released version. Read it before assuming a
