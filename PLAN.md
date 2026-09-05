@@ -18,15 +18,17 @@ Measured 2026-09-03, not assumed:
 
 | Repo | Last commit | State |
 |---|---|---|
-| **WebEngineTS** | 2026-09-04 | 53k LOC, 6 TODOs, 1762 tests. Healthy. |
+| **WebEngineTS** | 2026-09-05 | 53k LOC, 6 TODOs, 1765 tests. Healthy. |
 | **testv/virtual-lab** | 2026-08-30 | **Live — students use it.** Express + `pg` + nginx + Docker, Angular frontend. |
 | **ScenarioCreator** | 2026-08-30 | Active, 10 production scenarios. To be retired once the editor can export. |
-| **WebEngineTSEditor** | 2026-08-11 | **Dormant stub.** 19 `.ts` files; `app/` has never been `npm install`ed, so `release:local` has always skipped it. |
+| **WebEngineTSEditor** | 2026-09-05 | 19 `.ts` files, and **it builds** as of today. Takes the packed tarball like every other consumer. Whether it *runs* usefully is still open. |
 | **WebEngineTS-Benchmarks** | 2026-08-30 | Harness + recorded results. Re-measure after any engine change that moves a number. |
 
-**The consequence:** much of the engine's planned work (Canvas UI Stage 1, Unity-parity Stages 2–4)
-is justified by the editor — and the editor does not build. Until it does, that work is
-speculative. The consumer with real users is the platform.
+**The consequence, revised 2026-09-05:** the work justified by the editor (Canvas UI Stage 1,
+Unity-parity Stages 2–4) was parked because the editor did not build. It does now, so those items
+are no longer speculative on that ground — but nothing has yet shown the editor *doing* anything, so
+sequence them behind editor P1 (decide what it is for) rather than starting them outright. The
+consumer with real users is still the platform.
 
 ---
 
@@ -64,8 +66,12 @@ direction. Push the fixed engine to the consumers first with `npm run release:lo
   default is `true`, the opposite of what happens, and Unity's `true` means world space. Fixing it
   **changes rendered output** for any LineRenderer under a transformed parent — DNA has one. The
   default is a content decision, not a free choice.
-- **`Renderer._computeWorldBounds` has no test** across the handedness mirror. The fix is reasoned,
-  not witnessed; standing a `MeshRenderer` with real geometry up headlessly did not work cheaply.
+- ~~`Renderer._computeWorldBounds` has no test~~ — **done 2026-09-05, and it was hiding a real
+  bug.** Three's `updateMatrixWorld` reads `parent.matrixWorld` without refreshing it, so world
+  bounds were computed against a stale ancestor chain — identity before the first render. Bounds
+  came back at the origin however the object was placed, and had done since long before the
+  handedness work. `Transform._computeHierarchyBounds` had the same fault *plus* returned a
+  mirrored Z. Both fixed, three regression tests added.
 
 ### P2 — `RenderTexture` *(~2–3 days, after the editor question is settled)*
 The one genuinely missing Unity primitive for this domain (`NavMesh`, `Terrain`, `Tilemap` are
