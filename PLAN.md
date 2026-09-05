@@ -101,15 +101,20 @@ Express + `multer` + `pg`, nginx, Docker Compose, Playwright e2e. Closed: catalo
 file half, build identity, Playwright, archive GC, CSP, the Google Drive removal, the CI nginx
 check.
 
-1. **G2 — the streamed path holds ~2.9× the texture VRAM of the ZIP path** *(the one blocker)*.
-   269.8 MB vs 92.8 MB, same scenario, same 19 live textures — so the platform will not default to
-   streaming. The engine has already shown `Resources` + a source are identical
-   (`WebEngineTS/tests/SourceVramParity.test.ts`) and added the instrument. **Next move is here:**
-   re-run `e2e/tests/streaming.spec.ts` printing both `liveTextures` and `textures`.
-   - `liveTextures` differs, `textures` matches → the streamed path retains textures nothing drew.
-     A leak; send both figures upstream.
-   - Both match → same textures estimated at different sizes. Check `textureFormats`, then
-     dimensions.
+1. **G2 — diagnosed 2026-09-05; the remaining work is content-side, not platform-side.**
+   Streamed scenarios eagerly decode every non-`Lazy` manifest asset
+   (`Scenario._preloadCriticalAssets`, then `_startDeferredLoading`); the ZIP path is lazy by
+   design. The solar-system content ships **redundant assets** — all six planets declare both a
+   `.glb` and a loose albedo `.jpg`, plus Earth's normal and emissive — so the streamed path
+   decodes both sets and the ZIP path never touches the unused ones. That is why
+   `renderer.textures` matches at 19 (GPU uploads) while `estimatedTextureVramBytes` does not
+   (every live `Texture` object). **Not an engine leak.**
+   - **To confirm:** re-run `e2e/tests/streaming.spec.ts` printing `liveTextures` *and* `textures`.
+     Prediction: `liveTextures` differs, `textures` matches.
+   - **To fix (ScenarioCreator, §4):** mark the fallback textures `Lazy` in the manifest, or stop
+     emitting them for planets that have a model.
+   - Only then is the "2.9×" number worth re-reading as a streaming cost.
+
 2. **R8 / Phase 6 — streaming integration.** The path is proven; wiring it end to end is blocked on
    ScenarioCreator emitting manifests, not on the engine.
 3. **R2 runtime half — KTX2 transcode is never called at runtime.** The file half is verified.
@@ -159,6 +164,9 @@ P0–P4 are done (compression, `scenario.json`, real manifest metadata, LOD vari
 Open:
 
 1. **Emit manifests for the streaming path** — blocks virtual-lab item 2.
+2. **Stop shipping redundant fallback textures, or mark them `Lazy`** — the cause of G2. Every
+   solar-system planet declares a `.glb` *and* a loose albedo; the streamed path decodes both
+   because prefetch covers everything not marked `Lazy`. See `ENGINE-GAPS.md` G2.
 2. **P3's VRAM claim is unmeasured** — LOD texture variants shipped, the saving was never measured.
 3. **Open question: where hashed objects live** — a directory beside the archive, or content-addressed
    storage. Needs a decision before streaming ships.

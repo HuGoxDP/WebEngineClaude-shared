@@ -12,8 +12,24 @@ were re-checked. The engine moves faster than any list describing it.
 
 | # | Gap | Found in | Found against | Detail |
 |---|---|---|---|---|
-| G2 | Streamed asset path reports ~2.9× the texture VRAM of the ZIP path for the same scenario; not reproduced in `Resources` + source, root cause still above that layer | testv/virtual-lab | `0.1.0-local.1786569427449` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
+| G2 | Streamed asset path reports ~2.9× the texture VRAM of the ZIP path for the same scenario | testv/virtual-lab | `0.1.0-local.1786569427449` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
 | G4 | Texture orientation depends on the file format: the image path uploads `flipY = true`, glTF and KTX2 use `false`, so a de-embedded map samples upside down and a KTX2 A/B compares two different pictures | ScenarioCreator | `0.1.0-local.1787408668962` | `ScenarioCreator/docs/ENGINE-GAPS.md` §6 |
+
+**G2 has a diagnosis (2026-09-05), and it is not an engine leak.** Streamed scenarios eagerly
+decode every non-`Lazy` manifest asset — `Scenario._preloadCriticalAssets` then
+`_startDeferredLoading`, which is the streaming design working as intended, and which the ZIP path
+deliberately skips ("a ZIP is already in memory… nothing is gained by asking earlier"). The
+solar-system content then ships **redundant assets**: every planet declares both a `.glb` *and* a
+loose albedo `.jpg` (`texAlbedo: "mercury", model: "mercury"`, and so on for six planets, plus
+Earth's normal and emissive). The ZIP path never decodes the unused fallbacks because
+`Resources.tryLoad` is lazy; the streamed path decodes both sets. That is the right magnitude for
+2.9×, and it explains why `renderer.textures` matches at 19 while `estimatedTextureVramBytes` does
+not — the former counts GPU uploads, the latter counts every live `Texture` object.
+
+**Predicted reading, still to be confirmed on the platform:** `liveTextures` differs while
+`textures` matches. That is branch 1 of the platform's own decision tree, but the cause is
+redundant content eagerly prefetched, not a leak. **The fix is content-side** — mark the fallback
+textures `Lazy` in the manifest, or stop shipping them for planets that have a model.
 
 **G4 is half-closed, deliberately.** `Texture.flipVertically` (2026-08-22) lets content state the
 orientation through the public API instead of reaching into the Three.js texture, which closes the
