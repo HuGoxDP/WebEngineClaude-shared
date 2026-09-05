@@ -40,10 +40,27 @@ factually wrong that is now correct (see `CHANGELOG.md`). What analysis cannot a
 as 3D geometry** (it would read backwards), **sprites and billboards**, and **shadow direction**.
 Consumers already carry the fixed engine. Reference: `WebEngineTS/design/coordinate-check/`.
 
-### 1.2 `LineRenderer.useWorldSpace` is a no-op — *needs a decision*
-Stored, never read; vertices are always treated as local. The default is `true`, the opposite of
-what happens, and Unity's `true` means world space. Implementing it **changes rendered output** for
-any LineRenderer under a transformed parent — DNA has one. The default is a content decision.
+### 1.2 `LineRenderer` is largely a stub wearing a `Renderer` interface — *partly needs a decision*
+Surfaced by the visual harness on 2026-09-05, and wider than first recorded. Four separate gaps:
+
+1. **`startWidth` / `endWidth` do nothing.** The material is built with a hardcoded
+   `linewidth: 1`, and **WebGL ignores `linewidth` for `LineBasicMaterial` regardless** — every
+   line is a 1 px hairline. Real width needs a ribbon mesh, which is what Unity's LineRenderer
+   draws. This is the visible symptom: a line that looks like a pale hairline rather than a
+   coloured stroke. *(No decision needed — it is simply missing.)*
+2. **`useWorldSpace` does nothing.** Stored, never read; vertices are always treated as local. The
+   default is `true`, the opposite of what happens, and Unity's `true` means world space.
+   Implementing it **changes rendered output** for any line under a transformed parent — DNA has
+   one. **The default is a content decision.**
+3. **The engine `Material` system is disconnected.** `_syncMaterialToThree` / `_syncMaterialsToThree`
+   are commented out with a TODO, so `sharedMaterial` is ignored entirely and colour comes only
+   from `startColor`. A line cannot be given a Material at all.
+4. **`_setInternalRenderObject` is bypassed** — the Three object is added straight to the
+   Transform, so `_internalRenderObject` stays `null` and the base `Renderer`'s shadow/visibility
+   sync and `bounds` never apply to lines.
+
+Verified: `startColor` *does* reach the Three material (probed `rgb 1, 0.45, 0.1`), so colour is
+wired; the washed-out appearance is the 1 px width, not a colour fault.
 
 ### 1.3 `RenderTexture` *(~2–3 days)*
 The one genuinely missing Unity primitive for this domain (`NavMesh`, `Terrain`, `Tilemap` are
