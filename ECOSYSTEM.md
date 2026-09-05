@@ -58,6 +58,7 @@ written against, and that build is usually old.
 
 **One plan for every repo: [`PLAN.md`](PLAN.md).** New tasks go there, under their project — do not
 start a per-repo `PLAN.md`/`TODO.md` again. It replaced five scattered plans on 2026-09-04.
+**It carries open items only**: finished work is deleted from it and recorded in `CHANGELOG.md`.
 
 **One changelog: [`CHANGELOG.md`](CHANGELOG.md)**, a section per project. The single exception is
 `WebEngineTS/CHANGELOG.md`, which stays because `package.json` ships it inside the npm tarball —

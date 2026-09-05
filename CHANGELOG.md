@@ -15,6 +15,24 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-09-05
+- **⚠ measurable — world bounds were read against a stale ancestor chain.** Three's
+  `updateMatrixWorld` reads `parent.matrixWorld` without refreshing it, so `Renderer.bounds`
+  reported an object **at the origin** however it was placed, before the first render. Predates the
+  handedness work by a long way. `Transform._computeHierarchyBounds` had the same fault *plus*
+  returned a mirrored Z. Both now use `updateWorldMatrix(true, …)`, which walks up first;
+  `setParent`'s flush too. Three regression tests.
+- **`"types"` now comes first in `package.json` exports.** It sat last, and conditions resolve in
+  order — `"import"` matched first, so `"types"` was never reached and every TypeScript consumer
+  silently lost engine types through the exports map. Surfaced only when the editor became the
+  first consumer to resolve the package directly.
+- `release:local` packs the tarball for **WebEngineTSEditor** as well; it used to hand over the
+  engine *directory*, which loaded two THREE.js instances.
+- Handedness fix verified against all ten scenarios by static analysis: **DNA** was rendering a
+  left-handed helix (Z-form, not B-form), **solar-system** was retrograde, and **Optics** drew the
+  object on the wrong side of its own documented sign convention. All three correct now, and no
+  scenario had compensated by hand, so nothing needed editing.
+
 ### 2026-09-04
 - **⚠ measurable — the renderer now matches Unity's handedness (F7).** The engine's left-handed
   world reached Three's right-handed one through a single `rotateY(π)`; a rotation cannot mirror,
@@ -57,6 +75,12 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## testv/virtual-lab — the platform
 
+### 2026-09-05
+- **G2 diagnosed upstream, and it is not an engine leak.** The streamed path eagerly decodes every
+  non-`Lazy` manifest asset by design where the ZIP path is lazy, and the solar-system content ships
+  a `.glb` *and* a redundant loose albedo for all six planets. Prediction to confirm here:
+  `liveTextures` differs while `textures` matches. The fix belongs to ScenarioCreator.
+
 ### 2026-08-30
 - Upstream Q&A updated with the engine's answers.
 
@@ -87,6 +111,17 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## WebEngineTSEditor — the editor
+
+### 2026-09-05
+- **It builds, and it runs.** First `npm install` + `ng build` since extraction; `ng serve` serves
+  the shell and a 666 kB `main.js`. Whether the Angular app boots without runtime errors in a
+  browser is still unverified.
+- **Was loading two THREE.js instances.** It took the engine as `file:../../WebEngineTS`, a symlink
+  to the engine directory, so the bundler resolved the engine's own `node_modules/three` beside the
+  app's. Measured as 12 occurrences of `__THREE_DEVTOOLS__` in the bundle against 6 in the engine's
+  own — exactly 2×. Nothing crashes; the `instanceof THREE.Mesh` checks the engine relies on just
+  stop matching. Now takes the packed tarball, and the bundle is back to 6.
+- Fixed a duplicate `GameObject` import that blocked compilation.
 
 ### 2026-08-11
 - A plan written where there was none: get it running first, then decide what it is for. `app/` has
