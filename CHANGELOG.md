@@ -16,6 +16,30 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 ## WebEngineTS — the engine
 
 ### 2026-09-05
+- **⚠ measurable — `Transform`'s point conversions answered in Three's mirrored world space.**
+  `transformPoint`, `inverseTransformPoint`, the vector and direction pairs and both matrices read
+  the backing `Object3D` directly, which sits below the scene's handedness mirror, while
+  `position` and `rotation` answer in engine space. An object at `(1, 2, 5)` converted its own
+  origin to z = −5, and `inverseTransformPoint(position)` returned `(0, 0, −10)` instead of the
+  origin. All six now go through `_engineWorldMatrix`. The existing tests could not catch it —
+  every case used z = 0, a round trip, or read only `.x` — so seven were added that compare each
+  conversion against `position` on Z.
+- **⚠ measurable — a `LineRenderer` ribbon kept the facing it was built with.** Width is
+  geometry, so the ribbon is turned toward the camera once in `updateLine`, and nothing marked a
+  line dirty when the camera or its parent moved: lines went edge-on and rendered as hairlines.
+  Crystals showed it as unit-cell edges fading one by one as the lattice turned. Now re-faced from
+  the per-frame driver whenever the camera's world position or the line's world matrix moves, with
+  the geometry buffers reused so an orbiting camera does not allocate.
+- **`LineRenderer.useWorldSpace` is honoured**, having been stored, serialized and never read — so
+  its declared default of `true`, Unity's, described the opposite of what happened. World-space
+  points are pulled through the inverse of the object's *engine* world matrix. No scenario changes
+  shape: all eleven lines across the ten scenarios set the property explicitly, and the three
+  asking for world space sit on transforms that never leave the origin.
+- `Transform._ensureWorldMatrix` and `_engineWorldMatrix` are open to the engine (`@internal`), so
+  a component can read a current world matrix without allocating a `Vector3` for the side effect.
+- `scripts/shoot.mjs` gained `--do`: click, move, drag, key and wheel steps before the shot. A
+  panel that only appears once something is clicked cannot be checked from a still frame of an
+  untouched page, and a planet's texture cannot be read at a hundred pixels across.
 - **⚠ measurable — nothing consumed `LineRenderer`'s dirty flag.** Every setter marks the line
   dirty and the class has a `_systemLateUpdate` that rebuilds — but `GameObject._systemLateUpdate`
   only visits `ScriptableBehaviour`s, and a LineRenderer is a `Renderer`, so it was never called.
@@ -108,6 +132,32 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ## ScenarioCreator — content and packaging
 
 ### 2026-09-05
+- **AtomStructure's electrons did not travel the orbits drawn for them.** Two faults: the electron
+  circled in its shell's local *XY* plane on the word of a comment, where the engine builds a torus
+  in *XZ* — only `THREE.TorusGeometry` uses XY; and the shell rings lost their tilt entirely,
+  because `transform.parent =` preserves a child's world pose and the shell is tilted before its
+  children exist. The electrons escaped the second because `ElectronOrbit` rewrites `localPosition`
+  every frame. Result was three coplanar rings with eight electrons orbiting outside them.
+- **Mechanics drew its force vectors a metre and a half beside the block.** Same parenting trap:
+  the bench is shifted off the origin before the arrows are made. The blocks survived it only
+  because `place` overwrites their local position. Every parenting call in `Ramp.ts` now passes
+  `worldPositionStays = false`.
+- **Kepler's third-law plot was drawn across the readout panel**, its own panel holding nothing but
+  a title, because its parts anchored to the top-left of the screen while the panel is anchored
+  bottom-left. Found while fixing it: the orange marker for the student's own body was off-screen
+  entirely — `update` negated Y where the constructor did not — so the one thing the panel exists
+  to show was never visible.
+- **Circuits spaced its charge carriers by wire length, not by current.** The gap was
+  `length / floor(length / spacing)`, so wires carrying identical current spaced them differently
+  (200 px and 239 px in the same series loop) and a whole-number count re-spaced every carrier at
+  once whenever it ticked over. Carriers now sit at whole multiples of the spacing, with the phase
+  carried across wire boundaries rather than each wire recirculating its own set.
+- **Every slider drew its label over its value** — identical code in all eight UIKit copies, both
+  placed at the same origin. Reported in Kepler, where "Швидкість, часток кругової" collided with
+  its reading. Now two columns, placed with the anchor's sign in mind.
+- **An empty readout panel still painted its background** in Molecules, AtomStructure and DNA. The
+  text and the panel were only ever set together by convention, across twelve write sites; they now
+  go through one setter that owns both.
 - **Optics, Circuits and Kepler rendered no 3D content at all**, and had not for some time. Each
   places a fixed orthographic camera through its own copy of `FlatCamera.ts` at `(0, 0, 20)` with
   no rotation, its header claiming it looks "straight down −Z" — Three's convention, not this
