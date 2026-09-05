@@ -16,6 +16,15 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 ## WebEngineTS — the engine
 
 ### 2026-09-05
+- **⚠ measurable — nothing consumed `LineRenderer`'s dirty flag.** Every setter marks the line
+  dirty and the class has a `_systemLateUpdate` that rebuilds — but `GameObject._systemLateUpdate`
+  only visits `ScriptableBehaviour`s, and a LineRenderer is a `Renderer`, so it was never called.
+  Ten setters were silently dropped; geometry only worked because `setPosition` rebuilds directly,
+  so a line drawn orange rendered **white**. Now driven from `Application._loop` through a
+  registry, like `LODGroup`.
+- `scripts/shoot.mjs` — loads a page in the local Edge via Playwright, records the console and
+  saves a screenshot. The defects that cost most here are invisible to unit tests and only appear
+  in a rendered frame; this one was found and verified that way.
 - **⚠ measurable — world bounds were read against a stale ancestor chain.** Three's
   `updateMatrixWorld` reads `parent.matrixWorld` without refreshing it, so `Renderer.bounds`
   reported an object **at the origin** however it was placed, before the first render. Predates the

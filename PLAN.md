@@ -30,6 +30,10 @@ rather than starting on the strength of the build alone.
 **Three items need a human, not an agent:** the visual scenario pass (§1.1), the
 `LineRenderer.useWorldSpace` default (§1.2), and what the editor is for (§3.1).
 
+**Screenshots are available to an agent.** `WebEngineTS/scripts/shoot.mjs` drives the locally
+installed Edge through Playwright, records the console and saves a PNG — so "load it and look" is
+no longer a human-only step. It found the LineRenderer colour defect and confirmed its fix.
+
 ---
 
 ## 1. WebEngineTS — the engine
@@ -41,26 +45,23 @@ as 3D geometry** (it would read backwards), **sprites and billboards**, and **sh
 Consumers already carry the fixed engine. Reference: `WebEngineTS/design/coordinate-check/`.
 
 ### 1.2 `LineRenderer` is largely a stub wearing a `Renderer` interface — *partly needs a decision*
-Surfaced by the visual harness on 2026-09-05, and wider than first recorded. Four separate gaps:
+Surfaced by the visual harness on 2026-09-05. The missing per-frame driver is **fixed** (see
+`CHANGELOG.md`); three gaps remain:
 
 1. **`startWidth` / `endWidth` do nothing.** The material is built with a hardcoded
    `linewidth: 1`, and **WebGL ignores `linewidth` for `LineBasicMaterial` regardless** — every
    line is a 1 px hairline. Real width needs a ribbon mesh, which is what Unity's LineRenderer
-   draws. This is the visible symptom: a line that looks like a pale hairline rather than a
-   coloured stroke. *(No decision needed — it is simply missing.)*
+   draws. ~1–2 days, and it **changes the look of every scenario with a line**. *(No decision on
+   whether it is broken — only on when to absorb the visual change.)*
 2. **`useWorldSpace` does nothing.** Stored, never read; vertices are always treated as local. The
    default is `true`, the opposite of what happens, and Unity's `true` means world space.
    Implementing it **changes rendered output** for any line under a transformed parent — DNA has
    one. **The default is a content decision.**
-3. **The engine `Material` system is disconnected.** `_syncMaterialToThree` / `_syncMaterialsToThree`
-   are commented out with a TODO, so `sharedMaterial` is ignored entirely and colour comes only
-   from `startColor`. A line cannot be given a Material at all.
-4. **`_setInternalRenderObject` is bypassed** — the Three object is added straight to the
-   Transform, so `_internalRenderObject` stays `null` and the base `Renderer`'s shadow/visibility
-   sync and `bounds` never apply to lines.
-
-Verified: `startColor` *does* reach the Three material (probed `rgb 1, 0.45, 0.1`), so colour is
-wired; the washed-out appearance is the 1 px width, not a colour fault.
+3. **The engine `Material` system is disconnected.** `_syncMaterialToThree` /
+   `_syncMaterialsToThree` are commented out with a TODO, so `sharedMaterial` is ignored entirely
+   and colour comes only from `startColor`. A line cannot be given a Material at all. Related:
+   `_setInternalRenderObject` is bypassed, so `_internalRenderObject` stays `null` and the base
+   `Renderer`'s shadow/visibility sync and `bounds` never apply to lines.
 
 ### 1.3 `RenderTexture` *(~2–3 days)*
 The one genuinely missing Unity primitive for this domain (`NavMesh`, `Terrain`, `Tilemap` are
