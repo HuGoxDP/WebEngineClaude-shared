@@ -12,16 +12,12 @@ Severity: **A** wrong/misleading to a student · **B** broken interaction · **C
 
 ## Engine — WebEngineTS
 
-- [ ] **B · Dropdown's open list is drawn inside its own element, so it is overlapped by siblings instead of covering them** — `src/engine/core/ui/Dropdown.ts:24` states this as the design; the list must rise above neighbouring controls while open. Seen in Optics, where the option list collides with the slider labels below it.
-- [ ] **A · `LineRenderer.startWidth`/`endWidth` do nothing** — `src/engine/core/components/LineRenderer.ts:142` hardcodes `linewidth: 1`, and WebGL ignores `linewidth` for `LineBasicMaterial` regardless; real width needs a ribbon mesh. Every line in every scenario is a 1 px hairline.
 - [ ] **B · `LineRenderer.useWorldSpace` is stored and never read** — `src/engine/core/components/LineRenderer.ts:109`; vertices are always treated as local, and the default `true` is the opposite of what happens. Implementing it moves lines in any scenario with a transformed parent (DNA has one) — the default is a content decision.
-- [ ] **C · `LineRenderer` ignores the engine `Material` system** — `src/engine/core/components/LineRenderer.ts:574` has `_syncMaterialToThree`/`_syncMaterialsToThree` commented out with a TODO, so `sharedMaterial` never reaches a line and colour comes only from `startColor`.
-- [ ] **C · `LineRenderer` bypasses `_setInternalRenderObject`** — `src/engine/core/components/LineRenderer.ts:150` adds the Three object straight to the Transform, so `_internalRenderObject` stays `null` and the base `Renderer`'s shadow, visibility and `bounds` never apply to lines.
 
 ## Content — ScenarioCreator
 
 - [ ] **A · AtomStructure shows only ~36 elements, not the full periodic table** — `Scenarios/AtomStructure/scripts/data/elements.ts`; 118 entries needed, each with shell configuration, category, mass and fact. Scope decision, not a defect.
-- [ ] **B · Circuits: charge carriers appear from nowhere on the wire** — `Scenarios/Circuits/scripts/Scenario.ts:95` fixes `count = MAX_CARRIERS` on an `InstancedMeshRenderer`; instances beyond the ones in use are still drawn rather than parked.
+- [ ] **B · Circuits: charge carriers appear from nowhere on the wire** — `Scenarios/Circuits/scripts/Scenario.ts:228` `_drawCarriers`. **Three causes ruled out by inspection 2026-09-05:** the shared `_scale` is safe (`setInstanceTransform` bakes values immediately via `Matrix4x4.TRS`); `t` outside 0–1 is safe (`pointAlong` wraps with `((t % 1) + 1) % 1`); and the carrier budget does not starve later wires (5 wires x 26 max = 130 against `MAX_CARRIERS` 220). What remains, unconfirmed: `count` is derived from current, so moving a slider re-spaces every carrier at once — which is also physically odd, since current should change carrier *speed*, not density. **Needs the reporter to say whether the popping happens while a slider moves or on its own**; it cannot be reproduced headlessly, where the renderer manages about 1 fps.
 - [ ] **C · Kepler: the T² vs a³ plot overlaps the text panel** — `Scenarios/Kepler/scripts/Scenario.ts`; the chart is drawn over the panel that explains it.
 - [ ] **C · Kepler: the "Швидкість, частка кругової" slider label overlaps its value** — right-hand control panel; label and readout occupy the same line.
 - [ ] **C · An empty info panel still paints its background** — bottom-left in Molecules and AtomStructure; the panel should hide when its text is empty.
