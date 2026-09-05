@@ -38,11 +38,15 @@ no longer a human-only step. It found the LineRenderer colour defect and confirm
 
 ## 1. WebEngineTS — the engine
 
-### 1.1 Look at the scenarios after the handedness fix — *needs a browser*
-Static analysis found no scenario had compensated by hand, and three were rendering something
-factually wrong that is now correct (see `CHANGELOG.md`). What analysis cannot answer: **text drawn
-as 3D geometry** (it would read backwards), **sprites and billboards**, and **shadow direction**.
-Consumers already carry the fixed engine. Reference: `WebEngineTS/design/coordinate-check/`.
+### 1.1 Look at the scenarios after the handedness fix — *mostly done 2026-09-05*
+Nine of ten screenshotted through `WebEngineTS/scripts/shoot.mjs`; no scenario had compensated for
+the mirror by hand. It also turned up a defect static analysis had missed entirely — **Optics,
+Circuits and Kepler rendered no 3D at all** (fixed in ScenarioCreator, see `CHANGELOG.md`).
+
+**Still open, and it does need eyes:** confirming the DNA helix reads *right-handed* and the
+solar-system orbits *prograde*. Both are derived and both screenshot cleanly, but neither can be
+called from a still frame — the helix needs a judgement about which strand is in front, and orbital
+sense needs two frames. Sprites, billboards and shadow direction are also unchecked.
 
 ### 1.2 `LineRenderer` is largely a stub wearing a `Renderer` interface — *partly needs a decision*
 Surfaced by the visual harness on 2026-09-05. The missing per-frame driver is **fixed** (see

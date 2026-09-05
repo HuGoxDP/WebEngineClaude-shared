@@ -107,6 +107,15 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## ScenarioCreator — content and packaging
 
+### 2026-09-05
+- **Optics, Circuits and Kepler rendered no 3D content at all**, and had not for some time. Each
+  places a fixed orthographic camera through its own copy of `FlatCamera.ts` at `(0, 0, 20)` with
+  no rotation, its header claiming it looks "straight down −Z" — Three's convention, not this
+  engine's `+Z` forward. The camera faced away from the plane it was meant to show, so each drew
+  its UI over an empty scene while the physics panels stayed correct. Moved to `(0, 0, −20)`.
+  Verified by screenshot; **not** caused by the engine's handedness fix, confirmed by rebuilding
+  the engine at the commit before it.
+
 ### 2026-08-30
 - Engine-gap entry corrected: flipped orientation on a de-embedded albedo map.
 
