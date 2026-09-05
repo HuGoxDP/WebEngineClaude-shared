@@ -3,6 +3,9 @@
 **The single place work is planned.** New tasks go here, under their project, not into a new
 per-repo plan file.
 
+**Open defects from the 2026-09-05 visual review are being worked through in
+[`ISSUES.md`](ISSUES.md)**, one line each; that file is deleted when empty.
+
 **Open items only.** Completed work is removed from this file and recorded in
 [`CHANGELOG.md`](CHANGELOG.md) — go there for what changed and why, and to git for the full
 reasoning. If an item here has no owner action left, delete it.
