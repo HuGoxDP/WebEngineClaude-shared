@@ -141,7 +141,10 @@ the ecosystem: it decides whether several engine plans are real.
    - One editor-side compile error: a duplicate `GameObject` import.
 
    **The editor is therefore viable**, which un-gates the plans that were waiting on this answer.
-   Not yet checked: whether it *runs* (`ng serve`) and what it does once open.
+   `ng serve` also verified 2026-09-05: the dev server builds in ~4 s, serves the app shell
+   (HTTP 200, title *"WETS · Editor"*) and a 666 kB `main.js`. **What is still unverified is whether
+   the Angular app boots without runtime errors in a browser** — that needs eyes on a page, not a
+   status code.
 
 2. **P1 — decide what the editor is for** *(~1 day of thinking)*, before adding to it.
 3. **P2 — serialization round-trip** *(~2–3 days)*.
