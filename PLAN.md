@@ -121,15 +121,22 @@ Reference kept in that repo: `docs/implementation-plan.md` (closed history, Phas
 **P0 blocks everything and costs half a day.** It is also the highest information-per-hour action in
 the ecosystem: it decides whether several engine plans are real.
 
-1. **P0 — make it run at all** *(~0.5 day)*. `npm install` in `app/`, build against the current
-   engine, see what breaks. The engine has moved a long way underneath it: full component
-   serialization, prefab variants, `ScriptableObject`, the Animator state machine, the
-   `RenderBackend` seam, the streaming stack, and now the handedness change.
-   - **Hazard to settle while there:** `app/package.json` takes the engine as
-     `file:../../WebEngineTS` — a directory, not a packed tarball — and also depends on `three`.
-     That is the configuration `WebEngineTS/CLAUDE.md` warns about: the bundler may resolve the
-     engine's own `node_modules/three` and load **two** THREE instances, which does not crash, it
-     quietly breaks every `instanceof THREE.Mesh` check.
+1. ~~**P0 — make it run at all**~~ — **done 2026-09-05.** `npm install` succeeded and `ng build`
+   now produces a bundle. Two defects had to be fixed to get there:
+   - **Engine `package.json` exports were mis-ordered** — `"types"` came *after* `"import"` and
+     `"require"`. Conditions resolve in order, so `types` was never reached and **every**
+     TypeScript consumer silently lost types through the exports map. Fixed engine-side.
+   - **The editor loaded two THREE.js instances.** It took the engine as
+     `file:../../WebEngineTS`, a symlink to the engine *directory*, so the bundler resolved the
+     engine's own `node_modules/three` alongside the app's. Measured by counting
+     `__THREE_DEVTOOLS__` in the output bundle: 12 against the engine bundle's 6, exactly 2×.
+     `instanceof THREE.Mesh` checks would have failed silently for objects from the other copy.
+     Fixed by packing the tarball for the editor like every other consumer — now 6.
+   - One editor-side compile error: a duplicate `GameObject` import.
+
+   **The editor is therefore viable**, which un-gates the plans that were waiting on this answer.
+   Not yet checked: whether it *runs* (`ng serve`) and what it does once open.
+
 2. **P1 — decide what the editor is for** *(~1 day of thinking)*, before adding to it.
 3. **P2 — serialization round-trip** *(~2–3 days)*.
 4. **P3 — the generated Inspector** *(~1 week)*.

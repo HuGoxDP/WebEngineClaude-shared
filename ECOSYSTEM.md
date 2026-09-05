@@ -28,7 +28,8 @@ surfaces diagnostics must gate them behind an explicit opt-in.
 Run `npm run release:local` **in WebEngineTS**. One command covers every consumer:
 
 - **ScenarioCreator** and **testv/virtual-lab/frontend** — the packed tarball, then `npm install`.
-- **WebEngineTSEditor/app** — skipped until it has a `node_modules/` (run `npm install` there once).
+- **WebEngineTSEditor/app** — the packed tarball, like the rest. Taking the engine *directory*
+  instead loaded two THREE.js instances; don't go back to it.
 - **WebEngineTS-Benchmarks** — `engine/WebEngineTS.standalone.js` + `.d.ts` copied directly.
 - The **basis transcoder** (`basis_transcoder.js` / `.wasm`) into virtual-lab and the benchmarks.
 
