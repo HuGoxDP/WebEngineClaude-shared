@@ -16,6 +16,20 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 ## WebEngineTS — the engine
 
 ### 2026-09-05
+- **⚠ measurable — every textured sphere was wrapped backwards.** `Mesh.createSphere`
+  carried `THREE.SphereGeometry`'s parameterisation, written for a right-handed frame, into this
+  engine's left-handed one. A sphere is the same sphere either way, so it showed only on mapped
+  content: the solar system's Earth rendered with India west of Africa and Madagascar off the wrong
+  coast. Reported as the planets looking upside down — north was always up, east and west were
+  swapped. Winding reversed to match; `tests/PrimitiveWinding.test.ts` still passes and
+  `tests/SphereUvOrientation.test.ts` pins the mapping.
+- **⚠ measurable — imported glTF models were their own mirror image, and lost their hierarchy.**
+  glTF 2.0 is right-handed with −Z forward and this engine is left-handed with +Z forward;
+  `_convertGLTFScene` copied node transforms across verbatim. The flip is now carried by one node
+  below the returned root — not baked into geometry, which would convert the model out from under
+  the animation clips that drive it, and not on the root, which `normalizeToSize` overwrites.
+  Separately, each child was attached with the default `worldPositionStays`, which divides out the
+  parent it has just been given: every node past the first collapsed onto its own local offset.
 - **⚠ measurable — `Transform`'s point conversions answered in Three's mirrored world space.**
   `transformPoint`, `inverseTransformPoint`, the vector and direction pairs and both matrices read
   the backing `Object3D` directly, which sits below the scene's handedness mirror, while
@@ -132,6 +146,11 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ## ScenarioCreator — content and packaging
 
 ### 2026-09-05
+- **Kepler opened on a circle, the one shape that cannot show Kepler's first law**, with the star
+  at its centre and apsis crosses at what were genuinely arbitrary points. It now draws the
+  ellipse's construction — both axes, the centre they cross at, and the radius vector from star to
+  body — and launches at 0.8 of circular speed, an ellipse of e = 0.36. The apsides and the empty
+  focus are drawn only above e = 0.01.
 - **AtomStructure's electrons did not travel the orbits drawn for them.** Two faults: the electron
   circled in its shell's local *XY* plane on the word of a comment, where the engine builds a torus
   in *XZ* — only `THREE.TorusGeometry` uses XY; and the shell rings lost their tilt entirely,
