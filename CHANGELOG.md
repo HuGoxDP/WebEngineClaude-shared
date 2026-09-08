@@ -146,6 +146,18 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ## ScenarioCreator — content and packaging
 
 ### 2026-09-05
+- **Kepler now draws the reference diagram** it was asked to look like: a starfield, the real Sun
+  and Earth maps from `solar-system-scenario`, `r1` from the star to the body in yellow, `r2` on to
+  the empty focus in violet, one semi-major axis in red labelled `a`, dots on the centre and the
+  empty focus, and the `r1 + r2 = 2a` legend. Two causes behind "everything is too big": the star
+  was drawn at **twice its own radius** — `Mesh.createSphere(1, …)` has radius 1, so the scale is
+  the radius, and it was set to `BODY_RADIUS * 2` — and every stroke was two to three times the
+  reference's. The sky is a camera-locked quad rather than `RenderSettings.skybox`, because three.js
+  draws a scene background as a unit box through the camera's projection and this scenario's camera
+  is orthographic: measured, that is a 360px square in the middle of a 1600px view. ZIP 21 KB → 2.3 MB.
+- **A scenario's `update` runs while its async `awake` is still awaiting.** Loading Kepler's textures
+  turned that into a real window and `_draw` reached an orbit that did not exist yet, once a frame.
+  Worth knowing for any scenario that awaits in `awake`: guard with a ready flag.
 - **Kepler opened on a circle, the one shape that cannot show Kepler's first law**, with the star
   at its centre and apsis crosses at what were genuinely arbitrary points. It now draws the
   ellipse's construction — both axes, the centre they cross at, and the radius vector from star to
