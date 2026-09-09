@@ -16,4 +16,3 @@ Severity: **A** wrong/misleading to a student · **B** broken interaction · **C
 
 ## Needs a decision or clarification before it can be worked
 
-- [ ] **? · DNA helix handedness** — derived as correct (right-handed B-DNA), and screenshots do not contradict it, but it cannot be settled from a still frame. Look at the *near* face of the helix: the strands crossing it should run lower-left to upper-right. The solar-system half of this item is **closed** — orbits confirmed anticlockwise from the running scene, and the planets’ own orientation confirmed fixed. Axial rotation was found running the *other* way to the orbits and negated 2026-09-09; worth confirming in the same look.
