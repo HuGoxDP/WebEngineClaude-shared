@@ -15,6 +15,26 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-09-09
+- **A saved scene was dropping six components whole.** `AudioSource`, `AudioListener`,
+  `ParticleSystem`, `InstancedMeshRenderer`, `Animation` and `Animator` carried no
+  serialization metadata, so a round trip lost not their settings but the components
+  themselves. Closes §6.6 of the UI roadmap, the one item another repo was waiting on.
+  Runtime state (`isPlaying`, `time`, `particleCount`) is deliberately not stored, and four
+  ParticleSystem fields are left out because `ValueSerializer` has no representation for
+  `ParticleBurst`, `AnimationCurve` or `Gradient` — both pinned by tests so adding one later
+  is deliberate.
+- **Three.js isolation sweep.** Two real violations of the engine's headline rule:
+  `ParticleSystem.particleTexture` was a raw `THREE.Texture` (now `Texture2D`), and
+  `Mesh.fromThreeGeometry` was public and untagged (now `_fromThreeGeometry`).
+  `AnimationClip`'s constructor takes a Three type and cannot be renamed, so it is tagged
+  `@internal`. Verified against the built `.d.ts` rather than the source, since that is what
+  a consumer sees.
+- `design/canvas-ui-roadmap.md` was describing finished work as upcoming — five section
+  headings still read P1 while the task table had them done, and §8 listed six steps of
+  "next" work completed in August. Corrected. **Assume any plan in `design/` has drifted
+  before working from it.**
+
 ### 2026-09-05
 - **⚠ measurable — every textured sphere was wrapped backwards.** `Mesh.createSphere`
   carried `THREE.SphereGeometry`'s parameterisation, written for a right-handed frame, into this
