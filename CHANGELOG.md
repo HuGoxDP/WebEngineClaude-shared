@@ -24,6 +24,11 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
   ParticleSystem fields are left out because `ValueSerializer` has no representation for
   `ParticleBurst`, `AnimationCurve` or `Gradient` — both pinned by tests so adding one later
   is deliberate.
+- **`ValueSerializer` gained `Curve`, `Gradient` and `Bursts`.** It could describe a Vector3
+  and a Sprite but had no representation for `AnimationCurve`, `Gradient` or `ParticleBurst`,
+  which is what kept a particle system's curve modules out of a saved scene. Stored by value,
+  keyframes keeping their tangents and weights so a restored curve *evaluates* the same rather
+  than merely carrying the same numbers.
 - **Three.js isolation sweep.** Two real violations of the engine's headline rule:
   `ParticleSystem.particleTexture` was a raw `THREE.Texture` (now `Texture2D`), and
   `Mesh.fromThreeGeometry` was public and untagged (now `_fromThreeGeometry`).
