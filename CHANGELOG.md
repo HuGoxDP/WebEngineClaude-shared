@@ -147,6 +147,15 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## testv/virtual-lab — the platform
 
+### 2026-10-07
+- **The scenario editor is served at `/editor/`**, through `docker-compose.editor.yml`. An override
+  rather than a service in the base file, because the editor is built from another repository and
+  the platform must keep building without it; `nginx.conf` gains only an include of
+  `server.d/*.conf`, which matches nothing when the override is not applied. `/editor/` has its
+  own CSP file, so nothing an authoring tool needs is granted to student pages. The upstream is
+  resolved per request — with a literal name nginx kept the address from boot and hung once the
+  editor container alone was rebuilt.
+
 ### 2026-09-05
 - **G2 diagnosed upstream, and it is not an engine leak.** The streamed path eagerly decodes every
   non-`Lazy` manifest asset by design where the ZIP path is lazy, and the solar-system content ships
@@ -235,6 +244,43 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## WebEngineTSEditor — the editor
+
+### 2026-10-09
+- **What the editor is for is decided** (it was P1, the item that needed a human): teachers author
+  scenarios on the site, a project is a folder on their own computer, scripts are both written in
+  the editor and taken from a library, and it looks and works like the Unity editor. The plan
+  against Unity, window by window, is `docs/unity-editor-plan.md`.
+- **Start screen and recent projects.** Without a project there is no workspace and no WebGL
+  context. Nothing opens by itself after a reload — the browser wants a click before it grants a
+  folder again — so recent projects are listed and access is requested from the click.
+- **New-project wizard**, three steps; the address is transliterated from the title (a Ukrainian
+  title used to produce the id `scenario`); cancelling writes nothing. The first scene is built
+  through the engine and serialized rather than kept as a JSON file.
+- **A project it creates builds in ScenarioCreator and runs in the engine**, from the ZIP and from
+  the streaming manifest alike — `npm run e2e:build` checks it and removes what it wrote.
+- **Honest saving.** "Unsaved" follows a revision counter instead of `canUndo`; Save / Don't save /
+  Cancel on closing; a recovery copy in `.editor/` offered back after a crash; the browser asks
+  before the tab closes; one tab per project; the scene file is re-read on focus.
+- **Defects that predate all of this, found by the new checks:** Delete did not delete, and every
+  undo left a ghost of the old scene — `destroy()` defers to the end of the engine's frame and the
+  editor runs no engine loop, so it now uses `destroyImmediate()`. A gizmo drag was not in the
+  history, did not show in the inspector, and clicking a handle deselected the object.
+- **`for await` over a directory handle lost the error in the production build** — a deleted
+  folder surfaced as `undefined` — and behaved correctly under `ng serve`. The e2e is run against
+  the built bundle for that reason.
+
+### 2026-10-07
+- **It runs in Docker beside the catalog**, at `/editor/` on the platform's port, through an
+  override in virtual-lab. Boots without console errors — the check left open since 2026-09-05.
+- **The Project panel was mock data; it is the folder on disk now** (File System Access API):
+  tree, thumbnails, import by drag, scenes saved into the project.
+- **`AppComponent` was 900 lines; it is a frame.** Menus, the Hierarchy menu, the toolbar and the
+  keyboard reach one set of commands. Interface text is in typed dictionaries (Ukrainian and
+  English, switched live); `alert` / `confirm` / `prompt` are replaced by promise-based dialogs;
+  Preferences open from any screen.
+- `Ctrl+Shift+N` and `Ctrl+N` belong to Chrome and cannot be intercepted; Create Empty is
+  `Alt+Shift+N`.
+- An end-to-end check, `npm run e2e`: eleven scenarios against a live URL. There are no unit tests.
 
 ### 2026-09-05
 - **It builds, and it runs.** First `npm install` + `ng build` since extraction; `ng serve` serves
