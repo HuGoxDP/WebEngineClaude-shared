@@ -138,7 +138,6 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
   world matrix.
 - Diagnostics degradation on a non-WebGL backend is pinned (P2.8 stage 0); the WebGL-only counters
   reach around the `RenderBackend` seam and nothing had exercised their absence.
-- Thesis/paper scaffolding removed.
 
 ### Earlier
 See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` section.
@@ -303,9 +302,6 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## WebEngineTS-Benchmarks
-
-### 2026-08-30
-- Completed resubmission plan and result documents removed.
 
 ### 2026-08-21 → 28
 - Scene 1 matrix gained the W=3 write-rate pair; test scenarios added.
