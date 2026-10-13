@@ -150,7 +150,7 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 - **The platform refuses what its student player would misread** — at upload, in `publish:release`
   and in `import:assets`. The player (engine `0.1.0-local.1789023160893`) checks no scene format
   version, so a version-2 ("link mode") scene would load hollow, silently. Every `*.scene.json` /
-  `*.prefab.json` must carry a `version` the player reads (absent means 1; only 1 today),
+  `*.prefab.json` may only declare a `version` the player reads (absent means 1; only 1 today),
   `manifestVersion` must have major 1 and a streaming `schema` must be 1; each refusal names the
   file and what the player reads. Stated once, with when to raise it, in `backend/player-formats.js`.
   `publish:release` now validates before it writes a catalog row, so a refused archive no longer
