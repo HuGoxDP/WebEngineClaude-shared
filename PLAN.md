@@ -10,6 +10,11 @@ per-repo plan file.
 [`CHANGELOG.md`](CHANGELOG.md) — go there for what changed and why, and to git for the full
 reasoning. If an item here has no owner action left, delete it.
 
+**The direction these items serve** — the two format decisions (when link mode reaches files,
+component ids), the target architecture, budgets and the order of work — is the vision document
+of 2026-10-13: https://claude.ai/code/artifact/01113f63-16cd-4f87-912b-182e286b6501. This file keeps
+the actionable items; that one keeps the reasons.
+
 **Not loaded into session context automatically** — unlike `ECOSYSTEM.md` and `ENGINE-GAPS.md`,
 this file is read on demand. Keep it to *what to do and why*; deep design belongs in the documents
 indexed at the bottom.
@@ -20,7 +25,7 @@ indexed at the bottom.
 
 | Repo | State, 2026-09-05 |
 |---|---|
-| **WebEngineTS** | 53k LOC, 6 TODOs, 1765 tests. Healthy. |
+| **WebEngineTS** | *(2026-10-13)* 58k LOC, 4 TODOs, ~2,030 tests. Healthy — but **no consumer has any of the October work**: every one still runs the 2026-09-10 build (§1.2). |
 | **testv/virtual-lab** | **Live — students use it.** Express + `pg` + nginx + Docker, Angular frontend. |
 | **ScenarioCreator** | Active, 10 production scenarios. To be retired once the editor can export. |
 | **WebEngineTSEditor** | *(2026-10-09)* Runs in Docker beside the catalog at `/editor/`. Start screen, new-project wizard, Project panel on a local folder, honest saving. A project it creates builds in ScenarioCreator and runs in the engine. Not yet: adding a cube, assets in a scene, scripts, Play, publishing. |
@@ -51,24 +56,32 @@ solar-system orbits *prograde*. Both are derived and both screenshot cleanly, bu
 called from a still frame — the helix needs a judgement about which strand is in front, and orbital
 sense needs two frames. Sprites, billboards and shadow direction are also unchecked.
 
-### 1.2 `LineRenderer` is largely a stub wearing a `Renderer` interface — *partly needs a decision*
-Surfaced by the visual harness on 2026-09-05. The missing per-frame driver is **fixed** (see
-`CHANGELOG.md`); three gaps remain:
+### 1.2 First release, `v0.2.0` — delivery before features *(~2–3 weeks)*
+The engine has E3, E5, E6, E7, E10, E11 and E13 and a version-2 reader; the platform, the editor and
+ScenarioCreator all run `0.1.0-local.1789023160893` (2026-09-10), which checks no format version and
+would load a version-2 scene hollow. In this order:
 
-1. **`startWidth` / `endWidth` do nothing.** The material is built with a hardcoded
-   `linewidth: 1`, and **WebGL ignores `linewidth` for `LineBasicMaterial` regardless** — every
-   line is a 1 px hairline. Real width needs a ribbon mesh, which is what Unity's LineRenderer
-   draws. ~1–2 days, and it **changes the look of every scenario with a line**. *(No decision on
-   whether it is broken — only on when to absorb the visual change.)*
-2. **`useWorldSpace` does nothing.** Stored, never read; vertices are always treated as local. The
-   default is `true`, the opposite of what happens, and Unity's `true` means world space.
-   Implementing it **changes rendered output** for any line under a transformed parent — DNA has
-   one. **The default is a content decision.**
-3. **The engine `Material` system is disconnected.** `_syncMaterialToThree` /
-   `_syncMaterialsToThree` are commented out with a TODO, so `sharedMaterial` is ignored entirely
-   and colour comes only from `startColor`. A line cannot be given a Material at all. Related:
-   `_setInternalRenderObject` is bypassed, so `_internalRenderObject` stays `null` and the base
-   `Renderer`'s shadow/visibility sync and `bounds` never apply to lines.
+1. **Finish the E11 review** — the 20 findings on the prefab-instance serializer; most are fixed and
+   pushed, the rest are in flight.
+2. **Readers state what they read.** A public API for the scene/prefab format versions this build
+   reads, the same gate on every reader (lone GameObject, `.mat.json` and `.physicmat.json`, which
+   carry no version yet), the manifest's `manifestVersion` major refused when unknown. The editor
+   opens files through it instead of its `version !== 1` literal. *(The platform side is done:
+   `virtual-lab/backend/player-formats.js`.)*
+3. **Component ids (Q2)** — scoped like node ids: only in prefab trees and instance interiors,
+   legacy ids derived for old files, plain scenes byte for byte unchanged. Before the release, so
+   the format is not frozen with `componentIndex` and a second readers-first cycle is not needed.
+4. **Minify the standalone bundle** — 892 KB gzip today (unminified, with comments), 384 KB
+   minified (measured 2026-10-13). Every student downloads it.
+5. **Backfill `CHANGELOG.md`** — it has nothing on E3, E5, E6, E7, E10, E13 or the 2026-09-10
+   entries; `release.yml` checks a section exists, not that it is complete.
+6. **Tag `v0.2.0`** and move the platform onto the release URL (§2), the editor onto the same
+   release.
+
+**Link mode stays authoring-only (Q1).** Links live in the editor's project files from its stage 14;
+Build and Publish expand them, so archives keep carrying version 1 (as Unity's player never sees
+prefab links). Prefab files a script instantiates at run time are still version 2, which is why the
+platform needs the version-2 reader anyway.
 
 ### 1.3 `RenderTexture` *(~2–3 days)*
 The one genuinely missing Unity primitive for this domain (`NavMesh`, `Terrain`, `Tilemap` are
@@ -82,8 +95,11 @@ large one and the real prerequisite for WebGPU. **Do not start it in fragments**
 leave exactly one way to reach the GPU, or the `instanceof THREE.Mesh` checks the engine relies on
 start failing for whichever objects took the new path.
 
-### 1.5 What the editor needs from the engine *(~8–11 weeks in total, staged)*
-The editor's plan (`WebEngineTSEditor/docs/unity-editor-plan.md` §4) lists thirteen asks, E1–E13,
+### 1.5 What the editor needs from the engine
+**Implemented 2026-10-10..13, waiting on §1.2 to reach anyone:** E3, E5, E6, E7, E10, E11, E13.
+**Open:** E1 (`entryScene`, ½ day), E2 (edit mode, 3–5 days), E4 (replace a registered class, 1–2
+days), E8 (render target, 2–3 weeks), E9 (gizmos), E12 (animator assets). The list below is the
+original order, kept for its reasons. The editor's plan (`WebEngineTSEditor/docs/unity-editor-plan.md` §4) lists thirteen asks, E1–E13,
 each with the Unity behaviour it blocks and the evidence it was checked against. In the order the
 editor reaches them:
 
@@ -130,11 +146,26 @@ before — the engine moves faster than a list.
    handed to teachers — it deletes and publishes anything. A `publish_keys` table (hashed, one per
    person, revocable), `scenarios.owner_key_id`, and a scope: create a scenario unpublished, update
    and upload to one's own *unpublished* scenario, nothing else. Issued and revoked in `/admin`.
-   Design: `WebEngineTSEditor/docs/unity-editor-plan.md` §7. **One decision open:** whether an
-   author may update an already-published scenario through a draft an admin accepts, or not at all.
+   Design: `WebEngineTSEditor/docs/unity-editor-plan.md` §7. *Decided 2026-10-09:* an author
+   updates an already-published scenario only through a draft that an admin accepts.
 7. **Run the browser e2e against the stack with the editor override applied.** The override was
    checked by hand and by the header tests; the Playwright browser was not installed, so the
    eleven browser specs did not run (`npx playwright install` in `e2e/`).
+
+8. **Serve the engine from a versioned path** *(with §1.2.6)*. `/assets/WebEngineTS.standalone.js`
+   is cached `immutable` for 30 days, so after an engine update a returning browser can keep the
+   old build for a month. `/engine/<version>/…`, referenced from the no-cache `index.html`.
+9. **Run scenarios away from the platform's origin** *(before publish keys or LTI logins exist)*.
+   A teacher's script is arbitrary code and runs today on the same origin as the API. A player
+   document in an iframe on its own origin isolates it, and is also what per-scenario engine
+   pinning needs, since an import map cannot be remapped once a document has resolved it.
+10. **LTI 1.3 for Moodle** *(after 9)* — Dynamic Registration, Deep Linking to an exact archive
+    hash, grades through AGS, Platform Storage for Safari. The largest step for universities.
+11. **Offline lessons** — a cache-first Service Worker over the content-addressed archives, a
+    "prepare this lesson" action, `navigator.storage.persist()` (Safari wipes a site's storage after
+    7 days without a visit).
+12. **Backups of Postgres and the archives volume, with a restore actually tried; HTTPS on the
+    production server** (the editor's folder access and publish keys both need it).
 
 Reference kept in that repo: `docs/implementation-plan.md` (closed history), `docs/test-plan.md`,
 `docs/manual-browser-checks.md`, `docs/scenario-delivery-migration.md`.
@@ -160,7 +191,12 @@ editor.** Stages 0–5 are done (`CHANGELOG.md`). The plan, with a parity table 
 5. **Stages 14–16 — prefabs, settings windows, Unity-style undo** *(~6 weeks; E10, E11)*.
    **Milestone 3.** After it: Animation, Animator, UI tools, Profiler — each its own decision.
 6. **Redeploy the editor container** — the image predates stages 3–5; Docker Desktop was off.
-7. **Check the native folder picker by hand once.** The e2e substitutes a folder inside the
+7. **Open scene files through the engine's version check** (§1.2.2) — today `_loadSceneText`
+   accepts only `version === 1`, so the editor could not reopen a prefab file its own engine wrote.
+8. **A second project store for Safari and Firefox** — the project folder goes through
+   `showDirectoryPicker`, which only Chromium has. OPFS or the platform's server; the same store
+   is what share links and co-editing need later. Decide before the first real authors.
+9. **Check the native folder picker by hand once.** The e2e substitutes a folder inside the
    browser, so everything after the dialog is tested and the dialog itself is not.
 
 ---
