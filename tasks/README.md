@@ -11,7 +11,7 @@ State of every repository when these cards were written (2026-10-14), all on bra
 
 | Repo | Head | Notes |
 |---|---|---|
-| WebEngineTS | `e6a8500` | 133 test files / 2048 tests green, CI green. E11 review: 17 of 20 findings fixed; the fixes introduced 3 regressions (A1). |
+| WebEngineTS | `31c7793` | 133 test files / 2094 tests green. E11 review closed by A1; what is left of it is A2 (docs/API) and A3 (D5). |
 | virtual-lab | `709494c` | Refuses scene/prefab/manifest versions its player cannot read (`backend/player-formats.js`). Backend unit 125/125, full 232 with Postgres. |
 | WebEngineTSEditor | `b4a1a22` | Docs only since `9a6e35a`. Still on engine `0.1.0-local.1789023160893`. |
 | ScenarioCreator | `fbdc7c3` | Docs only. Still on engine `0.1.0-local.1789023160893`. |
@@ -113,7 +113,7 @@ Ordered. *Depends* must be done first. Sizes are for one person-session at the s
 
 | Card | What | Repo | Model | Size | Depends |
 |---|---|---|---|---|---|
-| [A1](A1-e11-regressions.md) | Fix N1–N3 (regressions from the E11 fixes), settle N4–N6 and the `path` churn | WebEngineTS | Opus | 1.5–2 d | — |
+| [A1](A1-e11-regressions.md) | **Done 2026-10-14** (`5579e59..31c7793`, 2094 tests). N1–N6, `path`; review fixes; format decisions: `after` replaces `index` on added children, one `applyInstance` rule, `of` binds in any load order | WebEngineTS | Opus | — | — |
 | [A2](A2-e11-docs-api.md) | E11 docs and API cleanup from the conventions review | WebEngineTS | Sonnet | ½ d | A1 |
 | [A3](A3-d5-destroyed-component.md) | D5: a destroyed component leaves its object's list | WebEngineTS | Sonnet + Opus review | ½–1 d | — |
 | [A4](A4-engine-version-api.md) | Readers state what they read: public version API, strict gates, manifest major | WebEngineTS | Sonnet | 1 d | A1 |
