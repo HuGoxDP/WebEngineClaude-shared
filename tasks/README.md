@@ -11,7 +11,7 @@ State of every repository when these cards were written (2026-10-14), all on bra
 
 | Repo | Head | Notes |
 |---|---|---|
-| WebEngineTS | `31c7793` | 133 test files / 2094 tests green. E11 review closed by A1; what is left of it is A2 (docs/API) and A3 (D5). |
+| WebEngineTS | `85496dc` | 136 test files / 2280 tests green; standalone 392 KB gzip. A1–A4 and A6 done. |
 | virtual-lab | `709494c` | Refuses scene/prefab/manifest versions its player cannot read (`backend/player-formats.js`). Backend unit 125/125, full 232 with Postgres. |
 | WebEngineTSEditor | `b4a1a22` | Docs only since `9a6e35a`. Still on engine `0.1.0-local.1789023160893`. |
 | ScenarioCreator | `fbdc7c3` | Docs only. Still on engine `0.1.0-local.1789023160893`. |
@@ -114,11 +114,13 @@ Ordered. *Depends* must be done first. Sizes are for one person-session at the s
 | Card | What | Repo | Model | Size | Depends |
 |---|---|---|---|---|---|
 | [A1](A1-e11-regressions.md) | **Done 2026-10-14** (`5579e59..31c7793`, 2094 tests). N1–N6, `path`; review fixes; format decisions: `after` replaces `index` on added children, one `applyInstance` rule, `of` binds in any load order | WebEngineTS | Opus | — | — |
-| [A2](A2-e11-docs-api.md) | E11 docs and API cleanup from the conventions review | WebEngineTS | Sonnet | ½ d | A1 |
-| [A3](A3-d5-destroyed-component.md) | D5: a destroyed component leaves its object's list | WebEngineTS | Sonnet + Opus review | ½–1 d | — |
-| [A4](A4-engine-version-api.md) | Readers state what they read: public version API, strict gates, manifest major | WebEngineTS | Sonnet | 1 d | A1 |
-| [A5](A5-component-ids.md) | Component ids (Q2), scoped like node ids | WebEngineTS | Opus | 3–5 d | A1, A3, A4 |
-| [A6](A6-minify-bundle.md) | Minify the standalone bundle; size budget in CI | WebEngineTS | Sonnet | ½ d | — |
+| [A2](A2-e11-docs-api.md) | **Done 2026-10-14** (`5d271e5`, `4823500`, `ef1a56a`). `PrefabDiff` export left to owner decision #12 | WebEngineTS | Sonnet | — | — |
+| [A3](A3-d5-destroyed-component.md) | **Done 2026-10-14** (`5c41aa3`, `4f99210`, review fix `d532df6`). Hazards it surfaced → A13 | WebEngineTS | Sonnet + Opus review | — | — |
+| [A4](A4-engine-version-api.md) | **Done 2026-10-14** (`5650921`, `ddcd126`, `115e91b`, `4a3f4fe`, review fix `85496dc`). `SceneSerializer.readableVersions`/`versionOf`/`canRead`, `UnsupportedFormatError` | WebEngineTS | Sonnet | — | — |
+| [A12](A12-ui-rect-transform-restore.md) | A UI object loads with one RectTransform, the saved one (pre-existing; found in A3's review) | WebEngineTS | Sonnet + Opus review | 1 d | — |
+| [A13](A13-lifecycle-robustness.md) | Destroy is robust: a throwing `onDestroy`, self-destroy, children destroyed mid-update | WebEngineTS | Sonnet + Opus review | 1 d | — |
+| [A5](A5-component-ids.md) | Component ids (Q2), scoped like node ids | WebEngineTS | Opus | 3–5 d | A12 |
+| [A6](A6-minify-bundle.md) | **Done 2026-10-14** (`80e9f2d`, `6db59ef`). 892 → 392 KB gzip, budget 450 KB in CI; browser check not run (needs ScenarioCreator's verify-render) | WebEngineTS | Sonnet | — | — |
 | [A7](A7-changelog-backfill.md) | Backfill CHANGELOG for E3/E5/E6/E7/E10/E13 and 2026-09-10 | WebEngineTS | Sonnet | ½ d | A1–A6 |
 | [A8](A8-editor-new-engine.md) | Editor takes the new engine and opens files through it | WebEngineTSEditor | Sonnet | 1 d | A4 |
 | [A9](A9-release-v0.2.0.md) | Cut `v0.2.0` | WebEngineTS | Sonnet | ½ d | A1–A8, **owner** |
