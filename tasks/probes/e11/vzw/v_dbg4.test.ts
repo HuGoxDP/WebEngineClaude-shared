@@ -1,0 +1,28 @@
+import { test, expect, beforeEach, afterEach } from "vitest";
+import { Tag, Aim, Pick, clear, child, world, saveLink, reload, rebind, quiet, GameObject, AssetDatabase, SceneManager, Prefab } from "./zz_probe_common";
+beforeEach(() => clear());
+afterEach(() => AssetDatabase.clear());
+const dump = (g: GameObject, d = 0): string => "  ".repeat(d) + g.name + (g.isPrefabAssetMissing ? " [MISSING]" : "") + "\n" + Array.from({ length: g.transform.childCount }, (_, i) => dump(child(g, i), d + 1)).join("");
+test("dbg", () => {
+    const { tank } = world();
+    const a = tank.instantiate(); a.name = "A";
+    const b = tank.instantiate(); b.name = "B";
+    const flagB = new GameObject("FlagB"); flagB.transform.setParent(child(b, 2, 0).transform, false);
+    const flagA = new GameObject("FlagA"); flagA.transform.setParent(a.transform, false);
+    child(a, 1).getComponent(Aim)!.target = flagB;
+    child(b, 1).getComponent(Aim)!.target = child(a, 0);
+    child(a, 2, 0).getComponent(Aim)!.target = flagA;
+    flagA.addComponent(Aim).target = child(b, 2, 0);
+    flagB.addComponent(Pick).comp = child(a, 1).getComponent(Aim);
+    const p = new GameObject("Player");
+    p.addComponent(Aim).target = flagB;
+    const l1 = saveLink();
+    reload(l1);
+    rebind("guid-tank", json => { json.snapshot.children.unshift({ name: "Antenna", active: true, transform: json.snapshot.transform, components: [], children: [], id: "ant01" }); });
+    rebind("guid-turret", json => { json.snapshot.children.unshift({ name: "Shield", active: true, transform: json.snapshot.transform, components: [], children: [], id: "sh01" }); });
+    const w = quiet();
+    const roots = reload(l1);
+    const calls = w.calls();
+    w.restore();
+    console.log(calls.join("\n") + "\n" + roots.map(r => dump(r)).join(""));
+});

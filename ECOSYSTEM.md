@@ -60,6 +60,9 @@ written against, and that build is usually old.
 start a per-repo `PLAN.md`/`TODO.md` again. It replaced five scattered plans on 2026-09-04.
 **It carries open items only**: finished work is deleted from it and recorded in `CHANGELOG.md`.
 
+**How to do a planned item: [`tasks/`](tasks/README.md)** — one card per task (files to read, steps,
+tests, acceptance), the order, which model, and the owner decisions. Start any task from its card.
+
 **One changelog: [`CHANGELOG.md`](CHANGELOG.md)**, a section per project. The single exception is
 `WebEngineTS/CHANGELOG.md`, which stays because `package.json` ships it inside the npm tarball —
 that one is the engine's release notes, this one is the cross-project record.

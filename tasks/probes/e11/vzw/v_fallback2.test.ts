@@ -1,0 +1,24 @@
+import { test, expect, beforeEach, afterEach } from "vitest";
+import { Tag, Aim, clear, child, obj, prefabFrom, saveLink, saveExpand, reload, quiet, GameObject, AssetDatabase, SceneManager } from "./zz_probe_common";
+beforeEach(() => clear());
+afterEach(() => AssetDatabase.clear());
+const dump = (g: GameObject, d = 0): string => "  ".repeat(d) + g.name + " id=" + g.prefabNodeId + "\n" + Array.from({ length: g.transform.childCount }, (_, i) => dump(child(g, i), d + 1)).join("");
+test("revert the removal half", () => {
+    const turret = prefabFrom(() => obj("Turret", "turret", obj("Barrel", "barrel"), obj("Light", "light")), "guid-turret");
+    const tank = prefabFrom(() => obj("Tank", "tank", obj("Hull", "hull"), turret.instantiate()), "guid-tank");
+    const t = tank.instantiate();
+    child(t, 1, 1).transform.setSiblingIndex(0);
+    child(t, 1, 0).getComponent(Tag)!.label = "EDITED";
+    const w = quiet();
+    const ch = tank.getChanges(t);
+    tank.revertOverride(t, ch.removedChildren![0]);
+    console.log(dump(t));
+    const s = saveLink();
+    const e = saveExpand();
+    console.log("WARN", w.calls());
+    console.log("LINK", JSON.stringify(s.roots[0].prefab));
+    console.log("EXPAND children", e.roots[0].children.map(c => c.name + ":" + c.children.map(x => x.name).join(",")));
+    const [r] = reload(s);
+    console.log("RELOADED\n" + dump(r));
+    w.restore();
+});

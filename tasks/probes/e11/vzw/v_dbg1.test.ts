@@ -1,0 +1,24 @@
+import { test, expect, beforeEach, afterEach } from "vitest";
+import { Tag, Aim, Pick, clear, child, world, saveLink, reload, GameObject, AssetDatabase, SceneManager } from "./zz_probe_common";
+beforeEach(() => clear());
+afterEach(() => AssetDatabase.clear());
+const dump = (g: GameObject, d = 0): string => "  ".repeat(d) + g.name + "\n" + Array.from({ length: g.transform.childCount }, (_, i) => dump(child(g, i), d + 1)).join("");
+test("dbg", () => {
+    const { tank } = world();
+    const a = tank.instantiate(); a.name = "A";
+    const b = tank.instantiate(); b.name = "B";
+    const flagB = new GameObject("FlagB"); flagB.transform.setParent(child(b, 2, 0).transform, false);
+    const flagA = new GameObject("FlagA"); flagA.transform.setParent(a.transform, false);
+    child(a, 1).getComponent(Aim)!.target = flagB;
+    child(b, 1).getComponent(Aim)!.target = child(a, 0);
+    child(a, 2, 0).getComponent(Aim)!.target = flagA;
+    flagA.addComponent(Aim).target = child(b, 2, 0);
+    flagB.addComponent(Pick).comp = child(a, 1).getComponent(Aim);
+    const p = new GameObject("Player");
+    p.addComponent(Aim).target = flagB;
+    console.log(SceneManager.activeScene.getRootGameObjects().map(r => dump(r)).join(""));
+    const l1 = saveLink();
+    console.log(JSON.stringify(l1.roots.map(r => [r.name, r.prefab ? JSON.stringify(r.prefab).slice(0, 1500) : null])));
+    const roots = reload(l1);
+    console.log(roots.map(r => dump(r)).join(""));
+});

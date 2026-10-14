@@ -15,6 +15,10 @@ component ids), the target architecture, budgets and the order of work — is th
 of 2026-10-13: https://claude.ai/code/artifact/01113f63-16cd-4f87-912b-182e286b6501. This file keeps
 the actionable items; that one keeps the reasons.
 
+**How to do each item: [`tasks/`](tasks/README.md)** — one card per task, written so a session
+(Sonnet for most) can do it without asking, with the files to read, the steps, the tests, the
+acceptance checks and the owner decisions it waits on.
+
 **Not loaded into session context automatically** — unlike `ECOSYSTEM.md` and `ENGINE-GAPS.md`,
 this file is read on demand. Keep it to *what to do and why*; deep design belongs in the documents
 indexed at the bottom.
