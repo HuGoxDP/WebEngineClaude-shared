@@ -16,8 +16,8 @@ waits on it can proceed.
 | 8 | Player on a separate origin (B5): which domain (`play.<domain>`) | A subdomain on the same host and certificate | B5 | |
 | 9 | LTI: which LMS first, and does a scenario report a score? | Moodle; yes, a 0..1 score + completed flag | P1 | |
 | 10 | A server-side project store (R1) vs browser-only OPFS | **OPFS first** (no server state, no auth); server store when share links or co-editing are scheduled | R1 | |
-| 12 | `PrefabDiff` is `@internal` but still a public value export (`index.ts` `export { PrefabDiff }`); the CHANGELOG calls it internal | **Remove the export** before `v0.2.0` (tests import it from `src`); revisit at editor stage 16 (D3) if undo needs it public | A9 | |
 | 11 | Deploy: who runs `docker compose up` on the production server after A10, and when (between lessons) | Owner, outside teaching hours; e2e against the deployed site afterwards | A10 | |
+| 12 | `PrefabDiff` is `@internal` but still a public value export (`index.ts` `export { PrefabDiff }`); the CHANGELOG calls it internal | **Remove the export** before `v0.2.0` (tests import it from `src`); revisit at editor stage 16 (D3) if undo needs it public | A9 | |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a
