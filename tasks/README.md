@@ -11,7 +11,7 @@ State of every repository when these cards were written (2026-10-14), all on bra
 
 | Repo | Head | Notes |
 |---|---|---|
-| WebEngineTS | `85496dc` | 136 test files / 2280 tests green; standalone 392 KB gzip. A1–A4 and A6 done. |
+| WebEngineTS | `bdf038b` | 136 test files / 2280 tests green; standalone 392 KB gzip. A1–A4 and A6 done; `PrefabDiff` no longer exported (#12). |
 | virtual-lab | `709494c` | Refuses scene/prefab/manifest versions its player cannot read (`backend/player-formats.js`). Backend unit 125/125, full 232 with Postgres. |
 | WebEngineTSEditor | `b4a1a22` | Docs only since `9a6e35a`. Still on engine `0.1.0-local.1789023160893`. |
 | ScenarioCreator | `fbdc7c3` | Docs only. Still on engine `0.1.0-local.1789023160893`. |
@@ -114,7 +114,7 @@ Ordered. *Depends* must be done first. Sizes are for one person-session at the s
 | Card | What | Repo | Model | Size | Depends |
 |---|---|---|---|---|---|
 | [A1](A1-e11-regressions.md) | **Done 2026-10-14** (`5579e59..31c7793`, 2094 tests). N1–N6, `path`; review fixes; format decisions: `after` replaces `index` on added children, one `applyInstance` rule, `of` binds in any load order | WebEngineTS | Opus | — | — |
-| [A2](A2-e11-docs-api.md) | **Done 2026-10-14** (`5d271e5`, `4823500`, `ef1a56a`). `PrefabDiff` export left to owner decision #12 | WebEngineTS | Sonnet | — | — |
+| [A2](A2-e11-docs-api.md) | **Done 2026-10-14** (`5d271e5`, `4823500`, `ef1a56a`). `PrefabDiff` export removed per owner decision #12 (`bdf038b`) | WebEngineTS | Sonnet | — | — |
 | [A3](A3-d5-destroyed-component.md) | **Done 2026-10-14** (`5c41aa3`, `4f99210`, review fix `d532df6`). Hazards it surfaced → A13 | WebEngineTS | Sonnet + Opus review | — | — |
 | [A4](A4-engine-version-api.md) | **Done 2026-10-14** (`5650921`, `ddcd126`, `115e91b`, `4a3f4fe`, review fix `85496dc`). `SceneSerializer.readableVersions`/`versionOf`/`canRead`, `UnsupportedFormatError` | WebEngineTS | Sonnet | — | — |
 | [A12](A12-ui-rect-transform-restore.md) | A UI object loads with one RectTransform, the saved one (pre-existing; found in A3's review) | WebEngineTS | Sonnet + Opus review | 1 d | — |
