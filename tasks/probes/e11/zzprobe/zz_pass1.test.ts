@@ -21,20 +21,30 @@ function source(): GameObject {
     return tank;
 }
 
+/**
+ * The prefab node an override addresses, by name. Since A1 (#10) an override names its node by id
+ * alone and writes no `path` beside it, so these probes read the node, not a position.
+ */
+const nodeName = (prefab: Prefab, id: string | undefined): string | null => {
+    const walk = (n: any): string | null => n.id === id ? n.name : n.children.map(walk).find((x: any) => x) ?? null;
+    return walk(prefab._resolvedTree());
+};
+
 describe("#12 objects without node ids", () => {
     test("untouched source of a non-connected prefab has no overrides", () => {
         const go = source();
         const prefab = Prefab.fromGameObject(go);
         expect(prefab.getOverrides(go)).toEqual([]);
     });
-    test("edits on the source are reported by position", () => {
+    test("edits on the source are matched by position, and addressed by node id", () => {
         const go = source();
         const prefab = Prefab.fromGameObject(go);
         child(go, 1, 0).getComponent(Tag)!.count = 42;
         child(go, 0).name = "HullRenamed";
-        const fields = prefab.getOverrides(go).map(o => `${JSON.stringify(o.path)} ${o.field}`);
-        expect(fields).toEqual(['[0] name', '[1,0] count']);
-        const v = Prefab.createVariant(prefab, prefab.getOverrides(go)).instantiate();
+        const overrides = prefab.getOverrides(go);
+        expect(overrides.map(o => `${nodeName(prefab, o.node)} ${o.field}`)).toEqual(["Hull name", "Barrel count"]);
+        expect(overrides.filter(o => o.path !== undefined)).toEqual([]);
+        const v = Prefab.createVariant(prefab, overrides).instantiate();
         expect(child(v, 0).name).toBe("HullRenamed");
         expect(child(v, 1, 0).getComponent(Tag)!.count).toBe(42);
         expect(v.getComponent(Aim)!.target).toBe(child(v, 1, 0));
@@ -45,8 +55,8 @@ describe("#12 objects without node ids", () => {
         const prefab = Prefab.fromGameObject(go);
         const copy = SceneSerializer.deserializeGameObject(SceneSerializer.serializeGameObject(go));
         child(copy, 1, 0).getComponent(Tag)!.count = 42;
-        const fields = prefab.getOverrides(copy).map(o => `${JSON.stringify(o.path)} ${o.field}`);
-        expect(fields).toEqual(['[1,0] count']);
+        const fields = prefab.getOverrides(copy).map(o => `${nodeName(prefab, o.node)} ${o.field}`);
+        expect(fields).toEqual(["Barrel count"]);
         expect(prefab.getChanges(copy)).toMatchObject({ overrides: [{ field: "count" }] });
         expect(prefab.getChanges(copy).addedChildren).toBeUndefined();
     });
@@ -55,8 +65,8 @@ describe("#12 objects without node ids", () => {
         const prefab = Prefab.fromGameObject(go);
         child(go, 1, 0).getComponent(Tag)!.count = 42;
         const snap = SceneSerializer.serializeGameObject(go);
-        const fields = PrefabDiff.compare(prefab._resolvedTree(), snap).map(o => `${JSON.stringify(o.path)} ${o.field}`);
-        expect(fields).toContain('[1,0] count');
+        const fields = PrefabDiff.compare(prefab._resolvedTree(), snap).map(o => `${nodeName(prefab, o.node)} ${o.field}`);
+        expect(fields).toContain("Barrel count");
     });
 });
 
