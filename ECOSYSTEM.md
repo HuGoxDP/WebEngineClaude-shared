@@ -13,6 +13,10 @@ four sessions at once. Repo-specific detail belongs in that repo's own `CLAUDE.m
 | **testv/virtual-lab** | The student platform: catalog, backend, db, nginx, docker | `WebstormProjects/testv/virtual-lab` |
 | **WebEngineTS-Benchmarks** | The benchmark harness, scenes, RUNBOOK, recorded results | `WebstormProjects/WebEngineTS-Benchmarks` |
 
+**Setting up a machine:** from an empty `WebEngine` folder run `.claude-shared/workspace/clone-all.ps1`
+(or `.sh`) — it clones every repo into the layout above (virtual-lab under `testv/`), installs,
+and drops a root `CLAUDE.md` + `WebEngine.code-workspace` so the whole folder opens as one project.
+
 ## The one rule that must not be broken
 
 **Data flows one way: engine → tarball / standalone bundle → consumers.** The engine imports from

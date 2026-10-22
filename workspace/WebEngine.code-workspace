@@ -1,0 +1,12 @@
+{
+  "folders": [
+    { "name": "WebEngineTS", "path": "WebEngineTS" },
+    { "name": "ScenarioCreator", "path": "ScenarioCreator" },
+    { "name": "WebEngineTSEditor", "path": "WebEngineTSEditor" },
+    { "name": "virtual-lab", "path": "testv/virtual-lab" },
+    { "name": ".claude-shared", "path": ".claude-shared" }
+  ],
+  "settings": {
+    "files.exclude": { "**/node_modules": true, "**/dist": true, "**/.angular": true }
+  }
+}
