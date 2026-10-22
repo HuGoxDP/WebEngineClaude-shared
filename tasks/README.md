@@ -11,7 +11,7 @@ State of every repository when these cards were written (2026-10-14), all on bra
 
 | Repo | Head | Notes |
 |---|---|---|
-| WebEngineTS | `bdf038b` | 136 test files / 2280 tests green; standalone 392 KB gzip. A1–A4 and A6 done; `PrefabDiff` no longer exported (#12). |
+| WebEngineTS | `609741e` | 139 test files / 2352 tests green; standalone 392 KB gzip. A1–A4, A6 done; A12, A13 merged (Opus review not yet run); `PrefabDiff` no longer exported (#12). |
 | virtual-lab | `709494c` | Refuses scene/prefab/manifest versions its player cannot read (`backend/player-formats.js`). Backend unit 125/125, full 232 with Postgres. |
 | WebEngineTSEditor | `b4a1a22` | Docs only since `9a6e35a`. Still on engine `0.1.0-local.1789023160893`. |
 | ScenarioCreator | `fbdc7c3` | Docs only. Still on engine `0.1.0-local.1789023160893`. |
@@ -117,8 +117,8 @@ Ordered. *Depends* must be done first. Sizes are for one person-session at the s
 | [A2](A2-e11-docs-api.md) | **Done 2026-10-14** (`5d271e5`, `4823500`, `ef1a56a`). `PrefabDiff` export removed per owner decision #12 (`bdf038b`) | WebEngineTS | Sonnet | — | — |
 | [A3](A3-d5-destroyed-component.md) | **Done 2026-10-14** (`5c41aa3`, `4f99210`, review fix `d532df6`). Hazards it surfaced → A13 | WebEngineTS | Sonnet + Opus review | — | — |
 | [A4](A4-engine-version-api.md) | **Done 2026-10-14** (`5650921`, `ddcd126`, `115e91b`, `4a3f4fe`, review fix `85496dc`). `SceneSerializer.readableVersions`/`versionOf`/`canRead`, `UnsupportedFormatError` | WebEngineTS | Sonnet | — | — |
-| [A12](A12-ui-rect-transform-restore.md) | A UI object loads with one RectTransform, the saved one (pre-existing; found in A3's review) | WebEngineTS | Sonnet + Opus review | 1 d | — |
-| [A13](A13-lifecycle-robustness.md) | Destroy is robust: a throwing `onDestroy`, self-destroy, children destroyed mid-update | WebEngineTS | Sonnet + Opus review | 1 d | — |
+| [A12](A12-ui-rect-transform-restore.md) | **Merged 2026-10-22** (`05811fb`, `6e84c2a`); **Opus review pending** — focus: later-copy-wins for doubled RectTransforms, an earlier sibling now sees a later not-yet-woken component in `awake`, component indices before A5 | WebEngineTS | Sonnet + Opus review | 1 d | — |
+| [A13](A13-lifecycle-robustness.md) | **Merged 2026-10-22** (`72e7b08`, `faa77e4`); **Opus review pending** — focus: copy-on-write children cost (+15–60% on empty children), errors now logged not rethrown from `GameObject.onDestroy`; open: `Scene` root loops still skip a root after one is destroyed mid-update | WebEngineTS | Sonnet + Opus review | 1 d | — |
 | [A5](A5-component-ids.md) | Component ids (Q2), scoped like node ids | WebEngineTS | Opus | 3–5 d | A12 |
 | [A6](A6-minify-bundle.md) | **Done 2026-10-14** (`80e9f2d`, `6db59ef`). 892 → 392 KB gzip, budget 450 KB in CI; browser check not run (needs ScenarioCreator's verify-render) | WebEngineTS | Sonnet | — | — |
 | [A7](A7-changelog-backfill.md) | Backfill CHANGELOG for E3/E5/E6/E7/E10/E13 and 2026-09-10 | WebEngineTS | Sonnet | ½ d | A1–A6 |
