@@ -6,7 +6,7 @@ waits on it can proceed.
 
 | # | Decision | Recommended | Blocks | Answer |
 |---|---|---|---|---|
-| 1 | Merge the `claude/scenario-platform-architecture-24f9fy` branches into `main`/`master` in all four repos (and the stale `integration/engine-tasks-e1-e4`, `fix/e1-…`, `feat/e2-…`, `docs/e3-…`, `docs/e4-…` branches in WebEngineTS deleted) | **Yes**, via a PR per repo after Phase A's engine cards, so `v0.2.0` is tagged on `main` | A9 | |
+| 1 | Merge the `claude/scenario-platform-architecture-24f9fy` branches into `main`/`master` in all four repos (and the stale `integration/engine-tasks-e1-e4`, `fix/e1-…`, `feat/e2-…`, `docs/e3-…`, `docs/e4-…` branches in WebEngineTS deleted) | **Yes**, via a PR per repo after Phase A's engine cards, so `v0.2.0` is tagged on `main` | A9 | **Yes** — fast-forwarded to `master`/`main` in all four repos 2026-10-22 (owner asked, to run on the PC); stale remote branches not yet deleted |
 | 2 | Cut `v0.2.0` (publishes a GitHub Release) | **Yes**, after A1–A8 | A9 | |
 | 3 | Back up `WebEngineTS/design/Article` locally before pulling `main` — the merge deletes it from the working tree (it stays in history and on `Test_changing`) | **Do it** before step 1 | 1 | |
 | 4 | Student hardware to budget for: Intel UHD laptops, Chromebooks, Android tablets, phones? | Answer in the vision doc's comment; the budgets in its "Производительность" section depend on it | performance budgets, N4 | |
