@@ -8,17 +8,26 @@ sections "Движок", "Каталог и облако", "Производит
 
 ## Platform lane (virtual-lab)
 
-**P1 — LTI 1.3 for Moodle** *(Opus design → Sonnet; ~2 weeks; after B5 player isolation)*
-- Backend as an LTI 1.3 tool (`ltijs` or a minimal OIDC + JWT implementation; decide with evidence of
-  maintenance status). Dynamic Registration (Moodle adds the tool from one URL); Deep Linking (the
-  teacher picks a scenario, the link pins the **archive sha256**, not the row); launch opens the player.
-- Grades (AGS): needs an engine API for a scenario to report a result — design it with the engine owner
-  (e.g. `ScenarioBehaviour.reportResult({ score: 0..1, completed })`), carried player → viewer by
-  `postMessage`, then backend → AGS. Names and Roles only if a teacher view needs it.
-- Safari: no third-party cookies → LTI Platform Storage (`lti.put_data`/`get_data` via postMessage),
-  cookie fallback where the LMS lacks it.
-- Privacy: store the LMS `sub` and context id, no names or emails unless a feature needs them;
-  retention period; deletion on request. Write it into `docs/privacy.md`.
+**P1 — LTI 1.3 for Moodle** *(done 2026-10-28; plan `.code-foundations/plans/2026-10-27-lms-lti-integration.md`, research `.code-foundations/research/2026-10-27-lms-integration-lti.md`)*
+Shipped as decided:
+- **Own LTI module on `jose`, not `ltijs`** (`virtual-lab/backend/lti/`): Dynamic Registration (`/api/lti/register`, Moodle adds the
+  tool from one URL), OIDC login + launch, Deep Linking, AGS. Server-side sessions behind an `HttpOnly` cookie.
+- **Deep Linking** links the scenario's **latest published version** (catalog id), **not** an archive sha256 — a re-upload is
+  picked up by existing course activities. (Reverses this card's original "pin the sha256"; reason in the research doc §7.)
+- **Launch in a new window, no Platform Storage**: the resource launch is a top-level page, so Safari's third-party-cookie
+  rules do not apply. LTI Platform Storage is out of scope.
+- **Grades**: the engine API is `ScenarioBehaviour.reportResult({ score: 0..1, completed })`, carried player → viewer by
+  `postMessage` (`PlayerHost` `onResult`), then `POST /api/lti/submit` → AGS. **One submission per student per activity, read
+  back from Moodle AGS** (a second submit gets 409 with the stored score). The **platform stores no grades, attempts, names or
+  e-mails**. The submit button belongs to the platform («Здати» with a confirmation for a graded scenario, «Завершити» = 100 for
+  a non-graded one); `graded: true` is a key in the scenario manifest (Circuits is the first graded scenario).
+- **NRPS (Names and Role Provisioning) is out of scope**; only `iss` and `sub` claims are requested.
+- Privacy: `virtual-lab/docs/privacy.md` (what is processed, retention, deletion on request).
+- Demo stand: `virtual-lab/lti-demo/` (Moodle 5.0.2 + HTTPS), runbook and the recorded full walkthrough with screenshots:
+  `virtual-lab/docs/lti-demo.md`.
+Fixed: the Deep Linking picker inside Moodle's "Select content" modal (`LTI_FRAME_ANCESTORS` on `/lti/pick` + `Partitioned`
+LTI cookies; verified in Chromium with third-party cookies blocked, Safari/Firefox not exercised) — see PLAN §2.10.
+Still open: running it on KSU-online (own Moodle version unconfirmed) is the owner's deploy step.
 
 **P2 — Offline lessons** *(Sonnet; ~1 week; after A10)*
 Cache-first Service Worker over `/scenarios/<sha256>.zip` and `/engine/<version>/…` (both immutable);

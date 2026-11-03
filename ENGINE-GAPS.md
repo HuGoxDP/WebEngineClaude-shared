@@ -14,7 +14,7 @@ were re-checked. The engine moves faster than any list describing it.
 |---|---|---|---|---|
 | G2 | Streamed asset path reports ~2.9× the texture VRAM of the ZIP path for the same scenario | testv/virtual-lab | `0.1.0-local.1786569427449` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
 | G4 | Texture orientation depends on the file format: the image path uploads `flipY = true`, glTF and KTX2 use `false`, so a de-embedded map samples upside down and a KTX2 A/B compares two different pictures | ScenarioCreator | `0.1.0-local.1787408668962` | `ScenarioCreator/docs/ENGINE-GAPS.md` §6 |
-| G5 | `Time.timeScale` survives `Application.dispose()` and the next scenario load — `Time._reset()` (`Time.ts:280`) has no caller, so a paused or slowed scenario leaks its scale into the next one in the same page | testv/virtual-lab | `0.1.0-local.1792706134341` | `testv/virtual-lab/docs/upstream/webenginets.md` (written by release-1 plan Phase 4; the viewer resets the scale meanwhile) |
+| G5 | `Time.timeScale` survives `Application.dispose()` and the next scenario load — `Time._reset()` (`Time.ts:280`) has no caller, so a paused or slowed scenario leaks its scale into the next one in the same page | testv/virtual-lab | `0.1.0-local.1792706134341` | `testv/virtual-lab/docs/upstream/webenginets.md` §6 (the platform runs every scenario, restarts included, in a fresh player frame — player-isolation, virtual-lab 2bf3a12 — so the scale cannot leak there; the engine fix, a `Time._reset()` caller, is still open for hosts that reuse one realm) |
 
 **G2 has a diagnosis (2026-09-05), and it is not an engine leak.** Streamed scenarios eagerly
 decode every non-`Lazy` manifest asset — `Scenario._preloadCriticalAssets` then

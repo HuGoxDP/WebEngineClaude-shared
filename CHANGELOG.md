@@ -15,6 +15,31 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-10-24 → 27
+- **The engine ships a sandboxed player for scenario code, and a host client for it.** A teacher's
+  script is arbitrary code; until now it ran in the page, beside the API, the admin token and the
+  editor. `dist/player/` (`player.html`, `player.js`, `player.nginx.conf`) is a page that runs a
+  scenario in an `<iframe sandbox>` on an opaque origin, served with the CSP, `sandbox` and
+  `frame-ancestors` that the shipped snippet carries; `WebEngineTS/player-host` (`PlayerHost`, protocol
+  v1, no engine code in it) is what a host page drives it with: origin and version checked before a
+  byte is sent, then a private `MessageChannel`; restart is always a fresh frame. The measured CSP and
+  tokens, per browser, are in `WebEngineTS/design/player-sandbox.md`; `npm run player-smoke` re-runs
+  it on the shipped files in Chromium, Firefox and WebKit. KTX2 transcodes inside the frame. `release:local`
+  now finds virtual-lab at the workspace root or under `testv/`, and refuses a tarball without the player.
+  Release notes: `WebEngineTS/CHANGELOG.md` (*Unreleased*).
+- **`Scenario.engineModuleUrl` replaces the host import map for the player.** Set before a load, it makes
+  the pre-linker rewrite a scenario's bare `"WebEngineTS"` import to an absolute URL; unset, the output is
+  byte for byte what it was, so ScenarioCreator, the benchmarks and the editor keep their import maps.
+  It is also what per-scenario engine pinning needs (an import map cannot be remapped once a document has
+  resolved it); pinning itself is not built.
+- **`MemoryProfiler.diagnosticsAllowed` latches at `false`.** A scenario could reopen the gate its host had
+  closed; now `true` after `false` is ignored with a warning. Policy, not a boundary: only the sandboxed
+  player is one. A host that closes the gate and reopens it must set it once instead.
+- **Space pauses inside the player** when the frame has focus, so the HUD's pause works whichever side has
+  the keyboard.
+- Nothing here changes rendered output or, expectedly, a measured number: the new code runs outside the
+  frame loop, and was not measured.
+
 ### 2026-09-09
 - **A saved scene was dropping six components whole.** `AudioSource`, `AudioListener`,
   `ParticleSystem`, `InstancedMeshRenderer`, `Animation` and `Animator` carried no
@@ -145,6 +170,50 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+
+### 2026-10-27 → 28
+- **virtual-lab works as an LTI 1.3 tool for Moodle.** The admin registers it with one URL (Dynamic Registration), a teacher
+  picks a lab through Deep Linking, a student opens it from the course in a new window without a separate login, presses
+  «Здати» (graded) or «Завершити» (non-graded, 100) and the grade lands in the Moodle gradebook; relaunch shows «Роботу здано,
+  оцінка X з 100»; an instructor gets a view mode. Own module on `jose` (`backend/lti/`), not `ltijs`; the link targets the
+  scenario's latest published version, not a sha256; no Platform Storage; one submission per student per activity, read from
+  Moodle AGS; **the platform stores no grades, attempts, names or e-mails** (`virtual-lab/docs/privacy.md`).
+  - **Engine contract:** a scenario reports `{ score: 0..1, completed }` with `ScenarioBehaviour.reportResult`, carried by the
+    player's `onResult`. Circuits has a task mode (four tasks, `graded: true` in its manifest) as the first graded scenario.
+  - **Verified** on a local Moodle 5.0.2 stand over HTTPS (`virtual-lab/lti-demo/`): full walkthrough with screenshots in
+    `virtual-lab/docs/lti-demo.md`. Moodle's "Select content" iframe is
+    handled: `/lti/pick` is frameable through `LTI_FRAME_ANCESTORS` and the LTI cookies are `Partitioned`, verified in Chromium
+    with third-party cookies blocked (`PLAN.md` §2.10). Open: deploy to KSU-online; Safari/Firefox not exercised.
+
+### 2026-10-26 → 27
+- **Scenario code no longer runs on the platform's origin.** Every scenario — ZIP and `?stream=1` — runs
+  in the engine's sandboxed player (`/player/`, an `<iframe sandbox>` on an opaque origin) driven by
+  `PlayerHost`, so a hostile archive can no longer read the page's storage (the admin token), navigate
+  `top`, call `/api/admin/*` with the page's credentials, or reach `/editor/`. An e2e builds exactly such an
+  archive and shows each of those failing. Closes `PLAN.md` §2.9 (*isolation before keys*); **author keys
+  (§2.6) are unblocked from the isolation side** — in production, deploy this first. Plan:
+  `.code-foundations/plans/2026-10-24-player-isolation.md`; research: `…/research/2026-10-24-scenario-delivery-and-script-isolation.md`.
+  - **Viewer:** keeps the archive as a `Blob`; restart opens a **fresh frame** (no second download for a ZIP)
+    and now works for a streamed run too; pause is real — the HUD button and Space with either the host
+    or the frame focused; FPS comes from the player. The host always sends `diag: false`, so the profiler
+    stays off for any scenario and `?diag=1` shows only the engine build stamp. The page-side profiler guard
+    (`viewer-profiler.ts`) is deleted, and with it the loop that re-closed the gate every second.
+  - **CSP and nginx:** `/` has no import map and `script-src 'self'` — no `blob:`, no nonce; `frame-src 'self'`
+    is the one directive added. `/player/` is served with the engine's own header snippet; the engine bundle, the
+    basis transcoder and `/a/` answer `Access-Control-Allow-Origin: *` because the frame's origin is `null`.
+    The import map and its nonce `sub_filter` moved into `/editor/` (`editor.conf`, inside `location ^~ /editor/`;
+    `csp-editor.conf` untouched), which still shares the platform origin and still runs what the editor runs — the residual
+    risk until editor Play moves onto the player.
+  - **Engine integration:** the page imports only `WebEngineTS/player-host`; `angular.json` copies
+    `dist/player/` to `/player/` and no longer lists `WebEngineTS` under `externalDependencies` (esbuild treats
+    it as covering subpaths, which left the `player-host` import unresolvable). `transcoderPath` goes to the
+    player.
+  - **Tests:** unit 293, backend 348, e2e 104 (hostile archive, KTX2 render through the player, the
+    frame-aware helpers, `e2e/editor-csp-harness/` pinning `/editor/`'s nonce); `npm run check:csp` and
+    `npm run test:scripts` guard the built `index.html`.
+- **`docs/scenario-delivery-migration.md` Stage 3 no longer names MinIO**: its open-source repository was
+  archived on 2026-04-25. SeaweedFS, Garage and a hosted S3 are the candidates; the Docker volume served by
+  nginx remains the current choice.
 
 ### 2026-10-13
 - **The platform refuses what its student player would misread** — at upload, in `publish:release`

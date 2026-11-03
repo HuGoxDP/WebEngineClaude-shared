@@ -152,19 +152,26 @@ before — the engine moves faster than a list.
    and upload to one's own *unpublished* scenario, nothing else. Issued and revoked in `/admin`.
    Design: `WebEngineTSEditor/docs/unity-editor-plan.md` §7. *Decided 2026-10-09:* an author
    updates an already-published scenario only through a draft that an admin accepts.
+   **Isolation (§2.9) is done, so keys are unblocked from that side** — deploy it before issuing one.
 7. **Run the browser e2e against the stack with the editor override applied.** The override was
    checked by hand and by the header tests; the Playwright browser was not installed, so the
    eleven browser specs did not run (`npx playwright install` in `e2e/`).
 
 8. **Serve the engine from a versioned path** *(with §1.2.6)*. `/assets/WebEngineTS.standalone.js`
-   is cached `immutable` for 30 days, so after an engine update a returning browser can keep the
-   old build for a month. `/engine/<version>/…`, referenced from the no-cache `index.html`.
-9. **Run scenarios away from the platform's origin** *(before publish keys or LTI logins exist)*.
-   A teacher's script is arbitrary code and runs today on the same origin as the API. A player
-   document in an iframe on its own origin isolates it, and is also what per-scenario engine
-   pinning needs, since an import map cannot be remapped once a document has resolved it.
-10. **LTI 1.3 for Moodle** *(after 9)* — Dynamic Registration, Deep Linking to an exact archive
-    hash, grades through AGS, Platform Storage for Safari. The largest step for universities.
+   is served `Cache-Control: no-cache` (its own exact-match nginx location), so a returning browser
+   revalidates it on every load. A versioned path, `/engine/<version>/…`, would let it be cached long and
+   `immutable`; the page no longer references the engine, so the viewer would pass that URL to `PlayerHost`
+   and the player frame would load it.
+9. *Closed 2026-10-27 — scenarios run in the engine's sandboxed player; see `CHANGELOG.md`. The number
+   stays because other documents cite §2.9 and §2.10.*
+10. **LTI 1.3 for Moodle** — *done 2026-10-28 on the local stand (Moodle 5.0.2, HTTPS); see `CHANGELOG.md` and
+    `tasks/E-growth.md` P1.* Own module on `jose`; Dynamic Registration; Deep Linking to the scenario's latest published
+    version (not an archive hash); grades through AGS, one submission per student read from Moodle; launch in a new window
+    (no Platform Storage); platform stores no grades, names or e-mails (`virtual-lab/docs/privacy.md`).
+    **Fixed:** (a) Moodle's "Select content" shows the picker in an iframe: `/lti/pick` is now served with
+    `frame-ancestors <LTI_FRAME_ANCESTORS>` (the Moodle origin; every other page keeps `'self'`) and the LTI cookies are
+    `Partitioned`; verified in Chromium with third-party cookies blocked (Safari/Firefox not exercised).
+    **Open:** (b) deploy to KSU-online (its Moodle version is unconfirmed); (c) NRPS and server-side score verification, out of scope.
 11. **Offline lessons** — a cache-first Service Worker over the content-addressed archives, a
     "prepare this lesson" action, `navigator.storage.persist()` (Safari wipes a site's storage after
     7 days without a visit).
@@ -227,6 +234,10 @@ editor.** Stages 0–5 are done (`CHANGELOG.md`). The plan, with a parity table 
    engine's decorators are the legacy kind. No scenario uses `@SerializedField` yet, which is why
    it has not surfaced; the editor's scripts will.
 9. **Write `entryScene` into the manifest** when the scenario has one *(minutes; with engine E1)*.
+10. **Take the profiler out of `solar-system`** *(minutes + republish; owner, 2026-10-25)*. Its `Scenario.ts`
+    calls `MemoryProfiler.enableToggle()`/`showOverlay()` itself. The platform now keeps the profiler off
+    (virtual-lab release 1 Phase 5), so the call is a no-op there, but content should not open a developer
+    overlay at all; the profiler is being developed separately. Rebuild the archive and `npm run publish:release`.
 
 Per-scenario specifications stay as `docs/TASK-*.md` (11 files, ~2.1k lines) — they are content
 specs, not plans.
