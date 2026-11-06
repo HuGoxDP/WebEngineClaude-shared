@@ -19,6 +19,9 @@ the actionable items; that one keeps the reasons.
 (Sonnet for most) can do it without asking, with the files to read, the steps, the tests, the
 acceptance checks and the owner decisions it waits on.
 
+**Milestone view: [`ROADMAP.md`](ROADMAP.md)** — the same items grouped into M0–M7 with "done when"
+for each; it links back here and to the cards, and holds no reasoning of its own.
+
 **Not loaded into session context automatically** — unlike `ECOSYSTEM.md` and `ENGINE-GAPS.md`,
 this file is read on demand. Keep it to *what to do and why*; deep design belongs in the documents
 indexed at the bottom.

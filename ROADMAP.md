@@ -1,0 +1,164 @@
+# Roadmap — the whole WebEngineTS ecosystem
+
+**A milestone view of [`PLAN.md`](PLAN.md) and [`tasks/`](tasks/README.md), not a second plan.**
+The reasons, the evidence and the how live there; this file says *in which order* and *what "done"
+means* for each milestone. When an item closes, update its card / `PLAN.md` / `CHANGELOG.md` first,
+then tick it here. Written 2026-11-06 against: WebEngineTS `03b640f`, `.claude-shared` `83750d5`.
+
+Sizes are one person at the card's model. **Status:** ✅ done · 🟡 started / waiting on review ·
+⬜ open · 🔒 waits on an owner decision ([`tasks/OWNER-DECISIONS.md`](tasks/OWNER-DECISIONS.md)).
+Repos: **E** WebEngineTS · **P** virtual-lab · **Ed** WebEngineTSEditor · **SC** ScenarioCreator ·
+**S** .claude-shared · **B** Benchmarks.
+
+```
+M0 Foundation ──► M1 v0.2.0 release ──┬─► M3 Editor milestone 1 ──► M4 Editor milestone 2 ──► M5 Editor milestone 3 ──► M7 Unity windows
+   (now, days)    (~2–3 weeks)        │   (~11–12 weeks)              (~10–12 weeks)             (~6 weeks)                 (per decision)
+                                      └─► M2 Platform for real teachers (parallel, ~2 weeks spread)
+                                          M6 Growth lanes (parallel, pulled in when a lesson needs them)
+```
+
+Critical path to "a teacher builds and publishes a scenario without code": **M0 → M1 → M3**
+(≈ 4 months). Everything in M2 and M6 runs beside it and must not block it.
+
+---
+
+## M0 — Foundation *(now; a few days)*
+
+**Done when:** nothing merged is unreviewed, the tooling the sessions rely on actually runs, and the
+owner's pending pushes and decisions for M1 are made.
+
+| ID | Task | Repo | Size | Source | Status |
+|---|---|---|---|---|---|
+| M0.1 | Code graph (graphify) for the engine, wired into root sessions | E, S | — | research/plan 2026-11-04 | ✅ 2026-11-06 |
+| M0.2 | Opus review of **A12** (RectTransform restore) | E | ½ d | `tasks/A12` | 🟡 merged, review pending |
+| M0.3 | Opus review of **A13** (lifecycle robustness); decide the open `Scene` root-loop skip | E | ½ d | `tasks/A13` | 🟡 merged, review pending |
+| M0.4 | Confirm and fix: engine typecheck hooks never run in root sessions | E / root | ½ d + 1 h | `PLAN.md` §1.6 | ⬜ |
+| M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
+| M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | 🔒 |
+| M0.7 | Commit or drop the stray `workspace/clone-all.sh` change | S | owner | — | ⬜ owner |
+| M0.8 | Guard review: is the graphify PreToolUse nudge useful? (≈ 2026-11-11) | root | 10 min | research 2026-11-04 | ⬜ |
+
+## M1 — Release `v0.2.0`: every consumer on one tagged engine *(~2–3 weeks)*
+
+**Why first:** no consumer has any engine work since 2026-09-10; a v2 scene loads hollow on the
+platform today. **Done when:** `v0.2.0` is a GitHub Release; platform, editor and ScenarioCreator
+depend on its URL; the platform serves the engine from a versioned, cacheable path; the ten
+production scenarios are re-published and pass the e2e.
+
+| ID | Task | Repo | Size | Depends | Source | Status |
+|---|---|---|---|---|---|---|
+| A1–A4, A6 | E11 regressions, docs/API, format-version API, minified bundle | E | — | — | `tasks/A1…A6` | ✅ 2026-10-14 |
+| A5 | Component ids (Q2), scoped like node ids — before the format freezes | E | 3–5 d (Opus) | M0.2 | `tasks/A5` | ⬜ **next** |
+| A7 | Backfill engine `CHANGELOG.md` (E3/E5/E6/E7/E10/E13, 2026-09-10) | E | ½ d | A5 | `tasks/A7` | ⬜ |
+| B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ⬜ |
+| A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ⬜ |
+| A9 | Cut `v0.2.0` | E | ½ d | A5–A8, owner | `tasks/A9` | 🔒 decision #2 |
+| A10 | Platform on the release: URL dependency, `/engine/<version>/…` immutable, prefab v2 accepted | P | 1–2 d | A9 | `tasks/A10`, `PLAN.md` §2.8 | ⬜ |
+| A11 | ScenarioCreator on the release; `.meta` guids; `--experimentalDecorators` | SC | 1–2 d | A9 | `tasks/A11` | ⬜ |
+| M1.1 | Take the profiler out of `solar-system`; re-publish | SC | ½ h | A11 | `PLAN.md` §4.10 | ⬜ |
+| M1.2 | Deploy to production + e2e against the deployed site | P | owner | A10 | decision #11 | 🔒 |
+
+## M2 — Platform ready for real teachers *(parallel with M1/M3; ~2 weeks spread)*
+
+**Done when:** production has HTTPS and tested backups, Moodle at KSU-online launches and grades a
+scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and fixed in content.
+
+| ID | Task | Repo | Size | Depends | Source | Status |
+|---|---|---|---|---|---|---|
+| P1 | LTI 1.3 for Moodle (Dynamic Registration, Deep Linking, AGS grades) | P, E | — | — | `tasks/E-growth` P1 | ✅ 2026-10-28 (local) |
+| P1b | Deploy LTI to KSU-online (confirm its Moodle version) | P | 1–2 d | P5 | `PLAN.md` §2.10(b) | ⬜ |
+| P5 | Backups (Postgres + archives, restore tried) and HTTPS on production | P | 1–2 d + owner | — | `PLAN.md` §2.12 | ⬜ |
+| P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
+| P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ⬜ |
+| SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
+| M2.1 | Run the eleven browser e2e specs with the editor override (`npx playwright install`) | P | ½ d | — | `PLAN.md` §2.7 | ⬜ |
+| P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | ⬜ |
+| R3 | Redeploy the editor container; hand-check the native folder picker | Ed | owner | — | `tasks/E-growth` R3 | ⬜ owner |
+
+## M3 — Editor milestone 1: a scenario without code, "Create project" → catalog *(~11–12 weeks)*
+
+**Done when:** a teacher, in the editor on the site, creates a project, builds a lit scene from
+primitives and imported models, sets components in the Inspector, and publishes it with their own
+key into a draft an admin accepts — no ScenarioCreator involved.
+
+| ID | Task | Repo | Size | Depends | Source | Status |
+|---|---|---|---|---|---|---|
+| B1 | Stage 6 — scene and objects: 3D Object menu, Unity navigation, orientation cube, tools, selection outline, gizmos, scene lighting | Ed | ~2 w | A8 | `tasks/B` B1 | ⬜ |
+| B2 | Stage 7 — Hierarchy (E7 sibling/component order) | Ed | ~1 w | B1 | `tasks/B` B2 | ⬜ |
+| B3 | Stage 8 — Inspector (four sessions) | Ed | ~2.5 w | B2 | `tasks/B` B3 | ⬜ |
+| B4 | Stage 9 — Project window and assets (E3, E5, `.meta` guids) | Ed, SC | ~3 w | A11, B3 | `tasks/B` B4 | ⬜ |
+| B5 | Scenarios on their own origin | P | — | — | `tasks/B` B5 | ✅ superseded by the sandboxed player (`PLAN.md` §2.9, 2026-10-27) — close the card |
+| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5 (HTTPS) | `tasks/B` B6, `PLAN.md` §2.6 | ⬜ |
+| B7 | Stage 10 — Build, Build And Run, Publish | Ed | ~2 w | B0, B4, B6, A8 | `tasks/B` B7 | ⬜ |
+| R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | 🔒 |
+| M3.1 | Retire ScenarioCreator as the authoring path (keeps KTX2, LOD, manifests) | SC | ½ d | B7 | `tasks/B` | ⬜ |
+
+## M4 — Editor milestone 2: behaviour and Play, as in Unity *(~10–12 weeks)*
+
+**Done when:** a teacher adds scripts (written in the editor or from the behaviour library), presses
+Play inside the editor, and the published scenario behaves the same on the platform.
+
+| ID | Task | Repo | Size | Depends | Source | Status |
+|---|---|---|---|---|---|---|
+| C1 | Stage 11 — dockable windows, tabs, layouts | Ed | ~1.5 w | M3 | `tasks/C` C1 | ⬜ |
+| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | ⬜ |
+| C3 | Engine E4 — type registry accepts a replacement class | E | 1–2 d | — | `tasks/C` C3 | ⬜ |
+| C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | 🔒 decision #7 |
+| C5 | Stage 13 — Play and Game view (spike first) | Ed | ~2.5 w | C4 | `tasks/C` C5 | ⬜ |
+| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | ⬜ |
+
+## M5 — Editor milestone 3: prefabs, settings, undo *(~6 weeks)*
+
+**Done when:** prefabs with links work in project files (expanded at Build), project/render settings
+have their windows, and undo/redo behaves like Unity's across every edit.
+
+| ID | Task | Repo | Size | Depends | Source | Status |
+|---|---|---|---|---|---|---|
+| D1 | Stage 14 — prefabs (link-mode switch: Opus) | Ed, E | ~3 w | M4 | `tasks/D` D1 | ⬜ |
+| D2 | Stage 15 — settings windows (E10) | Ed | ~1.5 w | — | `tasks/D` D2 | ⬜ |
+| D3 | Stage 16 — Unity-style undo (by diffs; revisit `PrefabDiff` export) | Ed, E | ~1.5 w (Opus) | D1 | `tasks/D` D3, decision #12 | ⬜ |
+
+## M6 — Growth lanes *(parallel; each pulled in when a lesson or a measurement needs it)*
+
+| ID | Task | Repo | Size | Trigger / depends | Source | Status |
+|---|---|---|---|---|---|---|
+| P2 | Offline lessons (Service Worker, "prepare this lesson", `storage.persist()`) | P | ~1 w | after A10 | `tasks/E-growth` P2 | ⬜ |
+| P4 | Per-scenario engine pinning | P | ~1 w | after A10 | `tasks/E-growth` P4 | ⬜ |
+| R9 | Performance telemetry — decide before building | P | 1–2 d | owner | `PLAN.md` §2.5 | 🔒 |
+| R8 | Streaming end to end (manifests from SC; where hashed objects live) | SC, P | 1–2 w | SC manifests, storage decision | `PLAN.md` §2.2, §4.1, §4.4 | ⬜ |
+| R2rt | KTX2 transcode actually called at runtime | P | 1–2 d | — | `PLAN.md` §2.3 | ⬜ |
+| N1 | KTX2 without `'unsafe-eval'` (own transcoder build) | E | 2–3 d | — | `tasks/E-growth` N1 | ⬜ |
+| N2 | meshopt + KTX2 inside glTF | E | 1–2 d | N1 | `tasks/E-growth` N2 | ⬜ |
+| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | ⬜ |
+| N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | ⬜ |
+| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | ⬜ |
+| N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | ⬜ |
+| N7 | Canvas UI stage 1 | E | — | when the editor's UI tools are scheduled | `tasks/E-growth` N7 | ⬜ |
+| R2 | Editor Angular 19 → 21, zoneless | Ed | 2–3 d | — | `tasks/E-growth` R2 | ⬜ |
+| R4 | Realtime co-editing | Ed, P | later (Opus) | R1, D3 | `tasks/E-growth` R4 | ⬜ |
+| G5 | Engine: a caller for `Time._reset()` so `timeScale` does not leak | E | ½ d | — | `ENGINE-GAPS.md` G5 | ⬜ |
+| V1 | DNA right-handedness, orbit direction, sprites/shadows — by eye | SC | owner | — | `PLAN.md` §1.1 | ⬜ owner |
+| V2 | `LineRenderer.useWorldSpace` default | E | owner | — | `PLAN.md` §0 | 🔒 |
+| V3 | AtomStructure: ~36 of 118 elements — scope | SC | owner | — | `ISSUES.md` | 🔒 |
+| V4 | LOD texture variants' VRAM saving, measured on real GPUs | SC, B | owner hw | decision #4 | `PLAN.md` §4.3 | 🔒 |
+| M6.1 | Code graph for virtual-lab (most-edited repo) | P | ½ d | if work there continues | research 2026-11-04 | ⬜ |
+
+## M7 — After milestone 3: the remaining Unity windows *(stages 17–27, one decision each)*
+
+UI tools (needs N7), Animation + Animator (needs E12 animator assets), Profiler (engine diagnostics
+exist), and the rest — a card per window when a scenario needs it (`tasks/D-milestone-3.md`, editor
+plan §6, §6a, §10).
+
+---
+
+## Owner decisions that gate the roadmap
+
+| # | Decision | Gates |
+|---|---|---|
+| 2 | Cut `v0.2.0` | M1 (A9) |
+| 3 | Back up `design/Article` | M0 |
+| 4 | Student hardware to budget for | M6 (V4, N4 budgets) |
+| 7 | The editor's starter behaviour library | M4 (C4) |
+| 10 | OPFS vs server project store | M3 (R1) |
+| 11 | Who deploys production, and when | M1 (M1.2) |
+| — | `LineRenderer.useWorldSpace` default; AtomStructure scope; R9 telemetry | M6 |
