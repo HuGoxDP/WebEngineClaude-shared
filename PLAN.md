@@ -123,6 +123,17 @@ editor reaches them:
 Each is re-verified and given a row in `ENGINE-GAPS.md` when the editor's stage reaches it, not
 before — the engine moves faster than a list.
 
+### 1.6 The engine's typecheck hooks probably never run *(confirm ~½ h, fix ~1 h)*
+`WebEngineTS/.claude/settings.json` registers `typecheck-mark` (PostToolUse) and `typecheck-run`
+(Stop). Claude Code reads `.claude/settings*.json` only from the folder a session is launched in,
+and every Claude session on this machine is launched from the `WebEngine` root: 14 of 14 as of
+2026-11-04, with 162 edits to `WebEngineTS/` (44 in `src/`, most by subagents). Transcripts show
+no typecheck run, but a silent hook leaves no trace, so **confirm first**: in a root session, leave
+a type error in `src/` and end the turn. If confirmed, the fix has two traps: at the root
+`${CLAUDE_PROJECT_DIR}` is `WebEngine/`, not the engine, and the mark hook's `/src/` test also
+matches `virtual-lab/…/src/`. Found while researching graphify
+(`WebEngine/.code-foundations/research/2026-11-04-graphify-adoption.md` §5).
+
 ### Deferred, with the condition that revives each
 | Item | Revives when |
 |---|---|

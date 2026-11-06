@@ -22,3 +22,8 @@ Rules when working from this root:
   each, engine first.
 - An engine change reaches the consumers only through `npm run release:local` in `WebEngineTS/`.
 - Plans and task cards: `.claude-shared/PLAN.md`, `.claude-shared/tasks/`.
+- **Engine code graph** (only if `WebEngineTS/graphify-out/graph.json` exists): before grepping or reading engine code, run
+  `graphify query "…"` / `graphify explain "File.ts::Symbol"`; without `GRAPHIFY_OUT` set, add `--graph WebEngineTS/graphify-out/graph.json`.
+  Output paths are relative to `WebEngineTS/`. The graph reflects the last commit: read files in `git -C WebEngineTS status` directly.
+  Never run `graphify update`/`extract` from this root or a worktree; rebuild only on request, `cd WebEngineTS && graphify update .`.
+  Recipes: `WebEngineTS/CLAUDE.md` § Knowledge graph (graphify).

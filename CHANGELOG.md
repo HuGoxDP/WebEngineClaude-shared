@@ -15,6 +15,17 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-11-04
+- **The engine has a local code graph (graphify), and workspace-root sessions reach it by default.**
+  `WebEngineTS/graphify-out/` holds a code-only AST graph (no LLM extraction), git-ignored and never
+  committed; git hooks installed in the engine's main checkout rebuild it after each commit, merge and
+  checkout. Recipes (`explain`, `affected`, `query`, `path`, `god-nodes`) are in `WebEngineTS/CLAUDE.md`
+  § Knowledge graph (graphify). Sessions launched from the workspace root get `GRAPHIFY_OUT` and a
+  `hook-guard search` nudge from the root `.claude/settings.local.json` (uncommitted, the root is no repo),
+  plus a short block in `workspace/CLAUDE.md` and the root `CLAUDE.md`. Rebuilds run only inside the
+  engine's main checkout, never from the root or a worktree.
+- Dev tooling only: no engine source, API, rendered output or measured number changes.
+
 ### 2026-10-24 → 27
 - **The engine ships a sandboxed player for scenario code, and a host client for it.** A teacher's
   script is arbitrary code; until now it ran in the page, beside the API, the admin token and the
