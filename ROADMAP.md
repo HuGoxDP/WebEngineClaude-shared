@@ -30,7 +30,7 @@ owner's pending pushes and decisions for M1 are made.
 | ID | Task | Repo | Size | Source | Status |
 |---|---|---|---|---|---|
 | M0.1 | Code graph (graphify) for the engine, wired into root sessions | E, S | — | research/plan 2026-11-04 | ✅ 2026-11-06 |
-| M0.2 | Opus review of **A12** (RectTransform restore) | E | ½ d | `tasks/A12` | 🟡 merged, review pending |
+| M0.2 | Opus review of **A12** (RectTransform restore) | E | ½ d | `tasks/A12` | ✅ 2026-11-07: lifecycle order unchanged (2809 pairs); fix `a60e548`, a prefab file with a doubled rect reads as one; A5 notes, owner question (which doubled copy wins) and follow-ups M0.2a–c in `code-foundations/M0.2/review.md` |
 | M0.3 | Opus review of **A13** (lifecycle robustness); decide the open `Scene` root-loop skip | E | ½ d | `tasks/A13` | 🟡 merged, review pending |
 | M0.4 | Confirm and fix: engine typecheck hooks never run in root sessions | E / root | ½ d + 1 h | `PLAN.md` §1.6 | ⬜ |
 | M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
@@ -48,7 +48,10 @@ production scenarios are re-published and pass the e2e.
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | A1–A4, A6 | E11 regressions, docs/API, format-version API, minified bundle | E | — | — | `tasks/A1…A6` | ✅ 2026-10-14 |
-| A5 | Component ids (Q2), scoped like node ids — before the format freezes | E | 3–5 d (Opus) | M0.2 | `tasks/A5` | ⬜ **next** |
+| A5 | Component ids (Q2), scoped like node ids — before the format freezes | E | 3–5 d (Opus) | M0.2 | `tasks/A5` | ⬜ **next**. Read the A5 notes in `code-foundations/M0.2/review.md` first |
+| M0.2a | Restore writes saved fields before any sibling wakes (Unity order). Needs an audit of every built-in setter that writes to an object its `onAwake` creates | E | 1–2 d (Opus) | — | `code-foundations/M0.2/review.md` | ⬜ |
+| M0.2b | One-per-object enforced at `addComponent` (Unity `[DisallowMultipleComponent]`). Today only a load reads `_allowMultiple`, so a second RectTransform added by code is folded away on the next load. Best before A5 | E | ½ d | owner | `code-foundations/M0.2/review.md` | 🔒 changes the `addComponent` contract |
+| M0.2c | A load stops building an object's children once an earlier `awake` destroyed the object (pre-existing) | E | ½ d | — | `code-foundations/M0.2/review.md` | ⬜ |
 | A7 | Backfill engine `CHANGELOG.md` (E3/E5/E6/E7/E10/E13, 2026-09-10) | E | ½ d | A5 | `tasks/A7` | ⬜ |
 | B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ⬜ |
 | A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ⬜ |
