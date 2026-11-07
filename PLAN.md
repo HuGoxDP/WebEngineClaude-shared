@@ -126,16 +126,17 @@ editor reaches them:
 Each is re-verified and given a row in `ENGINE-GAPS.md` when the editor's stage reaches it, not
 before — the engine moves faster than a list.
 
-### 1.6 The engine's typecheck hooks probably never run *(confirm ~½ h, fix ~1 h)*
-`WebEngineTS/.claude/settings.json` registers `typecheck-mark` (PostToolUse) and `typecheck-run`
-(Stop). Claude Code reads `.claude/settings*.json` only from the folder a session is launched in,
-and every Claude session on this machine is launched from the `WebEngine` root: 14 of 14 as of
-2026-11-04, with 162 edits to `WebEngineTS/` (44 in `src/`, most by subagents). Transcripts show
-no typecheck run, but a silent hook leaves no trace, so **confirm first**: in a root session, leave
-a type error in `src/` and end the turn. If confirmed, the fix has two traps: at the root
-`${CLAUDE_PROJECT_DIR}` is `WebEngine/`, not the engine, and the mark hook's `/src/` test also
-matches `virtual-lab/…/src/`. Found while researching graphify
-(`WebEngine/.code-foundations/research/2026-11-04-graphify-adoption.md` §5).
+### 1.6 The engine's typecheck hooks never ran in root sessions *(fixed in the engine; registration + manual check remain, ~10 min)*
+Confirmed 2026-11-07 (`code-foundations/M0.4/notes.md`): `WebEngineTS/.claude/settings.json` is read
+only by sessions launched in `WebEngineTS/`, and all 14 of 14 sessions start at the `WebEngine` root.
+The hook scripts also could not have worked there (`CLAUDE_PROJECT_DIR` = the workspace, no
+`package.json`; the `/src/` test matched `virtual-lab/…/src/`). **Fixed** on branch
+`M0.4-typecheck-hooks` of the engine: the scripts derive the checkout from the edited file, so they
+typecheck the main checkout or the task worktree that was edited, once per turn, and ignore other
+repos. **Remaining:** (1) after the merge, the dispatcher adds the two hook registrations from the
+notes to the root `.claude/settings.local.json` (machine-local, not in git; keep `env` and the
+graphify `PreToolUse` guard); (2) owner check in a new root session: introduce a type error in
+`WebEngineTS/src/…`, end the turn — the Stop hook must block with the compiler output.
 
 ### Deferred, with the condition that revives each
 | Item | Revives when |
