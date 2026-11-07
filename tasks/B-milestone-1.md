@@ -17,6 +17,7 @@ if it does not build and run on the platform, the stage is not closed. Add e2e s
 ---
 
 ## B0 — Engine E1: the loader reads `entryScene` *(engine; Sonnet; ½ day)*
+**Done 2026-11-07** (branch `B0-entry-scene`; notes `code-foundations/B0/notes.md`).
 `ScenarioTypes.ts:124` declares `entryScene` and nothing reads it; the scenario template loads
 `scenes/main.scene.json` by hand.
 - `Scenario` (ZIP and streaming): if the manifest has `entryScene`, after the entry script's

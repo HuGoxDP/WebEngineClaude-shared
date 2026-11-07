@@ -55,7 +55,7 @@ production scenarios are re-published and pass the e2e.
 | M0.2b | One-per-object enforced at `addComponent` (Unity `[DisallowMultipleComponent]`). Today only a load reads `_allowMultiple`, so a second RectTransform added by code is folded away on the next load. Best before A5 | E | ½ d | owner | `code-foundations/M0.2/review.md` | 🔒 changes the `addComponent` contract |
 | M0.2c | A load stops building an object's children once an earlier `awake` destroyed the object (pre-existing) | E | ½ d | — | `code-foundations/M0.2/review.md` | ⬜ |
 | A7 | Backfill engine `CHANGELOG.md` (E3/E5/E6/E7/E10/E13, 2026-09-10) | E | ½ d | A5 | `tasks/A7` | ⬜ |
-| B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ⬜ |
+| B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ✅ `Scenario.run()` builds `entryScene` after `awake()` (ZIP + streaming), references preloaded; SC writes it from `scenario.meta.json`. Branch `B0-entry-scene`. The editor template must drop its manual load when B7 writes `entryScene`. |
 | A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ⬜ |
 | A9 | Cut `v0.2.0` | E | ½ d | A5–A8, owner | `tasks/A9` | 🔒 decision #2 |
 | A10 | Platform on the release: URL dependency, `/engine/<version>/…` immutable, prefab v2 accepted | P | 1–2 d | A9 | `tasks/A10`, `PLAN.md` §2.8 | ⬜ |
