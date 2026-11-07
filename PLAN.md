@@ -104,7 +104,7 @@ start failing for whichever objects took the new path.
 
 ### 1.5 What the editor needs from the engine
 **Implemented 2026-10-10..13, waiting on §1.2 to reach anyone:** E3, E5, E6, E7, E10, E11, E13.
-**Open:** E1 (`entryScene`, ½ day), E2 (edit mode, 3–5 days), E4 (replace a registered class, 1–2
+**Open:** E2 (edit mode, 3–5 days), E4 (replace a registered class, 1–2
 days), E8 (render target, 2–3 weeks), E9 (gizmos), E12 (animator assets). The list below is the
 original order, kept for its reasons. The editor's plan (`WebEngineTSEditor/docs/unity-editor-plan.md` §4) lists thirteen asks, E1–E13,
 each with the Unity behaviour it blocks and the evidence it was checked against. In the order the
@@ -121,7 +121,7 @@ editor reaches them:
    type registry accepts a replacement class.** Together they are script reloading and Play.
 5. **E8 — render a camera into a target** (§1.3). 2–3 weeks; improves Play, does not block it.
 6. **E10** render settings saved with the scene, **E11** prefab identity and instance links,
-   **E1** the loader reading `entryScene`. Later: E9, E12, E13.
+   (**E1**, the loader reading `entryScene`, landed in B0). Later: E9, E12, E13.
 
 Each is re-verified and given a row in `ENGINE-GAPS.md` when the editor's stage reaches it, not
 before — the engine moves faster than a list.
@@ -248,7 +248,7 @@ editor.** Stages 0–5 are done (`CHANGELOG.md`). The plan, with a parity table 
    runs `tsc` with `--ignoreConfig`, so the flag set in `tsconfig.json` does not apply, and the
    engine's decorators are the legacy kind. No scenario uses `@SerializedField` yet, which is why
    it has not surfaced; the editor's scripts will.
-9. **Write `entryScene` into the manifest** when the scenario has one *(minutes; with engine E1)*.
+9. ~~Write `entryScene` into the manifest~~ — **done (B0, 2026-11-07)**: `scenario.meta.json` `entryScene` goes into the ZIP manifest and `scenario.json`; the engine builds it after `awake()`. Record in `CHANGELOG.md`; delete this line with the next PLAN cleanup.
 10. **Take the profiler out of `solar-system`** *(minutes + republish; owner, 2026-10-25)*. Its `Scenario.ts`
     calls `MemoryProfiler.enableToggle()`/`showOverlay()` itself. The platform now keeps the profiler off
     (virtual-lab release 1 Phase 5), so the call is a no-op there, but content should not open a developer
