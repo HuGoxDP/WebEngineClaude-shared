@@ -31,7 +31,9 @@ owner's pending pushes and decisions for M1 are made.
 |---|---|---|---|---|---|
 | M0.1 | Code graph (graphify) for the engine, wired into root sessions | E, S | — | research/plan 2026-11-04 | ✅ 2026-11-06 |
 | M0.2 | Opus review of **A12** (RectTransform restore) | E | ½ d | `tasks/A12` | 🟡 merged, review pending |
-| M0.3 | Opus review of **A13** (lifecycle robustness); decide the open `Scene` root-loop skip | E | ½ d | `tasks/A13` | 🟡 merged, review pending |
+| M0.3 | Opus review of **A13** (lifecycle robustness); decide the open `Scene` root-loop skip | E | ½ d | `tasks/A13` | ✅ 2026-11-07 — A13 holds; root-loop skip was a real defect, fixed (`0b080ad`); deferred-destroy / onDisable errors no longer lost (`3eefb27`); review `code-foundations/M0.3/review.md` |
+| M0.3a | Hierarchy update walk: an object that already ran this frame and reparents under a later-walked parent runs again (child and root level) — per-pass "already ran" stamp | E | ½ d | M0.3 review | ⬜ |
+| M0.3b | Check: zero-delay `Destroy()` runs on a microtask after LateUpdate and render; Unity destroys before rendering — probe with a running `Application`, then decide | E | ½ d | M0.3 review | ⬜ |
 | M0.4 | Confirm and fix: engine typecheck hooks never run in root sessions | E / root | ½ d + 1 h | `PLAN.md` §1.6 | ⬜ |
 | M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
 | M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | 🔒 |
