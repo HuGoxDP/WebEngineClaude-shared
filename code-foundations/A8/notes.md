@@ -33,7 +33,7 @@ Card: `tasks/A8-editor-new-engine.md`; research and plan: `code-foundations/A8/{
 ## Deviations from the card
 
 - The card's engine version (`0.1.0-local.1789023160893`) was stale: the tarball in `app/` was
-  already at `1793745537109`. The pack mechanic is unchanged; the stamp is `1794329867`.
+  already at `1793745537109`. The pack mechanic is unchanged; the stamp is `1794329867`, re-packed as `1794336134` after engine master moved (W2's M0.2g landed while this task was building).
 - Docs phase empty: no doc mentions the version literal or the check (the dated
   `0.1.0-local.…` baselines in `docs/` are records of when a document was written, left as is).
 
