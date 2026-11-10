@@ -25,6 +25,7 @@ waits on it can proceed.
 | 17 | B6: how long the publish audit log is kept | **Indefinitely** | B6 (assumed) | |
 | 18 | B6: do publish keys expire? | **No**; the key list flags keys unused for 180 days | B6 (assumed) | |
 | 19 | B6: issue author keys on production only after P5b with `REQUIRE_HTTPS=true` | **Yes** | B6, P5b | |
+| 20 | B1: scene lighting toggle on by default for every scene (with a "no light in the scene" hint), instead of the card's "on when the scene has a light" — the editor's own light never lit the engine scene, so an unlit scene already looks black | **Yes** | B1 (assumed) | |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a

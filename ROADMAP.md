@@ -98,7 +98,7 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
-| B1 | Stage 6 — scene and objects: 3D Object menu, Unity navigation, orientation cube, tools, selection outline, gizmos, scene lighting | Ed | ~2 w | A8 | `tasks/B` B1 | ⬜ |
+| B1 | Stage 6 — scene and objects: 3D Object menu, Unity navigation, orientation cube, tools, selection outline, gizmos, scene lighting | Ed | ~2 w | A8 | `tasks/B` B1 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/B1/plan.md` — editor-side only, 8 serial phases, e2e via a localStorage-gated probe; navigation feel stays a manual DW; owner question #20 assumed |
 | B2 | Stage 7 — Hierarchy (E7 sibling/component order) | Ed | ~1 w | B1 | `tasks/B` B2 | ⬜ |
 | B3 | Stage 8 — Inspector (four sessions) | Ed | ~2.5 w | B2 | `tasks/B` B3 | ⬜ |
 | B4 | Stage 9 — Project window and assets (E3, E5, `.meta` guids) | Ed, SC | ~3 w | A11, B3 | `tasks/B` B4 | ⬜ |
