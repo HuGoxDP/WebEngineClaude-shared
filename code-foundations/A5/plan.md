@@ -1,0 +1,219 @@
+# Plan: A5 — component ids, scoped like node ids
+**Created:** 2026-11-10 (Claude, architect lane)
+**Status:** ready
+**Complexity:** complex
+**Review cadence:** 1
+**Check-ins:** quiet
+---
+## Context
+A component inside a prefab tree, a link-mode instance interior or a prefab file is addressed today by
+(node, registered type, occurrence of that type). Removing the first of two same-type components makes
+every override, removal and `ComponentRef` aimed at the second silently move to the wrong one. A5 gives
+those components persisted ids, minted like node ids, and makes every reader prefer them, before
+`v0.2.0` (A9) freezes the version-2 format. Card: `tasks/A5-component-ids.md`. Research and every
+decision with its evidence: `code-foundations/A5/research.md` — **read it first; its Decisions section
+is binding.**
+
+**Success criteria (card acceptance + research):**
+1. The verified misbehaviour is fixed: prefab `[Collider{size:1}, Collider{size:5,isTrigger:true}]`,
+   instance removes the first, prefab edits the second's size to 9 → the instance reads 9;
+   `removedComponents` names the first by id.
+2. A `ComponentRef` to the second of two same-type components survives removal of the first through a
+   link save and a reload.
+3. No plain scene gains an `id`, `cid` or `componentId`; re-saving every plain fixture is byte-identical
+   to the base `cd0f4d7`.
+4. Every `bde23fc` fixture loads identically; link files are idempotent (save → load → save, same bytes).
+5. `npm run typecheck`, `npm test`, `npm run build` green; previously passing `tasks/probes/e11` probes
+   still pass.
+
+## Constraints
+- Engine only (`WebEngineTS`), plus the task's `.claude-shared` notes. No consumer changes.
+- Writers keep the old fields (`component`, `componentIndex`, `index`) next to the ids: old readers and
+  the fallback still work.
+- Ids never appear outside files that already carry node ids; they never make a file version 2.
+- Mint after `_foldSingleCopies`; RT#k≥1 / Transform#k≥1 addresses in old files retarget to #0.
+- Do not restore `design/prefab-instances-plan.md` (deleted by the owner in `a3fe342`); read it from
+  history only.
+- Anything this plan does not answer is a question: park the task (ATTENTION), do not guess.
+
+---
+## Implementation Phases
+
+### Phase 1: Ids on their own — data, live field, minting, legacy derivation, copies
+**Skills:** code-foundations:cc-defensive-programming, code-foundations:code-clarity-and-docs
+**Model:** sonnet
+**Gate:** Standard
+**Depends on:** none
+**File scope:** src/engine/core/Component.ts, src/engine/core/GameObject.ts, src/engine/core/serialization/PrefabOverride.ts (types + `ensureIds` only), src/engine/core/serialization/SceneSerializer.ts (`SerializedComponent`, `_mintAll`, `_giveId`, build-pass id assignment only), tests/ComponentIds.test.ts
+
+**Goal:** components can hold, mint, derive and lose ids exactly like nodes, with nothing written yet.
+
+**Scope:**
+- IN: `SerializedComponent.id?: string`; `Component._prefabComponentId: string | null` (`@internal`,
+  default `null`); minting in the same passes as node ids (`_mintAll`, `mintLive`), for every
+  component of every node that gets a node id; legacy derivation in `ensureIds(…, legacy)`:
+  `~c:<nodeId>:<type>:<occurrence>`, occurrence per type, computed after `_foldSingleCopies`;
+  assignment of `json.id` → `_prefabComponentId` in the M0.2a build pass (where `_prefabNodeId` is
+  set: `SceneSerializer.ts` ~2231/2392/2433); copies clear component ids where node ids are cleared
+  (`GameObject.ts` ~289/298).
+- OUT: writing ids to files (Phase 2), resolving by id (Phase 3), PrefabDiff (Phase 4).
+
+**Edge cases:** a node without an id → its components get no id; a nested instance's interior →
+its own prefab's ids, not minted by the outer save; a destroyed component's id is not reused;
+`Transform` is never in the saved list and never gets an id.
+
+**Produces:** `Component._prefabComponentId`, `SerializedComponent.id`, the legacy id format, minting
+rules — the contract Phases 2–5 rely on.
+
+**Done when:**
+- [ ] DW-1.1: minting a prefab from a live tree (`Prefab.fromGameObject`) gives every component of every id'd node a distinct id, and the same id is on the live component afterwards (unit test).
+- [ ] DW-1.2: `ensureIds(tree, true)` on a tree without component ids yields `~c:<nodeId>:<type>:<n>` ids, identical across two calls on equal input (determinism test), and derived after the fold (a doubled-RectTransform tree yields exactly one RT id).
+- [ ] DW-1.3: `EngineObject.Instantiate` and `serializeGameObject`→`deserializeGameObject` copies of an object inside an instance have `_prefabComponentId === null` on every component (D-10 test).
+- [ ] DW-1.4: a plain scene save is still byte-identical to the base (no `id` on components) — fixture compare.
+
+### Phase 2: Writers — component `id`, `cid` on refs, `componentId` on changes
+**Skills:** code-foundations:cc-defensive-programming
+**Model:** sonnet
+**Gate:** Full
+**Depends on:** Phase 1
+**File scope:** src/engine/core/serialization/SceneSerializer.ts (component writer, `_needsLinkReader` untouched), src/engine/core/serialization/ValueSerializer.ts (`_componentRef`, `SerializeContext`), src/engine/core/serialization/Prefab.ts (file writer), src/engine/core/serialization/PrefabOverride.ts (types `PrefabOverride.componentId?`, `PrefabRemovedComponent.componentId?`), tests/ComponentIds.test.ts, tests/ComponentIdsFormat.test.ts
+
+**Goal:** every writer that writes node ids also writes component ids and id-based addresses, keeping
+the old fields.
+
+**Scope:**
+- IN: component `id` in prefab trees, link-mode instance interiors and prefab files; `ComponentRef`
+  gains `cid` when the target node has an id (keep `component` + `index`); `PrefabOverride.componentId`
+  and `PrefabRemovedComponent.componentId` written next to `component` + `componentIndex`; an added
+  component carries `id` inside `component`.
+- OUT: reading them (Phase 3).
+
+**Edge cases:** a ref into a nested instance's interior (scope > 0) writes the nested prefab's id;
+a ref to a plain-scene object writes no `cid`; a `Transform` ref writes no `cid`.
+
+**Produces:** the on-disk format (document one example JSON of a link instance with a removed and an
+overridden component, and one `ComponentRef` with `cid`, in `code-foundations/A5/format.md`).
+
+**Done when:**
+- [ ] DW-2.1: for each writer path (scene with link instance, prefab file, variant, clipboard `serializeGameObject`), a test asserts: if the output contains `cid`/`componentId`/a component `id`, `SceneSerializer._needsLinkReader(output)` was already true for node ids alone (version gate test over all paths).
+- [ ] DW-2.2: a plain scene with `ComponentRef`s writes no `cid` (byte-identical to base).
+- [ ] DW-2.3: `format.md` examples are produced by running the writer (pasted output), not written by hand.
+
+### Phase 3: Readers — resolve by id, fall back by type + occurrence, migrate old addresses
+**Skills:** code-foundations:cc-defensive-programming
+**Model:** sonnet
+**Gate:** Full
+**Depends on:** Phase 2
+**File scope:** src/engine/core/serialization/SceneSerializer.ts (`_findComponent` callers, ref resolution ~2124/2724, load of `id`), src/engine/core/serialization/ValueSerializer.ts (`pendingComponentRefs`), src/engine/core/serialization/PrefabOverride.ts (`ensureIds` migration of RT/Transform #k≥1), tests/ComponentIds.test.ts, tests/ComponentIdsLegacy.test.ts
+
+**Goal:** readers prefer ids, never misresolve, and old files keep loading the same.
+
+**Scope:**
+- IN: `ComponentRef` resolution: `cid` among the target node's components first, else
+  `component` + `index`; overrides/removals: `componentId` on the addressed node (composite
+  `node` addresses resolve the node first, then the id within that node), else type + occurrence;
+  old-file migration: addresses to `RectTransform`/`Transform` with index ≥ 1 retarget to 0 before
+  ids are derived; a `ComponentRef` to `RectTransform` index ≥ 1 maps to 0.
+- OUT: PrefabDiff comparison (Phase 4).
+
+**Edge cases:** a `cid` that does not resolve on that node (component removed) → fall back, and if the
+fallback finds a different-typed or no component → `null`, never another component of another type;
+duplicate ids in one node (corrupt file) → first wins + `console.warn` once.
+
+**Done when:**
+- [ ] DW-3.1: the ref test of success criterion 2 passes (second of two same-type components, first removed, link save + reload).
+- [ ] DW-3.2: a file with `cid` pointing at a removed component resolves to `null` (not to a neighbour).
+- [ ] DW-3.3: every `bde23fc` fixture (generated via `git archive bde23fc | tar -x -C <tmp>`, script under `tasks/probes/` style, not committed under `tests/`) loads into the same live state as on base `cd0f4d7` (component lists, field values, ref targets compared).
+
+### Phase 4: PrefabDiff and Prefab by id
+**Skills:** code-foundations:cc-defensive-programming
+**Model:** sonnet
+**Gate:** Full
+**Depends on:** Phase 3
+**File scope:** src/engine/core/serialization/PrefabOverride.ts (`_compareComponents`, `_applyChanges` component parts, `unused`, `inexpressible`, nesting `layer/nest`), src/engine/core/serialization/Prefab.ts (`getChanges`, `revertOverride`, `applyInstance`, `createVariant`/variant changes, A1 N4 records), tests/ComponentIds.test.ts, tests/PrefabComponentIds.test.ts
+
+**Goal:** comparing, applying, reverting and varying instances match components by id.
+
+**Scope:**
+- IN: `_compareComponents` matches prefab↔instance components by id when both have one, else by type +
+  occurrence; removals/overrides/additions carry ids (Phase 2 fields); `applyChanges`/`unused` resolve
+  by id first; `revertOverride`, `applyInstance`, variants; A1's N4 records (refs into a reverted
+  subtree) use component ids where available.
+- OUT: reorder of the prefab's own components (stays inexpressible).
+
+**Edge cases:** nested prefab: an id inside the nested interior is matched only within that nested
+instance; two instances of the same nested prefab side by side share ids and must not cross-match;
+variant of a variant.
+
+**Done when:**
+- [ ] DW-4.1: success criterion 1 (the Collider case) passes through `getChanges`, a link save, a reload and a prefab edit.
+- [ ] DW-4.2: reordering two components the instance added round-trips; reordering the prefab's own still returns the existing `inexpressible` reason.
+- [ ] DW-4.3: two side-by-side instances of one nested prefab, one with its second collider removed: the other instance is unchanged (no cross-match).
+- [ ] DW-4.4: `revertOverride` of a removal restores the right component (by id) with its prefab values.
+
+### Phase 5: MissingComponent, idempotence, nested scope, acceptance suite
+**Skills:** code-foundations:cc-quality-practices
+**Model:** sonnet
+**Gate:** Full
+**Depends on:** Phase 4
+**File scope:** src/engine/core/serialization/MissingComponent.ts, src/engine/core/serialization/SceneSerializer.ts (MissingComponent read/write only), tests/ComponentIds.test.ts
+
+**Goal:** every remaining card test and the review focus are pinned.
+
+**Done when:**
+- [ ] DW-5.1: a `MissingComponent` keeps its `id` through load → save.
+- [ ] DW-5.2: link-mode idempotence: for every link fixture, save → load → save produces identical bytes; legacy ids never appear in a written file unless the file is written with ids anyway (then they are minted, not `~c:`).
+- [ ] DW-5.3: no plain scene (all fixtures + the ten ScenarioCreator production scenes read from `../ScenarioCreator/Scenarios/**/scenes/*.json` in the worker's own worktree, read-only) gains `id`/`cid`/`componentId` on re-save.
+- [ ] DW-5.4: `tasks/probes/e11` probes that passed on base still pass (list before/after in the notes).
+- [ ] DW-5.5: full checks green: `npm run typecheck`, `npm test`, `npm run build`.
+
+### Phase 6: Docs and roadmap
+**Skills:** code-foundations:code-clarity-and-docs
+**Model:** sonnet
+**Gate:** Minimal
+**Depends on:** Phase 5
+**File scope:** CHANGELOG.md (engine), .claude-shared/ROADMAP.md (A5 row), .claude-shared/tasks/A5-component-ids.md (status line), .claude-shared/tasks/README.md (A5 row), .claude-shared/code-foundations/A5/*
+
+**Goal:** the change is recorded where the owner and the next tasks will look.
+
+**Done when:**
+- [ ] DW-6.1: engine CHANGELOG *Added* (component ids, where written, `cid`/`componentId`) and *Changed* (exported types `PrefabOverride`, `PrefabRemovedComponent`, `SerializedComponent`), with decision D-16 summarised (the design doc is gone; point to `.claude-shared/code-foundations/A5/research.md`).
+- [ ] DW-6.2: ROADMAP A5 row → `✅ <date> W<n>` + what landed; README A5 row → Done; `format.md` and the build notes in `code-foundations/A5/`.
+
+---
+## Test Coverage
+**Level:** 100%
+## Test Plan
+- [ ] Every DW above has a named test in `tests/ComponentIds*.test.ts` / `tests/PrefabComponentIds.test.ts` (or a recorded command output for DW-2.3, 3.3, 5.4).
+- [ ] Dirty tests: corrupt file with duplicate component ids (first wins, one warning); `cid` to a removed component (→ null); RT index 1 in an old file (→ RT#0); a nested interior id colliding with an outer id (no cross-match).
+- [ ] Integration: link save → reload → prefab edit → instance follows, for colliders, UI (RectTransform + UIImage) and a script with a `ComponentRef` field.
+- [ ] Manual: none.
+
+## Assumptions
+| Assumption | Confidence | Verify Before Phase | Fallback If Wrong |
+|---|---|---|---|
+| `_foldSingleCopies` runs on every read path before ids would be derived | medium | 1 | add the fold to the missing path in Phase 1 and note it |
+| `ensureIds` is reached for every file without node ids | high | 1 | derive component ids in the same place node ids are given |
+| No consumer reads `componentIndex` from files directly | high | 2 | keep both fields (already required) |
+
+## Decision Log
+| Decision | Alternatives Considered | Rationale | Phase |
+|---|---|---|---|
+| D-16 ids only where node ids exist | ids on every component (Unity) | owner decision #5: not now, additive later | all |
+| keep old fields beside ids | ids only | old readers + fallback; version gate unchanged | 2 |
+| legacy ids derived after fold | before fold | M0.2 review note 3: a folded copy's id would dangle | 1 |
+| base for byte compare = `cd0f4d7` | card's `e6a8500` | M0.2a changed load order after `e6a8500` | 1, 5 |
+| D-16 recorded in task notes, not the design doc | restore the doc | the owner deleted the doc in `a3fe342` | 6 |
+
+---
+## Notes
+- Hub files: phases are strictly serial; do not parallelise.
+- Opus-level semantics: each Full-gate review must re-run the Collider case and the nested side-by-side case itself.
+- Owner decisions in force: #5 (no ids on every component), #13 (later doubled copy wins), #14 (one RectTransform per live object).
+---
+## Decided During Build
+_Filled by /code-foundations-build — one row per decision an agent made or question it raised:_
+| # | Phase | Decision or question | Source | Status |
+---
+## Execution Log
+_To be filled during /code-foundations-build_
