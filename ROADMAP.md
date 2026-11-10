@@ -80,7 +80,7 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 |---|---|---|---|---|---|---|
 | P1 | LTI 1.3 for Moodle (Dynamic Registration, Deep Linking, AGS grades) | P, E | — | — | `tasks/E-growth` P1 | ✅ 2026-10-28 (local) |
 | P1b | Deploy LTI to KSU-online (confirm its Moodle version) | P | 1–2 d | P5b | `PLAN.md` §2.10(b) | ⬜ |
-| P5a | Backups and HTTPS, repo side: a backup container (nightly `pg_dump` + archives copy), a restore script with a restore actually tried on the local stack, and the HTTPS nginx/compose config — all tested locally | P | 1–2 d | — | `PLAN.md` §2.12 | ⬜ |
+| P5a | Backups and HTTPS, repo side: a backup container (nightly `pg_dump` + archives copy), a restore script with a restore actually tried on the local stack, and the HTTPS nginx/compose config — all tested locally | P | 1–2 d | — | `PLAN.md` §2.12 | 🟡 W3 2026-11-10 |
 | P5b | Deploy P5a to production, enable HTTPS, try one restore there | P | owner | P5a | `PLAN.md` §2.12 | ⬜ owner |
 | P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
 | P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ⬜ |
