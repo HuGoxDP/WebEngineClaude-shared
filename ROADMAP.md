@@ -78,8 +78,9 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | P1 | LTI 1.3 for Moodle (Dynamic Registration, Deep Linking, AGS grades) | P, E | — | — | `tasks/E-growth` P1 | ✅ 2026-10-28 (local) |
-| P1b | Deploy LTI to KSU-online (confirm its Moodle version) | P | 1–2 d | P5 | `PLAN.md` §2.10(b) | ⬜ |
-| P5 | Backups (Postgres + archives, restore tried) and HTTPS on production | P | 1–2 d + owner | — | `PLAN.md` §2.12 | ⬜ |
+| P1b | Deploy LTI to KSU-online (confirm its Moodle version) | P | 1–2 d | P5b | `PLAN.md` §2.10(b) | ⬜ |
+| P5a | Backups and HTTPS, repo side: a backup container (nightly `pg_dump` + archives copy), a restore script with a restore actually tried on the local stack, and the HTTPS nginx/compose config — all tested locally | P | 1–2 d | — | `PLAN.md` §2.12 | ⬜ |
+| P5b | Deploy P5a to production, enable HTTPS, try one restore there | P | owner | P5a | `PLAN.md` §2.12 | ⬜ owner |
 | P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
 | P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ⬜ |
 | SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
@@ -100,7 +101,7 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 | B3 | Stage 8 — Inspector (four sessions) | Ed | ~2.5 w | B2 | `tasks/B` B3 | ⬜ |
 | B4 | Stage 9 — Project window and assets (E3, E5, `.meta` guids) | Ed, SC | ~3 w | A11, B3 | `tasks/B` B4 | ⬜ |
 | B5 | Scenarios on their own origin | P | — | — | `tasks/B` B5 | ✅ superseded by the sandboxed player (`PLAN.md` §2.9, 2026-10-27) — close the card |
-| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5 (HTTPS) | `tasks/B` B6, `PLAN.md` §2.6 | 🧠 needs a Claude plan first — |
+| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5a (HTTPS config) | `tasks/B` B6, `PLAN.md` §2.6 | 🧠 needs a Claude plan first — |
 | B7 | Stage 10 — Build, Build And Run, Publish | Ed | ~2 w | B0, B4, B6, A8 | `tasks/B` B7 | ⬜ |
 | R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | 🔒 |
 | M3.1 | Retire ScenarioCreator as the authoring path (keeps KTX2, LOD, manifests) | SC | ½ d | B7 | `tasks/B` | ⬜ |
@@ -113,11 +114,11 @@ Play inside the editor, and the published scenario behaves the same on the platf
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | C1 | Stage 11 — dockable windows, tabs, layouts | Ed | ~1.5 w | M3 | `tasks/C` C1 | ⬜ |
-| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | ⬜ |
+| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | 🧠 Opus-level design: Claude plans first — |
 | C3 | Engine E4 — type registry accepts a replacement class | E | 1–2 d | — | `tasks/C` C3 | ⬜ |
 | C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | 🔒 decision #7 |
 | C5 | Stage 13 — Play and Game view (spike first) | Ed | ~2.5 w | C4 | `tasks/C` C5 | ⬜ |
-| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | ⬜ |
+| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 🧠 Opus-level design: Claude plans first — |
 
 ## M5 — Editor milestone 3: prefabs, settings, undo *(~6 weeks)*
 
@@ -141,10 +142,10 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | R2rt | KTX2 transcode actually called at runtime | P | 1–2 d | — | `PLAN.md` §2.3 | ⬜ |
 | N1 | KTX2 without `'unsafe-eval'` (own transcoder build) | E | 2–3 d | — | `tasks/E-growth` N1 | ⬜ |
 | N2 | meshopt + KTX2 inside glTF | E | 1–2 d | N1 | `tasks/E-growth` N2 | ⬜ |
-| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | ⬜ |
-| N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | ⬜ |
-| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | ⬜ |
-| N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | ⬜ |
+| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | 🧠 Opus-level design: Claude plans first — |
+| N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | 🧠 Opus-level design: Claude plans first — |
+| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | 🧠 Opus-level design: Claude plans first — |
+| N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | 🧠 Opus-level design: Claude plans first — |
 | N7 | Canvas UI stage 1 | E | — | when the editor's UI tools are scheduled | `tasks/E-growth` N7 | ⬜ |
 | R2 | Editor Angular 19 → 21, zoneless | Ed | 2–3 d | — | `tasks/E-growth` R2 | ⬜ |
 | R4 | Realtime co-editing | Ed, P | later (Opus) | R1, D3 | `tasks/E-growth` R4 | ⬜ |
