@@ -219,7 +219,10 @@ _Filled by /code-foundations-build — one row per decision an agent made or que
 | B-2 | 1 | The copy rule mirrors nodes mechanically: `_stamp` (instance root) and `unpackPrefab` clear component ids exactly where node ids are cleared; `EngineObject.Instantiate` and the clipboard path get null ids for free because the plain (non-link) serializer writes no ids yet. | research D-16, code | done |
 | B-3 | 1 | `SceneCtx.mintedComponents` mirrors `minted` (shared with `outer`, `mintLive` decides live-vs-beside), so Phase 2's writers can read a component's id "as this pass writes it" the way `_nodeIdOf` does for nodes. | plan Phase 1 "Produces" | done |
 | B-4 | 2 | Two writers-phase gates mirror nodes mechanically: the component writer writes under the node writer's own `withId` flag (so a plain scene and the clipboard path gain nothing), and `ComponentRef`'s `cid` only exists in link passes (`componentId` closure is link-gated; `_enclosingCtx` passes are link by construction). `PrefabDiff._equal` ignores a `cid` when both refs are ComponentRefs and everything else matches — the cid names the component the type and index already name, so a file saved before it does not read as changed. | Phase 2 writers, suite evidence | done |
-| B-5 | 2 | `_borrowIds` borrows component ids by position from the match tree and marks the node in `SceneCtx.borrowedComponents`; `_mintComponentIds` skips marked nodes. Without it an object compared with a prefab by position minted ids the prefab tree does not carry, and every reference on it read as an override (`tests/PrefabIdentity.test.ts` "objects without node ids", 3 tests). | suite evidence | done |
+| B-5 | 2 | `_borrowIds` borrows component ids by position from the match tree and marks the node in `SceneCtx.borrowedComponents`; `_mintComponentIds` skips marked nodes. Without it an object compared with a prefab by position minted ids the prefab tree does not carry, and every reference on it read as an override (`tests/PrefabIdentity.test.ts` "objects without node ids", 3 tests). | suite evidence | superseded by B-6 (the same coverage, without a separate set) |
+| B-6 | 3 | Where ids are minted, final: (a) with a fresh node id, in `_mintAddedIds` — an added object's components are the instance's own; (b) for what the match tree does not cover, in `_giveAllIds`' `_mintUncoveredComponents` — an added component on a node the prefab has, where the pass knows the tree; (c) in `ensureIds`, for a prefab file's tree and its root. Minting "every component of every id'd node" in every pass gave the instance side ids the prefab tree could not know — a tree built without ever going through `ensureIds` (a test `bind`, an old file) has none — so every save minted a new one and an override could vanish. `_serializeInstance`, the scene's link writer, runs the same `_giveAllIds` pass a comparison does, or an added component is written with no id at all. | suite evidence: idempotence + override-preservation tests | done |
+| B-7 | 3 | `_matchComponentIds` (the pass that lets the match tree's components decide) gives the twin's id only to a component that has none of its own: a list that lost a component in front has shifted, and the twin at the same position is a different component — overwriting the live id there made a comparison match the wrong pair (found via the DW-2.3 example: a removal of the wrong Tag). Marking as covered still happens for every twin position. | DW-2.3 example generation | done |
+| B-8 | 3 | The comparison matches by id and falls back to type + occurrence for an id that names nothing here — a tree whose ids were minted in another namespace, or one from before ids. Reads (references) are stricter: a `cid` that resolves to nothing is null, never a positional neighbour (DW-3.2). Apply-side changes read by the id when it resolves and by the address written beside it otherwise, as the plan's reader rule says. | plan Phase 3/4 text | done |
 ---
 
 ## Execution Log
@@ -244,10 +247,25 @@ positional and never overwrites a live id, minting never overwrites, `_enclosing
 construction. `tests/PrefabInstances.test.ts` idempotence test adapted to save-twice form (first
 save of a pre-ids file adds ids; every save after writes the same bytes).
 
-### Phase 3 — readers — NEXT
-Resume here: wire `_ensureComponentIds` into `ensureIds` (B-1); `ComponentRef` resolution by
-`cid` first then `component` + `index` (`_findComponent` callers / ref resolution ~2124, ~2724,
-~2814, `ValueSerializer.pendingComponentRefs`); overrides/removals resolve `componentId` on the
-addressed node; RT/Transform index ≥ 1 retargets to 0 before ids are derived; unresolvable `cid`
-falls back and then nulls, never a neighbour; duplicate ids in one node → first wins + one warn;
-`tests/ComponentIdsLegacy.test.ts` (DW-3.1..3.3, bde23fc fixtures via `git archive`).
+### Phase 3 — readers — DONE (with the Phase 4 comparison change it forced)
+Commit `c82766b` (WebEngineTS) + the id-overwrite fix, tests `tests/ComponentIdsLegacy.test.ts`
+(3), format examples `code-foundations/A5/format.md`.
+- Readers: `ComponentRef` by `cid` first (unresolvable → null, never a neighbour, DW-3.2), else
+  type + occurrence; old-file addresses to `RectTransform`/`Transform` index ≥ 1 retarget to 0
+  (`legacyComponentIndex`) on every read path; overrides/removals resolve `componentId` on the
+  addressed node and read by the address beside it otherwise; duplicate ids on one node →
+  first wins + one warn.
+- `ensureIds` is wired: component ids derived where its nodes have them — `~c:` legacy for files
+  without them (deterministic across loads), minted for a tree that never had them.
+- The comparison (Phase 4's first change, pulled forward because a silent reference loss is
+  worse than the pre-A5 behaviour): `_compareComponents` matches by id, else by type +
+  occurrence, and writes `componentId` beside the readable address; `_equal` treats two refs
+  that differ only in a cid as the same value. Full-gate review re-ran the Collider shape (two
+  Tags, first removed, prefab edits the second) end to end and the nested side-by-side shape.
+- DW-3.3 verified by extraction, not asserted in the suite: `git archive bde23fc | tar -x -C
+  <tmp>` (the E11 compat fixtures built, saved, reloaded and dumped) under the base `cd0f4d7`
+  and under this branch — **the two dumps are byte-identical**. (Against `bde23fc` itself they
+  differ, as designed: `bde23fc` predates M0.2a's load-order change; the plan's baseline is
+  `cd0f4d7`.) Scratch probe kept out of the repo.
+- DW-2.3: `format.md` examples are the writer's own output (a link with a removed and an
+  overridden component, and a `ComponentRef` with `cid`).
