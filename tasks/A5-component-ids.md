@@ -2,11 +2,12 @@
 
 | | |
 |---|---|
-| Repo / branch | WebEngineTS · `claude/scenario-platform-architecture-24f9fy` |
+| Repo / branch | WebEngineTS · `A5-component-ids` (W1) |
 | Model | **Opus** (touches every part of `PrefabDiff`; same risk profile as E11) |
 | Size | 3–5 days |
 | Depends on | A1 (format decisions `after` / optional `path`), A3 (D5), A4 (gate) |
 | Blocks | A9 (must ship in the same release as the version-2 reader) |
+| Status | **Done 2026-11-10 W1** — phases 1–6 per `code-foundations/A5/plan.md`; format `code-foundations/A5/format.md`; deviations B-1..B-8 in the plan |
 
 ## Why (decided 2026-10-13, vision doc "Вопрос 2")
 

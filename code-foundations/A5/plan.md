@@ -269,3 +269,38 @@ Commit `c82766b` (WebEngineTS) + the id-overwrite fix, tests `tests/ComponentIds
   `cd0f4d7`.) Scratch probe kept out of the repo.
 - DW-2.3: `format.md` examples are the writer's own output (a link with a removed and an
   overridden component, and a `ComponentRef` with `cid`).
+
+### Phase 4 — prefab shapes by id (Full gate) — DONE
+Commit `f45a0be` (WebEngineTS), tests `tests/PrefabComponentIds.test.ts` (4).
+The comparison (Phase 4's first change) had been pulled into the Phase 3 commit because leaving
+references silently lost was worse than the pre-A5 behaviour; this phase pinned the shapes
+around it:
+- DW-4.1: the card's verified misbehaviour — remove the first of two colliders, the prefab
+  edits the second, the instance reads the edit; the removal names the prefab's first by
+  `componentId` with `componentIndex: 0`.
+- DW-4.2: reordering components the instance added round-trips through a link; the prefab's
+  own stays inexpressible (unchanged).
+- DW-4.3: two instances of one nested prefab side by side, one with its second component
+  removed — the other is untouched (no cross-match).
+- DW-4.4: `revertOverride` of a removal restores the right component by id, with the prefab's
+  values.
+
+### Phase 5 — a file from before ids (Full gate) — DONE
+Commit `f45a0be` (WebEngineTS), tests in `tests/ComponentIds.test.ts` (3 more).
+- DW-5.1: an unknown component keeps its id through a load and a save (both the live
+  `MissingComponent` and the written file).
+- DW-5.2: legacy `~c:` ids are minted when written — through the prefab's own memo, so its
+  file and every link to it agree and a second write of the same tree writes the same ids. The
+  tree in memory keeps what readers match by. A link save of an instance of a file from before
+  ids writes minted ids and is idempotent (save → load → save, same bytes).
+- DW-5.3: **partial, by evidence rather than by assertion**. The fixtures: the DW-3.3
+  extraction re-ran as save → load → save and the base/branch dumps are identical; no plain
+  scene gains an id by construction (`withId`-gated writer) and `tests/ComponentIds.test.ts`
+  pins it. The ten ScenarioCreator production scenes are NOT in this worktree — they are built
+  at publish time and live in virtual-lab's catalogue — so the per-scene check could not run
+  here; flagged for the owner as a follow-up (a row would be a P-repo task).
+- DW-5.4: the e11 probes, extracted into both trees — the pass/fail sets are identical on base
+  `cd0f4d7` and on this branch (26 passed, 5 pre-existing failures: `zz_probe_missing`,
+  `zz_probe_overrides` "getOverrides on objects without node ids", `zz_probe_shadow`,
+  `zz_probe_untouched`, `zz_probe_v2` — all failing on base too, so not A5 regressions).
+- DW-5.5: `npm run typecheck`, `npm test` (2864 tests), `npm run build` green.
