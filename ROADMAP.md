@@ -120,7 +120,7 @@ Play inside the editor, and the published scenario behaves the same on the platf
 | C3 | Engine E4 — type registry accepts a replacement class | E | 1–2 d | — | `tasks/C` C3 | ⬜ |
 | C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | 🔒 decision #7 |
 | C5 | Stage 13 — Play and Game view (spike first) | Ed | ~2.5 w | C4 | `tasks/C` C5 | ⬜ |
-| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 🧠 Opus-level design: Claude plans first — |
+| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/C6/plan.md` — RenderTexture extends Texture over a WebGLRenderTarget, engine-typed backend calls only (no second GPU path), target cameras by depth before the screen camera; shares Application.ts with C2 (second to merge syncs first) |
 
 ## M5 — Editor milestone 3: prefabs, settings, undo *(~6 weeks)*
 
