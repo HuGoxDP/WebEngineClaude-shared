@@ -352,6 +352,19 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## WebEngineTSEditor — the editor
 
+### 2026-11-10
+- **The editor runs the current engine and reads version 2 (A8).** The app takes
+  WebEngineTS `0.1.0-local.1794329867` (packed from engine master by hand, editor-only,
+  tarball + lockfile committed), and the scene open path no longer asks the literal
+  `data.version !== 1`: a file states its version, and one this build cannot read gets its
+  own message (`scene.tooNew`, en + uk) naming the file, its version and the versions this
+  editor reads — including the editor's own link-mode files, which it previously refused.
+  Everything a reader opens (open, autosave recovery, dropped file, folder import,
+  reload-from-disk) funnels through `_loadSceneText`, so one change covers all of them;
+  a refusal leaves selection, history and the open scene untouched. Writing is unchanged
+  (version 1, expand mode). The full pre-existing e2e suite (142 checks) passed unchanged
+  on the new engine, and 17 new checks pin the reader paths (`e2e` total 159, all green).
+
 ### 2026-10-09
 - **What the editor is for is decided** (it was P1, the item that needed a human): teachers author
   scenarios on the site, a project is a folder on their own computer, scripts are both written in
