@@ -41,7 +41,7 @@ owner's pending pushes and decisions for M1 are made.
 | M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
 | M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | 🔒 |
 | M0.7 | Commit or drop the stray `workspace/clone-all.sh` change | S | owner | — | ⬜ owner |
-| M0.8 | Guard review: is the graphify PreToolUse nudge useful? (≈ 2026-11-11) | root | 10 min | research 2026-11-04 | ⬜ |
+| M0.8 | Guard review: is the graphify PreToolUse nudge useful? (≈ 2026-11-11) | root | 10 min | research 2026-11-04 | ✅ 2026-11-10 W1 — nudge measured search-precise and advisory-only (fires on the Grep tool and `grep`/`rg` Bash commands inside the engine, silent on every other shape and outside the graph's coverage, pre-seeds the graph's hits, never blocks, instant); graph fresh (rebuilt 2026-11-10); verdict: keep unchanged, no settings change; notes `code-foundations/M0.8/notes.md` |
 
 ## M1 — Release `v0.2.0`: every consumer on one tagged engine *(~2–3 weeks)*
 

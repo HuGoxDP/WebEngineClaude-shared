@@ -15,6 +15,14 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-11-10
+- **Guard review (M0.8): the root `hook-guard search` nudge stays.** Measured with the real binary:
+  it fires on the Grep tool and on `grep`/`rg` Bash commands inside the engine, answers with the
+  graph's hits and the next command inline, and is silent on every other command shape and outside
+  the graph's coverage. Advisory only (always exit 0), instant. Verdict: keep, no settings change.
+  Notes `code-foundations/M0.8/notes.md`.
+- Dev tooling only: no engine source, API, rendered output or measured number changes.
+
 ### 2026-11-04
 - **The engine has a local code graph (graphify), and workspace-root sessions reach it by default.**
   `WebEngineTS/graphify-out/` holds a code-only AST graph (no LLM extraction), git-ignored and never
