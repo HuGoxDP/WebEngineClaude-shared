@@ -12,7 +12,7 @@ were re-checked. The engine moves faster than any list describing it.
 
 | # | Gap | Found in | Found against | Detail |
 |---|---|---|---|---|
-| G2 | Streamed asset path reports ~2.9× the texture VRAM of the ZIP path for the same scenario | testv/virtual-lab | `0.1.0-local.1786569427449` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
+| G2 | Streamed asset path reports ~2.8× the texture VRAM of the ZIP path for the same scenario — **confirmed on the platform 2026-11-10 (ROADMAP P7)**: `textures` (GPU uploads) matches at 20, `estimatedTextureVramBytes` (live `Texture` objects) differs — 96.8 MB (ZIP) against 273.8 MB (manifest). Cause is content-side: eagerly prefetched redundant fallbacks, not a leak | testv/virtual-lab | `0.1.0-local.1794342651370` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
 | G4 | Texture orientation depends on the file format: the image path uploads `flipY = true`, glTF and KTX2 use `false`, so a de-embedded map samples upside down and a KTX2 A/B compares two different pictures | ScenarioCreator | `0.1.0-local.1787408668962` | `ScenarioCreator/docs/ENGINE-GAPS.md` §6 |
 | G5 | `Time.timeScale` survives `Application.dispose()` and the next scenario load — `Time._reset()` (`Time.ts:280`) has no caller, so a paused or slowed scenario leaks its scale into the next one in the same page | testv/virtual-lab | `0.1.0-local.1792706134341` | `testv/virtual-lab/docs/upstream/webenginets.md` §6 (the platform runs every scenario, restarts included, in a fresh player frame — player-isolation, virtual-lab 2bf3a12 — so the scale cannot leak there; the engine fix, a `Time._reset()` caller, is still open for hosts that reuse one realm) |
 
@@ -24,13 +24,17 @@ solar-system content then ships **redundant assets**: every planet declares both
 loose albedo `.jpg` (`texAlbedo: "mercury", model: "mercury"`, and so on for six planets, plus
 Earth's normal and emissive). The ZIP path never decodes the unused fallbacks because
 `Resources.tryLoad` is lazy; the streamed path decodes both sets. That is the right magnitude for
-2.9×, and it explains why `renderer.textures` matches at 19 while `estimatedTextureVramBytes` does
+2.9×, and it explains why `renderer.textures` matches at 20 while `estimatedTextureVramBytes` does
 not — the former counts GPU uploads, the latter counts every live `Texture` object.
 
-**Predicted reading, still to be confirmed on the platform:** `liveTextures` differs while
-`textures` matches. That is branch 1 of the platform's own decision tree, but the cause is
+**The predicted reading is now confirmed on the platform (2026-11-10, P7, engine
+`0.1.0-local.1794342651370`):** `liveTextures` differs while `textures` matches —
+`e2e/tests/streaming.spec.ts`, solar-system ZIP vs manifest: textures 20 / 20 (GPU uploads),
+estimatedTextureVramBytes 96.8 MB / 273.8 MB (live `Texture` objects), draw calls 27 / 27, first
+frame 41.1 s / 40.6 s. That is branch 1 of the platform's own decision tree, and the cause is
 redundant content eagerly prefetched, not a leak. **The fix is content-side** — mark the fallback
-textures `Lazy` in the manifest, or stop shipping them for planets that have a model.
+textures `Lazy` in the manifest, or stop shipping them for planets that have a model (ROADMAP
+SC-G2, unblocked by P7).
 
 **G4 is half-closed, deliberately.** `Texture.flipVertically` (2026-08-22) lets content state the
 orientation through the public API instead of reaching into the Three.js texture, which closes the

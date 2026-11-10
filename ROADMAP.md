@@ -83,7 +83,7 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | P5a | Backups and HTTPS, repo side: a backup container (nightly `pg_dump` + archives copy), a restore script with a restore actually tried on the local stack, and the HTTPS nginx/compose config — all tested locally | P | 1–2 d | — | `PLAN.md` §2.12 | ⬜ |
 | P5b | Deploy P5a to production, enable HTTPS, try one restore there | P | owner | P5a | `PLAN.md` §2.12 | ⬜ owner |
 | P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
-| P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ⬜ |
+| P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ✅ 2026-11-10 W2 — confirmed on the platform (streaming e2e, engine `0.1.0-local.1794342651370`): textures 20/20 (GPU uploads), estimatedTextureVramBytes 96.8 MB (ZIP) vs 273.8 MB (manifest) = 2.83× (live `Texture` objects), draw calls 27/27 — the diagnosis holds, redundant prefetch not a leak; SC-G2 unblocked. Engine bumped in virtual-lab/frontend (was 6 days stale); the frontend lock had to be re-pinned or the Docker build EINTEGRITYs onto a 2-week-old image with no sandboxed player. notes `code-foundations/P7/notes.md` |
 | SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
 | M2.1 | Run the eleven browser e2e specs with the editor override (`npx playwright install`) | P | ½ d | — | `PLAN.md` §2.7 | ⬜ |
 | P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | ⬜ |
