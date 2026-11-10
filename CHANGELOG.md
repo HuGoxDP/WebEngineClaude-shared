@@ -16,6 +16,16 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 ## WebEngineTS — the engine
 
 ### 2026-11-10
+- **`Prefab.revert` no longer wakes a fresh instance as a scene root (M0.2f).** Reverting a top-level
+  instance that sits under a parent rebuilt it with `instantiate()` into the scene — where it woke
+  (`awake`, `onEnable`) — and moved it under the holder only afterwards, so under an **inactive**
+  holder it woke and was immediately disabled again (`awake`, `onEnable`, `onDisable`) and its
+  `awake` had seen the scene root, not the holder. **Changes observable lifecycle order:** the fresh
+  tree is now built directly under the holder at the saved index before the wake pass (new
+  `SceneSerializer._instantiatePrefabUnderParent`) — under an inactive holder it never wakes and waits
+  for activation (like a load and a nested instance since M0.2a), and under an active one its `awake`
+  sees the parent. A true scene-root instance reverts exactly as before.
+  `tests/PrefabRevertUnderHolder.test.ts`; notes `code-foundations/M0.2f/notes.md`.
 - **Guard review (M0.8): the root `hook-guard search` nudge stays.** Measured with the real binary:
   it fires on the Grep tool and on `grep`/`rg` Bash commands inside the engine, answers with the
   graph's hits and the next command inline, and is silent on every other command shape and outside
