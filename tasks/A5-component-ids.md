@@ -41,6 +41,11 @@ readers-first cycle.
 - `src/engine/core/GameObject.ts` — `_prefabNodeId` (~104) and how copies clear it (~264): the live
   pattern to mirror on `Component`.
 - `src/engine/core/serialization/MissingComponent.ts` — an unknown component must keep its id.
+- **M0.2b (2026-11-10): a live object can no longer hold two RectTransforms.** `addComponent` of a
+  type with `_allowMultiple = false` (`RectTransform`, `Transform`) returns the held one
+  (`code-foundations/M0.2b/notes.md`). So ids minted from a live object never see `RectTransform #k≥1`;
+  only files written by older engines can carry one, and the M0.2 review's A5 notes 1–3 (treat them
+  as RT#0, mint after the fold) still apply to those files.
 
 ## Design (implement this; deviations need a reason in the report)
 
