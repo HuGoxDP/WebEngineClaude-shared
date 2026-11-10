@@ -86,6 +86,7 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ✅ 2026-11-10 W2 — confirmed on the platform (streaming e2e, engine `0.1.0-local.1794342651370`): textures 20/20 (GPU uploads), estimatedTextureVramBytes 96.8 MB (ZIP) vs 273.8 MB (manifest) = 2.83× (live `Texture` objects), draw calls 27/27 — the diagnosis holds, redundant prefetch not a leak; SC-G2 unblocked. Engine bumped in virtual-lab/frontend (was 6 days stale); the frontend lock had to be re-pinned or the Docker build EINTEGRITYs onto a 2-week-old image with no sandboxed player. notes `code-foundations/P7/notes.md` |
 | SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
 | M2.1 | Run the eleven browser e2e specs with the editor override (`npx playwright install`) | P | ½ d | — | `PLAN.md` §2.7 | ⬜ |
+| M2.2 | Full virtual-lab checks on the engine tarball P7 committed (`frontend/WebEngineTS-0.1.0.tgz`, eb7f314): backend unit + Postgres suite (in `vl-db.lock`), `ng test`, the browser e2e — the platform's next deploy ships it, ahead of A10. Red → fix forward or restore the previous tarball, ATTENTION | P | ½ d | — | Claude review 2026-11-10 | ⬜ |
 | P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | ⬜ |
 | R3 | Redeploy the editor container; hand-check the native folder picker | Ed | owner | — | `tasks/E-growth` R3 | ⬜ owner |
 
