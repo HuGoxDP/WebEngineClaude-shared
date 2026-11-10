@@ -64,7 +64,7 @@ production scenarios are re-published and pass the e2e.
 | M0.2g | Public read of one-per-object (`_allowMultiple`) so the editor's Add Component can hide or grey out `RectTransform`/`Transform` when the object already has one | E, Ed | ½ d | M0.2b notes | ⬜ |
 | A7 | Backfill engine `CHANGELOG.md` (E3/E5/E6/E7/E10/E13, 2026-09-10) | E | ½ d | A5 | `tasks/A7` | ⬜ |
 | B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ✅ `Scenario.run()` builds `entryScene` after `awake()` (ZIP + streaming), references preloaded; SC writes it from `scenario.meta.json`. Branch `B0-entry-scene`. The editor template must drop its manual load when B7 writes `entryScene`. |
-| A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ⬜ |
+| A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | 🟡 W3 2026-11-10 |
 | A9 | Cut `v0.2.0` | E | ½ d | A5–A8, owner | `tasks/A9` | 🔒 decision #2 |
 | A10 | Platform on the release: URL dependency, `/engine/<version>/…` immutable, prefab v2 accepted | P | 1–2 d | A9 | `tasks/A10`, `PLAN.md` §2.8 | ⬜ |
 | A11 | ScenarioCreator on the release; `.meta` guids; `--experimentalDecorators` | SC | 1–2 d | A9 | `tasks/A11` | ⬜ |
