@@ -200,24 +200,6 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## testv/virtual-lab — the platform
 
-### 2026-11-11
-- **The platform can back itself up, and the restore is proven (P5a).** A `backup` service in the
-  stack keeps nightly backups: a logical `pg_dump` (crash-consistent, restorable into a newer
-  server) plus read-only copies of the four content volumes (content-addressed, so an append-only
-  copy is consistent), each with a manifest, pruned to `BACKUP_KEEP_DAYS`. `backup/restore.mjs`
-  restores one backup (dry run by default, `--yes` to run), and
-  `docs/backup-restore.md` is the written procedure — **run once on a scratch stack** with its
-  output recorded: a seeded row and object survived `down -v` and came back (row count 1, object
-  sha256 unchanged, nginx serves the restored bytes). Retention pinned by 8 unit tests; the
-  backend suite is 1487/1487 against the test database. Production's off-host target, its
-  certificate and a restore there are the owner's (P5b).
-- **The stack answers TLS on 443** (self-signed, built by `nginx/make-cert.mjs`, published by
-  `docker-compose.https.yml`, HSTS on https answers only) — the local proof for the HTTPS part
-  of P5a; production mounts its own certificate at `/etc/nginx/tls/`.
-- **Fixed:** a comment continuation in `.env.example` that had lost its `#`, which
-  `docker compose`'s env parser rejected; a failed backup no longer leaves a manifest-less
-  directory behind; a backup failure during the run is loud and leaves no partial evidence.
-
 ### 2026-10-27 → 28
 - **virtual-lab works as an LTI 1.3 tool for Moodle.** The admin registers it with one URL (Dynamic Registration), a teacher
   picks a lab through Deep Linking, a student opens it from the course in a new window without a separate login, presses

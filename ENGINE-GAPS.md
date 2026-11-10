@@ -12,7 +12,7 @@ were re-checked. The engine moves faster than any list describing it.
 
 | # | Gap | Found in | Found against | Detail |
 |---|---|---|---|---|
-| G2 | Streamed asset path reports ~2.8× the texture VRAM of the ZIP path for the same scenario — **confirmed on the platform 2026-11-10 (ROADMAP P7)**: `textures` (GPU uploads) matches at 20, `estimatedTextureVramBytes` (live `Texture` objects) differs — 96.8 MB (ZIP) against 273.8 MB (manifest). Cause is content-side: eagerly prefetched redundant fallbacks, not a leak | testv/virtual-lab | `0.1.0-local.1794342651370` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
+| G2 | Streamed asset path reports ~2.8× the texture VRAM of the ZIP path for the same scenario — **partly closed 2026-11-10 (ROADMAP P7 + SC-G2)**: the content half is fixed — solar-system's redundant fallbacks (six planets whose `.glb` loads, plus the unreferenced `saturn_ring.png`) now ship `Lazy`, measured 273.8 → 224.8 MB with the same 20 textures and 27 draw calls. The remaining 128 MB is ONE engine-side live `Texture` (the retained skybox pano) — ROADMAP **E-G2a** | testv/virtual-lab | `0.1.0-local.1794342651370` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
 | G4 | Texture orientation depends on the file format: the image path uploads `flipY = true`, glTF and KTX2 use `false`, so a de-embedded map samples upside down and a KTX2 A/B compares two different pictures | ScenarioCreator | `0.1.0-local.1787408668962` | `ScenarioCreator/docs/ENGINE-GAPS.md` §6 |
 | G5 | `Time.timeScale` survives `Application.dispose()` and the next scenario load — `Time._reset()` (`Time.ts:280`) has no caller, so a paused or slowed scenario leaks its scale into the next one in the same page | testv/virtual-lab | `0.1.0-local.1792706134341` | `testv/virtual-lab/docs/upstream/webenginets.md` §6 (the platform runs every scenario, restarts included, in a fresh player frame — player-isolation, virtual-lab 2bf3a12 — so the scale cannot leak there; the engine fix, a `Time._reset()` caller, is still open for hosts that reuse one realm) |
 
@@ -27,14 +27,27 @@ Earth's normal and emissive). The ZIP path never decodes the unused fallbacks be
 2.9×, and it explains why `renderer.textures` matches at 20 while `estimatedTextureVramBytes` does
 not — the former counts GPU uploads, the latter counts every live `Texture` object.
 
-**The predicted reading is now confirmed on the platform (2026-11-10, P7, engine
+**The predicted reading is confirmed on the platform (2026-11-10, P7, engine
 `0.1.0-local.1794342651370`):** `liveTextures` differs while `textures` matches —
 `e2e/tests/streaming.spec.ts`, solar-system ZIP vs manifest: textures 20 / 20 (GPU uploads),
 estimatedTextureVramBytes 96.8 MB / 273.8 MB (live `Texture` objects), draw calls 27 / 27, first
 frame 41.1 s / 40.6 s. That is branch 1 of the platform's own decision tree, and the cause is
-redundant content eagerly prefetched, not a leak. **The fix is content-side** — mark the fallback
-textures `Lazy` in the manifest, or stop shipping them for planets that have a model (ROADMAP
-SC-G2, unblocked by P7).
+redundant content eagerly prefetched, not a leak.
+
+**The content half is fixed (2026-11-10, SC-G2):** solar-system's `streaming.priorities` mark the
+six never-requested planet fallbacks and the unreferenced `saturn_ring.png` `Lazy` — the manifest
+path dropped 273.8 → 224.8 MB with the same 20 textures and 27 draw calls (the ZIP path is
+untouched, so no pixel changed).
+
+**The remaining 128 MB is one engine-side `Texture`, not content (E-G2a):** a per-path dump of
+`EngineObject.FindObjectsOfType(Texture)` shows the manifest path holding
+`Texture from ArrayBuffer 8192x4096 128.0MB` that the ZIP path never creates.
+`skybox/stars_panorama.jpg` is the only 8192×4096 asset and the scenario consumes it via
+`Resources.getUrl` + `Cubemap.fromEquirectangular` — on the ZIP path that fetches straight into the
+cubemap conversion with no engine `Texture` left behind; on the manifest path the eager prefetch
+decodes the skybox as a `Texture2D` and the resource cache keeps it. Fix in the engine: release the
+raw texture after the conversion, or keep `getUrl` from materializing a `Texture2D` for an asset
+the prefetch already decoded.
 
 **G4 is half-closed, deliberately.** `Texture.flipVertically` (2026-08-22) lets content state the
 orientation through the public API instead of reaching into the Three.js texture, which closes the
