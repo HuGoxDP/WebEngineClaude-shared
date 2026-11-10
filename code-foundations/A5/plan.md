@@ -214,6 +214,11 @@ variant of a variant.
 ## Decided During Build
 _Filled by /code-foundations-build — one row per decision an agent made or question it raised:_
 | # | Phase | Decision or question | Source | Status |
+|---|---|---|---|---|
+| B-1 | 1 | `ensureIds` derives component ids only once the readers exist (Phase 3), not in Phase 1: `PrefabDiff._ensureComponentIds` is implemented and unit-tested, but not called from `ensureIds` yet. Deriving earlier puts ids into written output ahead of the writers that own the format — a minted id appears in a re-saved changes list (`tests/PrefabInstances.test.ts` "saving a rebuilt instance in link mode writes back the same changes" failed with exactly that) and a legacy `~c:` one in a prefab file; neither is idempotent until writer and reader agree. Phase 1 is byte-neutral (DW-1.4 passes); the DW-1.2 assertions are pinned against the helper itself. | `tests/PrefabInstances.test.ts` idempotence guard | done in Phase 1, wire in Phase 3 |
+| B-2 | 1 | The copy rule mirrors nodes mechanically: `_stamp` (instance root) and `unpackPrefab` clear component ids exactly where node ids are cleared; `EngineObject.Instantiate` and the clipboard path get null ids for free because the plain (non-link) serializer writes no ids yet. | research D-16, code | done |
+| B-3 | 1 | `SceneCtx.mintedComponents` mirrors `minted` (shared with `outer`, `mintLive` decides live-vs-beside), so Phase 2's writers can read a component's id "as this pass writes it" the way `_nodeIdOf` does for nodes. | plan Phase 1 "Produces" | done |
 ---
+
 ## Execution Log
 _To be filled during /code-foundations-build_
