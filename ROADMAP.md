@@ -88,7 +88,7 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | E-G2a | The streaming prefetch retains a full-size `Texture` for an asset the host consumes via `Resources.getUrl` + `Cubemap.fromEquirectangular`: `skybox/stars_panorama.jpg` is 8192×4096 (128 MB live on the manifest path, absent on the ZIP path) — G2's remaining excess. Engine fix: release the raw texture after the cubemap conversion, or make `getUrl` on a prefetched asset not materialize a `Texture2D` | E | ½ d | SC-G2 | — | ⬜ |
 | M2.1 | Run the eleven browser e2e specs with the editor override (`npx playwright install`) | P | ½ d | — | `PLAN.md` §2.7 | ⬜ |
 | M2.2 | Full virtual-lab checks on the engine tarball P7 committed (`frontend/WebEngineTS-0.1.0.tgz`, eb7f314): backend unit + Postgres suite (in `vl-db.lock`), `ng test`, the browser e2e — the platform's next deploy ships it, ahead of A10. Red → fix forward or restore the previous tarball, ATTENTION | P | ½ d | — | Claude review 2026-11-10 | ⬜ |
-| P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | ⬜ |
+| P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | 🟡 W3 2026-11-11 |
 | R3 | Redeploy the editor container; hand-check the native folder picker | Ed | owner | — | `tasks/E-growth` R3 | ⬜ owner |
 
 ## M3 — Editor milestone 1: a scenario without code, "Create project" → catalog *(~11–12 weeks)*
