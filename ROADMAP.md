@@ -6,7 +6,7 @@ means* for each milestone. When an item closes, update its card / `PLAN.md` / `C
 then tick it here. Written 2026-11-06 against: WebEngineTS `03b640f`, `.claude-shared` `83750d5`.
 
 Sizes are one person at the card's model. **Status:** ✅ done · 🟡 started / waiting on review ·
-⬜ open · 🔒 waits on an owner decision ([`tasks/OWNER-DECISIONS.md`](tasks/OWNER-DECISIONS.md)).
+⬜ open · 🧠 Claude writes the research + plan first (workers skip it) · 📐 plan ready in `code-foundations/<ID>/` (workers build it as written) · 🔒 waits on an owner decision ([`tasks/OWNER-DECISIONS.md`](tasks/OWNER-DECISIONS.md)).
 Repos: **E** WebEngineTS · **P** virtual-lab · **Ed** WebEngineTSEditor · **SC** ScenarioCreator ·
 **S** .claude-shared · **B** Benchmarks.
 
@@ -33,7 +33,7 @@ owner's pending pushes and decisions for M1 are made.
 | M0.2 | Opus review of **A12** (RectTransform restore) | E | ½ d | `tasks/A12` | ✅ 2026-11-07: lifecycle order unchanged (2809 pairs); fix `a60e548`, a prefab file with a doubled rect reads as one; A5 notes, owner question (which doubled copy wins) and follow-ups M0.2a–c in `code-foundations/M0.2/review.md` |
 | M0.3 | Opus review of **A13** (lifecycle robustness); decide the open `Scene` root-loop skip | E | ½ d | `tasks/A13` | ✅ 2026-11-07 — A13 holds; root-loop skip was a real defect, fixed (`0b080ad`); deferred-destroy / onDisable errors no longer lost (`3eefb27`); review `code-foundations/M0.3/review.md` |
 | M0.3a | Hierarchy update walk: an object that already ran this frame and reparents under a later-walked parent runs again (child and root level) — per-pass "already ran" stamp | E | ½ d | M0.3 review | ✅ 2026-11-07 — per-walk stamp: each GameObject records the walk its components last ran in, `Scene` numbers one walk per pass/order; no allocation, cost within noise (`b05b3a2`, `tests/UpdateWalkOnce.test.ts`, 19 of 23 failed before); converse case (moved before its turn under an already-walked parent misses the frame) noted as follow-up; notes `code-foundations/M0.3a/notes.md` |
-| M0.3b | Check: zero-delay `Destroy()` runs on a microtask after LateUpdate and render; Unity destroys before rendering — probe with a running `Application`, then decide | E | ½ d | M0.3 review | ⬜ |
+| M0.3b | Check: zero-delay `Destroy()` runs on a microtask after LateUpdate and render; Unity destroys before rendering — probe with a running `Application`, then decide | E | ½ d | M0.3 review | ✅ 2026-11-10 W2 — probe on a running `Application` confirmed it: `["destroyer:update","victim:lateUpdate","loop:render","victim:onDestroy"]`; a zero delay now enters the same end-of-frame sweep a timed destroy uses (`remaining = 0`, after LateUpdate, before the render and the UI canvas), with the microtask kept only as the no-loop fallback. `tests/DestroyBeforeRender.test.ts`; notes `code-foundations/M0.3b/notes.md` |
 | M0.3c | Debug hard stop: with `isolateCallbackErrors = false`, rethrow the first component error after a GameObject is fully destroyed | E | ½ d | owner decision #15 | ✅ first error rethrown after full destruction on every path; `tests/DestroyHardStop.test.ts` |
 | M0.3d | Update walk, reverse case: an object moved before its turn under an already-walked parent misses this frame (`B` moves `C` under `A` → `["A","B"]`; Unity runs `C`) — needs a catch-up call | E | ½ d | M0.3a notes | ✅ 2026-11-07 — `setParent` records objects moved during a scene walk that have not run; after the roots each one still unrun, alive and active runs once with its subtree under the same walk number (M0.3a rule kept); objects created during the pass still start next frame; no allocation without reparenting, cost within noise (`fb32cd8`, `tests/UpdateWalkCatchUp.test.ts`, 27 of 39 failed before); notes `code-foundations/M0.3d/notes.md` |
 | M0.3e | `ScriptableBehaviour._guard` allocates a closure per callback (~2.8 MB garbage / 4500 frames with scripts) — breaks the zero-allocation rule | E | ½ d | M0.3a notes | ✅ 2026-11-07 — `_guard` removed: the three `_system*Update` entry points run `_runX()` in their own try/catch (`_onCallbackError` shared); behaviour identical. Measured without JIT (hot code hides the closure): 224 → 128 B per callback; ~2.8 MB figure not reproducible. `tests/ScriptableBehaviourAllocation.test.ts`; notes `code-foundations/M0.3e/notes.md` |
@@ -41,7 +41,7 @@ owner's pending pushes and decisions for M1 are made.
 | M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
 | M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | 🔒 |
 | M0.7 | Commit or drop the stray `workspace/clone-all.sh` change | S | owner | — | ⬜ owner |
-| M0.8 | Guard review: is the graphify PreToolUse nudge useful? (≈ 2026-11-11) | root | 10 min | research 2026-11-04 | ⬜ |
+| M0.8 | Guard review: is the graphify PreToolUse nudge useful? (≈ 2026-11-11) | root | 10 min | research 2026-11-04 | ✅ 2026-11-10 W1 — nudge measured search-precise and advisory-only (fires on the Grep tool and `grep`/`rg` Bash commands inside the engine, silent on every other shape and outside the graph's coverage, pre-seeds the graph's hits, never blocks, instant); graph fresh (rebuilt 2026-11-10); verdict: keep unchanged, no settings change; notes `code-foundations/M0.8/notes.md` |
 
 ## M1 — Release `v0.2.0`: every consumer on one tagged engine *(~2–3 weeks)*
 
@@ -53,7 +53,7 @@ production scenarios are re-published and pass the e2e.
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | A1–A4, A6 | E11 regressions, docs/API, format-version API, minified bundle | E | — | — | `tasks/A1…A6` | ✅ 2026-10-14 |
-| A5 | Component ids (Q2), scoped like node ids — before the format freezes | E | 3–5 d (Opus) | M0.2 | `tasks/A5` | ⬜ **next**. Read the A5 notes in `code-foundations/M0.2/review.md` first |
+| A5 | Component ids (Q2), scoped like node ids — before the format freezes | E | 3–5 d (Opus) | M0.2 | `tasks/A5` | 📐 plan ready (Claude, 2026-11-10): build `code-foundations/A5/plan.md` as written — **next**. Read the A5 notes in `code-foundations/M0.2/review.md` first |
 | M0.2a | Restore writes saved fields before any sibling wakes (Unity order). Needs an audit of every built-in setter that writes to an object its `onAwake` creates | E | 1–2 d (Opus) | — | `code-foundations/M0.2/review.md` | ✅ 2026-11-07 with M0.2d: `6bd9f4c`, `17c408a` — a load (scene, `Prefab.instantiate`, `Instantiate`, prefab links, prefab revert) builds every object, component, field, parent link and reference before any script wakes; then `awake`/`onEnable` parents first, list order. A write into any sibling's field stays. Built-ins keep `onAwake` before their own fields (audit of 51 types: only `DirectionalLight.shadowDistance`/`shadowFrustumSize` need it). **Changes observable lifecycle order** (engine CHANGELOG *Changed*). `tests/LoadBeforeWake.test.ts`; audit and changed expectations in `code-foundations/M0.2a/notes.md` |
 | M0.2b | One-per-object enforced at `addComponent` (Unity `[DisallowMultipleComponent]`). Today only a load reads `_allowMultiple`, so a second RectTransform added by code is folded away on the next load. Best before A5 | E | ½ d | owner | `code-foundations/M0.2/review.md` | ✅ 2026-11-10: `addComponent` of a one-per-object type (`RectTransform`, now also `Transform`) returns the held component with a `console.warn` instead of adding a second; a subclass beside a held base throws. Unity returns null — the engine keeps the non-null type (all callers dereference it). `tests/OnePerObject.test.ts`; A5 card noted; `code-foundations/M0.2b/notes.md` |
 | M0.2c | A load stops building an object's children once an earlier `awake` destroyed the object (pre-existing) | E | ½ d | — | `code-foundations/M0.2/review.md` | ✅ 2026-11-07: `4a1e922` — an object `destroyImmediate`d during its own load builds no children (scene load, `Prefab.instantiate`, `Instantiate`, prefab links); a self-destroyed child is not attached and saved paths keep its slot; `destroy()` (deferred) unchanged. `tests/DestroyedDuringLoad.test.ts`; notes and a new finding (children wake as roots, before they are parented) in `code-foundations/M0.2c/notes.md` |
@@ -78,8 +78,9 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | P1 | LTI 1.3 for Moodle (Dynamic Registration, Deep Linking, AGS grades) | P, E | — | — | `tasks/E-growth` P1 | ✅ 2026-10-28 (local) |
-| P1b | Deploy LTI to KSU-online (confirm its Moodle version) | P | 1–2 d | P5 | `PLAN.md` §2.10(b) | ⬜ |
-| P5 | Backups (Postgres + archives, restore tried) and HTTPS on production | P | 1–2 d + owner | — | `PLAN.md` §2.12 | ⬜ |
+| P1b | Deploy LTI to KSU-online (confirm its Moodle version) | P | 1–2 d | P5b | `PLAN.md` §2.10(b) | ⬜ |
+| P5a | Backups and HTTPS, repo side: a backup container (nightly `pg_dump` + archives copy), a restore script with a restore actually tried on the local stack, and the HTTPS nginx/compose config — all tested locally | P | 1–2 d | — | `PLAN.md` §2.12 | ⬜ |
+| P5b | Deploy P5a to production, enable HTTPS, try one restore there | P | owner | P5a | `PLAN.md` §2.12 | ⬜ owner |
 | P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
 | P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ⬜ |
 | SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
@@ -100,7 +101,7 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 | B3 | Stage 8 — Inspector (four sessions) | Ed | ~2.5 w | B2 | `tasks/B` B3 | ⬜ |
 | B4 | Stage 9 — Project window and assets (E3, E5, `.meta` guids) | Ed, SC | ~3 w | A11, B3 | `tasks/B` B4 | ⬜ |
 | B5 | Scenarios on their own origin | P | — | — | `tasks/B` B5 | ✅ superseded by the sandboxed player (`PLAN.md` §2.9, 2026-10-27) — close the card |
-| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5 (HTTPS) | `tasks/B` B6, `PLAN.md` §2.6 | ⬜ |
+| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5a (HTTPS config) | `tasks/B` B6, `PLAN.md` §2.6 | 🧠 needs a Claude plan first — |
 | B7 | Stage 10 — Build, Build And Run, Publish | Ed | ~2 w | B0, B4, B6, A8 | `tasks/B` B7 | ⬜ |
 | R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | 🔒 |
 | M3.1 | Retire ScenarioCreator as the authoring path (keeps KTX2, LOD, manifests) | SC | ½ d | B7 | `tasks/B` | ⬜ |
@@ -113,11 +114,11 @@ Play inside the editor, and the published scenario behaves the same on the platf
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | C1 | Stage 11 — dockable windows, tabs, layouts | Ed | ~1.5 w | M3 | `tasks/C` C1 | ⬜ |
-| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | ⬜ |
+| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | 🧠 Opus-level design: Claude plans first — |
 | C3 | Engine E4 — type registry accepts a replacement class | E | 1–2 d | — | `tasks/C` C3 | ⬜ |
 | C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | 🔒 decision #7 |
 | C5 | Stage 13 — Play and Game view (spike first) | Ed | ~2.5 w | C4 | `tasks/C` C5 | ⬜ |
-| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | ⬜ |
+| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 🧠 Opus-level design: Claude plans first — |
 
 ## M5 — Editor milestone 3: prefabs, settings, undo *(~6 weeks)*
 
@@ -126,9 +127,9 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
-| D1 | Stage 14 — prefabs (link-mode switch: Opus) | Ed, E | ~3 w | M4 | `tasks/D` D1 | ⬜ |
+| D1 | Stage 14 — prefabs (link-mode switch: Opus) | Ed, E | ~3 w | M4 | `tasks/D` D1 | 🧠 needs a Claude plan first — |
 | D2 | Stage 15 — settings windows (E10) | Ed | ~1.5 w | — | `tasks/D` D2 | ⬜ |
-| D3 | Stage 16 — Unity-style undo (by diffs; revisit `PrefabDiff` export) | Ed, E | ~1.5 w (Opus) | D1 | `tasks/D` D3, decision #12 | ⬜ |
+| D3 | Stage 16 — Unity-style undo (by diffs; revisit `PrefabDiff` export) | Ed, E | ~1.5 w (Opus) | D1 | `tasks/D` D3, decision #12 | 🧠 needs a Claude plan first — |
 
 ## M6 — Growth lanes *(parallel; each pulled in when a lesson or a measurement needs it)*
 
@@ -141,10 +142,10 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | R2rt | KTX2 transcode actually called at runtime | P | 1–2 d | — | `PLAN.md` §2.3 | ⬜ |
 | N1 | KTX2 without `'unsafe-eval'` (own transcoder build) | E | 2–3 d | — | `tasks/E-growth` N1 | ⬜ |
 | N2 | meshopt + KTX2 inside glTF | E | 1–2 d | N1 | `tasks/E-growth` N2 | ⬜ |
-| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | ⬜ |
-| N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | ⬜ |
-| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | ⬜ |
-| N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | ⬜ |
+| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | 🧠 Opus-level design: Claude plans first — |
+| N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | 🧠 Opus-level design: Claude plans first — |
+| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | 🧠 Opus-level design: Claude plans first — |
+| N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | 🧠 Opus-level design: Claude plans first — |
 | N7 | Canvas UI stage 1 | E | — | when the editor's UI tools are scheduled | `tasks/E-growth` N7 | ⬜ |
 | R2 | Editor Angular 19 → 21, zoneless | Ed | 2–3 d | — | `tasks/E-growth` R2 | ⬜ |
 | R4 | Realtime co-editing | Ed, P | later (Opus) | R1, D3 | `tasks/E-growth` R4 | ⬜ |
