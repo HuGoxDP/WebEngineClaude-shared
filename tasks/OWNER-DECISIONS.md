@@ -21,6 +21,11 @@ waits on it can proceed.
 | 13 | Two saved copies of a one-per-object component (doubled `RectTransform` from before A12): which copy wins on load | **The later one** | — | **Later copy wins** — owner, 2026-11-07 |
 | 14 | Enforce one-per-object at `addComponent` (Unity `[DisallowMultipleComponent]`), not only on load (M0.2b) | **Yes**, before A5 | M0.2b, A5 | **Yes** — owner, 2026-11-07 |
 | 15 | With `ScriptableBehaviour.isolateCallbackErrors = false`, rethrow the first component error after a GameObject is fully destroyed (M0.3 Q1) | **Yes**; default mode unchanged | M0.3c | **Yes** — owner, 2026-11-07 |
+| 16 | B6: how a teacher receives their publish key | **In person or via a messenger, never e-mail** | B6 (assumed) | |
+| 17 | B6: how long the publish audit log is kept | **Indefinitely** | B6 (assumed) | |
+| 18 | B6: do publish keys expire? | **No**; the key list flags keys unused for 180 days | B6 (assumed) | |
+| 19 | B6: issue author keys on production only after P5b with `REQUIRE_HTTPS=true` | **Yes** | B6, P5b | |
+| 20 | B1: scene lighting toggle on by default for every scene (with a "no light in the scene" hint), instead of the card's "on when the scene has a light" — the editor's own light never lit the engine scene, so an unlit scene already looks black | **Yes** | B1 (assumed) | |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a

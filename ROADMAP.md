@@ -37,7 +37,7 @@ owner's pending pushes and decisions for M1 are made.
 | M0.3c | Debug hard stop: with `isolateCallbackErrors = false`, rethrow the first component error after a GameObject is fully destroyed | E | ½ d | owner decision #15 | ✅ first error rethrown after full destruction on every path; `tests/DestroyHardStop.test.ts` |
 | M0.3d | Update walk, reverse case: an object moved before its turn under an already-walked parent misses this frame (`B` moves `C` under `A` → `["A","B"]`; Unity runs `C`) — needs a catch-up call | E | ½ d | M0.3a notes | ✅ 2026-11-07 — `setParent` records objects moved during a scene walk that have not run; after the roots each one still unrun, alive and active runs once with its subtree under the same walk number (M0.3a rule kept); objects created during the pass still start next frame; no allocation without reparenting, cost within noise (`fb32cd8`, `tests/UpdateWalkCatchUp.test.ts`, 27 of 39 failed before); notes `code-foundations/M0.3d/notes.md` |
 | M0.3e | `ScriptableBehaviour._guard` allocates a closure per callback (~2.8 MB garbage / 4500 frames with scripts) — breaks the zero-allocation rule | E | ½ d | M0.3a notes | ✅ 2026-11-07 — `_guard` removed: the three `_system*Update` entry points run `_runX()` in their own try/catch (`_onCallbackError` shared); behaviour identical. Measured without JIT (hot code hides the closure): 224 → 128 B per callback; ~2.8 MB figure not reproducible. `tests/ScriptableBehaviourAllocation.test.ts`; notes `code-foundations/M0.3e/notes.md` |
-| M0.3f | Doc fix from Claude's review of M0.3b: `EngineObject.Destroy` says a zero-delay destroy "no longer happens at all while the loop is stopped", but the microtask fallback does destroy it with no loop (pinned by `DestroyBeforeRender.test.ts` "still destroys its object when no loop is running"); make the comment say what the code and test do | E | ½ h | Claude review 2026-11-10 | ⬜ |
+| M0.3f | Doc fix from Claude's review of M0.3b: `EngineObject.Destroy` says a zero-delay destroy "no longer happens at all while the loop is stopped", but the microtask fallback does destroy it with no loop (pinned by `DestroyBeforeRender.test.ts` "still destroys its object when no loop is running"); make the comment say what the code and test do | E | ½ h | Claude review 2026-11-10 | ✅ 2026-11-10 W2 — the review was right and found two wrong clauses: with no loop the microtask still destroys it (pinned by `DestroyBeforeRender.test.ts`), and a paused game is not a stopped loop either (`0 - 0` is due). The doc and the inline comment now say both; a new test pins the paused reading. `code-foundations/M0.3f/notes.md` |
 | M0.4 | Confirm and fix: engine typecheck hooks never run in root sessions | E / root | ½ d + 1 h | `PLAN.md` §1.6 | ✅ 2026-11-07 — hooks find the engine checkout from the edited file (`10e1757`), registered in the root `settings.local.json`; owner's new-session check remains (`code-foundations/M0.4/notes.md`) |
 | M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
 | M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | 🔒 |
@@ -64,7 +64,7 @@ production scenarios are re-published and pass the e2e.
 | M0.2g | Public read of one-per-object (`_allowMultiple`) so the editor's Add Component can hide or grey out `RectTransform`/`Transform` when the object already has one | E, Ed | ½ d | M0.2b notes | ✅ 2026-11-10 W2 — `Component.allowsMultiple` (static, inherited) and `GameObject.hasComponent(type)`, which also knows the Transform that is never in the component list; they read the same held-copy lookup `addComponent` refuses on. The editor's Add Component greys out a held one-per-object type and refuses the click (no history step). `tests/OnePerObjectRead.test.ts`; notes `code-foundations/M0.2g/notes.md` |
 | A7 | Backfill engine `CHANGELOG.md` (E3/E5/E6/E7/E10/E13, 2026-09-10) | E | ½ d | A5 | `tasks/A7` | ⬜ |
 | B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ✅ `Scenario.run()` builds `entryScene` after `awake()` (ZIP + streaming), references preloaded; SC writes it from `scenario.meta.json`. Branch `B0-entry-scene`. The editor template must drop its manual load when B7 writes `entryScene`. |
-| A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ⬜ |
+| A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ✅ 2026-11-10 — the editor takes engine `0.1.0-local.1794329867` (packed from engine master by hand, editor-only; tarball + lockfile committed) and opens scenes through the engine's version API (A4): a file this build cannot read gets the new `scene.tooNew` message (en/uk), a malformed one keeps `scene.invalid`, and a refusal leaves selection/history/scene untouched. All outside reads funnel through `_loadSceneText`. Writing unchanged (v1, expand). `grep 'version !== 1' app/src` empty; `ng build` exit 0; e2e 159 checks all green (142 pre-existing passed unchanged on the new engine + 17 new reader checks). Notes `code-foundations/A8/notes.md` |
 | A9 | Cut `v0.2.0` | E | ½ d | A5–A8, owner | `tasks/A9` | 🔒 decision #2 |
 | A10 | Platform on the release: URL dependency, `/engine/<version>/…` immutable, prefab v2 accepted | P | 1–2 d | A9 | `tasks/A10`, `PLAN.md` §2.8 | ⬜ |
 | A11 | ScenarioCreator on the release; `.meta` guids; `--experimentalDecorators` | SC | 1–2 d | A9 | `tasks/A11` | ⬜ |
@@ -83,9 +83,10 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | P5a | Backups and HTTPS, repo side: a backup container (nightly `pg_dump` + archives copy), a restore script with a restore actually tried on the local stack, and the HTTPS nginx/compose config — all tested locally | P | 1–2 d | — | `PLAN.md` §2.12 | ⬜ |
 | P5b | Deploy P5a to production, enable HTTPS, try one restore there | P | owner | P5a | `PLAN.md` §2.12 | ⬜ owner |
 | P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
-| P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ⬜ |
+| P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ✅ 2026-11-10 W2 — confirmed on the platform (streaming e2e, engine `0.1.0-local.1794342651370`): textures 20/20 (GPU uploads), estimatedTextureVramBytes 96.8 MB (ZIP) vs 273.8 MB (manifest) = 2.83× (live `Texture` objects), draw calls 27/27 — the diagnosis holds, redundant prefetch not a leak; SC-G2 unblocked. Engine bumped in virtual-lab/frontend (was 6 days stale); the frontend lock had to be re-pinned or the Docker build EINTEGRITYs onto a 2-week-old image with no sandboxed player. notes `code-foundations/P7/notes.md` |
 | SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
 | M2.1 | Run the eleven browser e2e specs with the editor override (`npx playwright install`) | P | ½ d | — | `PLAN.md` §2.7 | ⬜ |
+| M2.2 | Full virtual-lab checks on the engine tarball P7 committed (`frontend/WebEngineTS-0.1.0.tgz`, eb7f314): backend unit + Postgres suite (in `vl-db.lock`), `ng test`, the browser e2e — the platform's next deploy ships it, ahead of A10. Red → fix forward or restore the previous tarball, ATTENTION | P | ½ d | — | Claude review 2026-11-10 | ⬜ |
 | P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | ⬜ |
 | R3 | Redeploy the editor container; hand-check the native folder picker | Ed | owner | — | `tasks/E-growth` R3 | ⬜ owner |
 
@@ -97,12 +98,12 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
-| B1 | Stage 6 — scene and objects: 3D Object menu, Unity navigation, orientation cube, tools, selection outline, gizmos, scene lighting | Ed | ~2 w | A8 | `tasks/B` B1 | ⬜ |
+| B1 | Stage 6 — scene and objects: 3D Object menu, Unity navigation, orientation cube, tools, selection outline, gizmos, scene lighting | Ed | ~2 w | A8 | `tasks/B` B1 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/B1/plan.md` — editor-side only, 8 serial phases, e2e via a localStorage-gated probe; navigation feel stays a manual DW; owner question #20 assumed |
 | B2 | Stage 7 — Hierarchy (E7 sibling/component order) | Ed | ~1 w | B1 | `tasks/B` B2 | ⬜ |
 | B3 | Stage 8 — Inspector (four sessions) | Ed | ~2.5 w | B2 | `tasks/B` B3 | ⬜ |
 | B4 | Stage 9 — Project window and assets (E3, E5, `.meta` guids) | Ed, SC | ~3 w | A11, B3 | `tasks/B` B4 | ⬜ |
 | B5 | Scenarios on their own origin | P | — | — | `tasks/B` B5 | ✅ superseded by the sandboxed player (`PLAN.md` §2.9, 2026-10-27) — close the card |
-| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5a (HTTPS config) | `tasks/B` B6, `PLAN.md` §2.6 | 🧠 needs a Claude plan first — |
+| B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5a (HTTPS config) | `tasks/B` B6, `PLAN.md` §2.6 | 📐 plan ready (Claude, 2026-11-10): most of B6 already shipped in virtual-lab release 2 (93608dd); the plan hardens it — HTTPS guard, rotation/transfer, approve bound to version, BOLA sweep — `code-foundations/B6/plan.md`; owner questions #16–19 assumed at their recommendation |
 | B7 | Stage 10 — Build, Build And Run, Publish | Ed | ~2 w | B0, B4, B6, A8 | `tasks/B` B7 | ⬜ |
 | R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | 🔒 |
 | M3.1 | Retire ScenarioCreator as the authoring path (keeps KTX2, LOD, manifests) | SC | ½ d | B7 | `tasks/B` | ⬜ |
@@ -115,11 +116,11 @@ Play inside the editor, and the published scenario behaves the same on the platf
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | C1 | Stage 11 — dockable windows, tabs, layouts | Ed | ~1.5 w | M3 | `tasks/C` C1 | ⬜ |
-| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | 🧠 Opus-level design: Claude plans first — |
+| C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/C2/plan.md` — process-wide mode flag, `@ExecuteAlways`/`@ExecuteInEditMode`, `Application.enterEditMode/enterPlayMode/updateEditMode`; note for C5: Play must reload the scene |
 | C3 | Engine E4 — type registry accepts a replacement class | E | 1–2 d | — | `tasks/C` C3 | ⬜ |
 | C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | 🔒 decision #7 |
 | C5 | Stage 13 — Play and Game view (spike first) | Ed | ~2.5 w | C4 | `tasks/C` C5 | ⬜ |
-| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 🧠 Opus-level design: Claude plans first — |
+| C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/C6/plan.md` — RenderTexture extends Texture over a WebGLRenderTarget, engine-typed backend calls only (no second GPU path), target cameras by depth before the screen camera; shares Application.ts with C2 (second to merge syncs first) |
 
 ## M5 — Editor milestone 3: prefabs, settings, undo *(~6 weeks)*
 
