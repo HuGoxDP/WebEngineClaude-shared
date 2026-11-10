@@ -218,7 +218,36 @@ _Filled by /code-foundations-build — one row per decision an agent made or que
 | B-1 | 1 | `ensureIds` derives component ids only once the readers exist (Phase 3), not in Phase 1: `PrefabDiff._ensureComponentIds` is implemented and unit-tested, but not called from `ensureIds` yet. Deriving earlier puts ids into written output ahead of the writers that own the format — a minted id appears in a re-saved changes list (`tests/PrefabInstances.test.ts` "saving a rebuilt instance in link mode writes back the same changes" failed with exactly that) and a legacy `~c:` one in a prefab file; neither is idempotent until writer and reader agree. Phase 1 is byte-neutral (DW-1.4 passes); the DW-1.2 assertions are pinned against the helper itself. | `tests/PrefabInstances.test.ts` idempotence guard | done in Phase 1, wire in Phase 3 |
 | B-2 | 1 | The copy rule mirrors nodes mechanically: `_stamp` (instance root) and `unpackPrefab` clear component ids exactly where node ids are cleared; `EngineObject.Instantiate` and the clipboard path get null ids for free because the plain (non-link) serializer writes no ids yet. | research D-16, code | done |
 | B-3 | 1 | `SceneCtx.mintedComponents` mirrors `minted` (shared with `outer`, `mintLive` decides live-vs-beside), so Phase 2's writers can read a component's id "as this pass writes it" the way `_nodeIdOf` does for nodes. | plan Phase 1 "Produces" | done |
+| B-4 | 2 | Two writers-phase gates mirror nodes mechanically: the component writer writes under the node writer's own `withId` flag (so a plain scene and the clipboard path gain nothing), and `ComponentRef`'s `cid` only exists in link passes (`componentId` closure is link-gated; `_enclosingCtx` passes are link by construction). `PrefabDiff._equal` ignores a `cid` when both refs are ComponentRefs and everything else matches — the cid names the component the type and index already name, so a file saved before it does not read as changed. | Phase 2 writers, suite evidence | done |
+| B-5 | 2 | `_borrowIds` borrows component ids by position from the match tree and marks the node in `SceneCtx.borrowedComponents`; `_mintComponentIds` skips marked nodes. Without it an object compared with a prefab by position minted ids the prefab tree does not carry, and every reference on it read as an override (`tests/PrefabIdentity.test.ts` "objects without node ids", 3 tests). | suite evidence | done |
 ---
 
 ## Execution Log
-_To be filled during /code-foundations-build_
+
+### Phase 1 — ids on their own (Standard gate) — DONE
+Commit `fa7af72` (WebEngineTS), tests `tests/ComponentIds.test.ts` (7).
+`Component._prefabComponentId`, `SerializedComponent.id`, `PrefabOverride.componentId?`,
+`PrefabRemovedComponent.componentId?`; minting in `_mintAll`'s passes (`_mintComponentIds`,
+`_giveComponentId`, `_componentIdOf`, `SceneCtx.mintedComponents`); load-side assignment in
+`_attachComponent`; clears on unpackPrefab and `Prefab._stamp`; `PrefabDiff._ensureComponentIds`
+(derivation, legacy `~c:<nodeId>:<type>:<n>` after the fold) implemented and unit-tested but
+NOT wired into `ensureIds` — see B-1: it lands with the readers in Phase 3.
+
+### Phase 2 — writers (Full gate) — DONE
+Commit `4a69551` (WebEngineTS), tests `tests/ComponentIdsFormat.test.ts` (5).
+Component `id` written under the node writer's `withId` gate; `cid` on `ComponentRef` in link
+passes beside `component` + `index` (`SerializeContext.componentId`, link-gated closure);
+component-id borrowing from the match tree in `_borrowIds` + `borrowedComponents`; cid-insensitive
+ref comparison in `PrefabDiff._equal`. Full gate review (writer-scoped; the Collider and nested
+side-by-side cases run at Phase 4/5 where they are decidable): gates mirror nodes, borrow is
+positional and never overwrites a live id, minting never overwrites, `_enclosingCtx` is link by
+construction. `tests/PrefabInstances.test.ts` idempotence test adapted to save-twice form (first
+save of a pre-ids file adds ids; every save after writes the same bytes).
+
+### Phase 3 — readers — NEXT
+Resume here: wire `_ensureComponentIds` into `ensureIds` (B-1); `ComponentRef` resolution by
+`cid` first then `component` + `index` (`_findComponent` callers / ref resolution ~2124, ~2724,
+~2814, `ValueSerializer.pendingComponentRefs`); overrides/removals resolve `componentId` on the
+addressed node; RT/Transform index ≥ 1 retargets to 0 before ids are derived; unresolvable `cid`
+falls back and then nulls, never a neighbour; duplicate ids in one node → first wins + one warn;
+`tests/ComponentIdsLegacy.test.ts` (DW-3.1..3.3, bde23fc fixtures via `git archive`).
