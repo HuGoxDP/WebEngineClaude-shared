@@ -218,6 +218,13 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
   `docker compose`'s env parser rejected; a failed backup no longer leaves a manifest-less
   directory behind; a backup failure during the run is loud and leaves no partial evidence.
 
+### 2026-11-11 (later still)
+- **The pre-compressed serving is now proved on the wire (P3b).** The P3 anomaly was a harness
+  effect: an in-page fetch sends no `Accept-Encoding` under Playwright, and Playwright's
+  request context decompresses transparently. A raw `node:http` request sees the truth, and
+  `e2e/tests/compression.spec.ts` pins it: `Content-Encoding: gzip`, at least 2:1 smaller,
+  `gunzip` of the compressed body equal to the identity one byte for byte.
+
 ### 2026-11-11 (later)
 - **The static assets are served pre-compressed (P3).** The frontend image now pre-compresses
   the text assets it ships (`gzip -9 -k`, Dockerfile.frontend) and nginx answers with
