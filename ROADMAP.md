@@ -149,7 +149,7 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | N2 | meshopt + KTX2 inside glTF | E | 1–2 d | N1 | `tasks/E-growth` N2 | ⬜ |
 | N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | 🧠 Opus-level design: Claude plans first — |
 | N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | 🧠 Opus-level design: Claude plans first — |
-| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | 🧠 Opus-level design: Claude plans first — |
+| N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | 📐 plan ready (Claude, 2026-11-11): `code-foundations/N5/plan.md` — hidden DOM twin of native controls under one root, EventSystem keeps the keyboard, two-way focus sync, Canvas-drawn focus ring, default-on (`Accessibility.enabled = false` opts out), 12 phases incl. a real-browser accessibility-tree check |
 | N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | 🧠 Opus-level design: Claude plans first — |
 | N7 | Canvas UI stage 1 | E | — | when the editor's UI tools are scheduled | `tasks/E-growth` N7 | ⬜ |
 | R2 | Editor Angular 19 → 21, zoneless | Ed | 2–3 d | — | `tasks/E-growth` R2 | ⬜ |
