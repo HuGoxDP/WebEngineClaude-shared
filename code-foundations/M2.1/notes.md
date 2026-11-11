@@ -37,14 +37,30 @@ Representative failure (`streaming.spec.ts:151`): *"the catalog advertises the m
 the stack was recreated between the publish/import and the test moments (see the env notes), so
 this looks time- or state-dependent rather than a code defect. To settle before fixing anything.
 
-## Next (for the following fire)
+## Final result (2026-11-11, the same stack, catalog verified in place)
 
-1. Bring the stack up on the same volumes (the images and content are already built/published),
-   re-check `/api/catalog/molecules` **before** starting the suite, then re-run the 14 once.
-2. Separate the slow-from-crashing: if a spec only times out on this hardware, that is a
-   capacity finding for the notes (SwiftShader WebGL), not a product bug.
-3. Only what still fails after (1) is a defect to fix.
+The "23 failures" were **my own environment mistake**: the `down -v` cleanup between the
+two runs wiped the published catalog, so every catalog-dependent spec failed against an
+empty store (the first failure — `manifestUrl: null` for molecules — was exactly that).
 
+With the stack up and `/api/catalog` re-checked first (10 rows, `manifestUrl` present),
+the heavy specs re-run clean: **45 passed / 1 failed** (streaming, viewer-player, viewer,
+student-golden-path — 30.8 min). The streaming spec alone: 6/7, the seventh is the
+performance budget below. Combined with the full-suite run (91 passed / 2 skipped), the
+editor changes nothing: **the whole suite passes except one hardware-bound budget**.
+
+- **The one failure** — `streaming.spec.ts:233`, *"an asset-heavy scenario renders the
+  same scene from a manifest as from its ZIP"*: the streamed first frame took ~100.7 s
+  against the spec's 60 s budget (ZIP ~49 s, manifest ~127 s on software WebGL). The
+  correctness half passes; the manifest path's speed on real hardware is the streaming
+  lane's (E-G2a / R8), and the ~2.8x texture VRAM the same test records is the known G2.
+  **No test was weakened** to get green — the budget stands and the finding is recorded.
+
+## What landed
+
+`virtual-lab/docs/e2e-with-editor.md` — the run procedure in a worker (editor context
+override, the publish/import commands, chromium, the empty-catalog trap and the check
+that tells it apart from a real breakage).
 ## Checks so far
 
 Backend unit 288/288 and the Docker DB suite 1487/1487 are unaffected by this task (no backend
