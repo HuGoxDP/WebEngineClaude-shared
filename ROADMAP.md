@@ -154,7 +154,7 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | N7 | Canvas UI stage 1 | E | — | when the editor's UI tools are scheduled | `tasks/E-growth` N7 | ⬜ |
 | R2 | Editor Angular 19 → 21, zoneless | Ed | 2–3 d | — | `tasks/E-growth` R2 | ⬜ |
 | R4 | Realtime co-editing | Ed, P | later (Opus) | R1, D3 | `tasks/E-growth` R4 | ⬜ |
-| G5 | Engine: a caller for `Time._reset()` so `timeScale` does not leak | E | ½ d | — | `ENGINE-GAPS.md` G5 | ⬜ |
+| G5 | Engine: a caller for `Time._reset()` so `timeScale` does not leak | E | ½ d | — | `ENGINE-GAPS.md` G5 | ✅ 2026-11-11 W2 — `Application.dispose()` now resets `Time` beside the other module resets; a paused (0) or slowed (0.25) scenario no longer leaks its scale or frame count into the next one in the same page. Not reset on `unloadScenario` — dispose is the documented boundary. `tests/TimeResetOnDispose.test.ts` (2 tests, both fail without the fix); engine suite 2876/2876. notes `code-foundations/G5/notes.md` |
 | G5a | `Physics._reset()` has no production caller (same leak class as G5): call it from `Application.dispose()` so physics state cannot outlive a scenario in a reused realm; test it | E | ½ h | N3 research | ⬜ |
 | V1 | DNA right-handedness, orbit direction, sprites/shadows — by eye | SC | owner | — | `PLAN.md` §1.1 | ⬜ owner |
 | V2 | `LineRenderer.useWorldSpace` default | E | owner | — | `PLAN.md` §0 | 🔒 |
