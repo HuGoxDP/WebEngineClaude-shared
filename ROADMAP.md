@@ -40,8 +40,8 @@ owner's pending pushes and decisions for M1 are made.
 | M0.3f | Doc fix from Claude's review of M0.3b: `EngineObject.Destroy` says a zero-delay destroy "no longer happens at all while the loop is stopped", but the microtask fallback does destroy it with no loop (pinned by `DestroyBeforeRender.test.ts` "still destroys its object when no loop is running"); make the comment say what the code and test do | E | ½ h | Claude review 2026-11-10 | ✅ 2026-11-10 W2 — the review was right and found two wrong clauses: with no loop the microtask still destroys it (pinned by `DestroyBeforeRender.test.ts`), and a paused game is not a stopped loop either (`0 - 0` is due). The doc and the inline comment now say both; a new test pins the paused reading. `code-foundations/M0.3f/notes.md` |
 | M0.4 | Confirm and fix: engine typecheck hooks never run in root sessions | E / root | ½ d + 1 h | `PLAN.md` §1.6 | ✅ 2026-11-07 — hooks find the engine checkout from the edited file (`10e1757`), registered in the root `settings.local.json`; owner's new-session check remains (`code-foundations/M0.4/notes.md`) |
 | M0.5 | Push the unpushed engine commits (`6ac58e5` capture, `03b640f` graphify); delete stale remote branches | E | owner | decision #1 | ✅ pushed; engine has no stale remote branches left |
-| M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | 🔒 |
-| M0.7 | Commit or drop the stray `workspace/clone-all.sh` change | S | owner | — | ⬜ owner |
+| M0.6 | Back up `WebEngineTS/design/Article` locally | E | owner | decision #3 | ✅ 2026-11-11 Claude — the folder left the tree in `9ffd1d1`; its parent's copy (22 files) is archived to `C:\Users\HuGox\Backups\WebEngineTS-design-Article-9ffd1d1parent-2026-11-11.zip` (SHA-256 `25e7a6ca…7372`), and it stays in git history |
+| M0.7 | Commit or drop the stray `workspace/clone-all.sh` change | S | owner | — | ✅ 2026-11-11 Claude — gone: `git status` of the primary `.claude-shared` and of W1–W3 shows no change under `workspace/` |
 | M0.8 | Guard review: is the graphify PreToolUse nudge useful? (≈ 2026-11-11) | root | 10 min | research 2026-11-04 | ✅ 2026-11-10 W1 — nudge measured search-precise and advisory-only (fires on the Grep tool and `grep`/`rg` Bash commands inside the engine, silent on every other shape and outside the graph's coverage, pre-seeds the graph's hits, never blocks, instant); graph fresh (rebuilt 2026-11-10); verdict: keep unchanged, no settings change; notes `code-foundations/M0.8/notes.md` |
 
 ## M1 — Release `v0.2.0`: every consumer on one tagged engine *(~2–3 weeks)*
@@ -102,6 +102,7 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 | ID | Task | Repo | Size | Depends | Source | Status |
 |---|---|---|---|---|---|---|
 | B1 | Stage 6 — scene and objects: 3D Object menu, Unity navigation, orientation cube, tools, selection outline, gizmos, scene lighting | Ed | ~2 w | A8 | `tasks/B` B1 | 🟡 W2 2026-11-11 — 📐 plan ready (Claude, 2026-11-10): `code-foundations/B1/plan.md` — editor-side only, 8 serial phases, e2e via a localStorage-gated probe; navigation feel stays a manual DW; owner question #20 assumed |
+| B1r | Review of B1 phase 1 (Claude, 2026-11-11): (1) a 3D Object / Create Empty / Create-with made **under a parent** keeps its world origin — `commands.service.ts` `createPrimitive`/`createEmpty`/`createWith` use `transform.parent = …`, which is `setParent(p, true)` (`Transform.ts:341`), so under a moved, rotated or scaled parent the child is not at local zero; Unity's menu uses `SetParentAndAlign` (local zero, identity rotation, unit scale): use `setParent(p, false)` and reset the local TRS; (2) DW-1.2 has no e2e at all (Hierarchy "+" and the object context menu → child at local zero) — add it with a parent at (3, 1, 2) rotated 45° about Y and scaled 2; (3) DW-1.3 checks only that `kind` is a string and that *some* collider exists — assert each kind's D-3 `kind`/args and collider type (Cube→Box, Sphere→Sphere, Capsule/Cylinder→Capsule). W2 may fold it into B1's remaining phases and mark this row ✅ there | Ed | ½ d | B1 | Claude review | ⬜ |
 | B2 | Stage 7 — Hierarchy (E7 sibling/component order) | Ed | ~1 w | B1 | `tasks/B` B2 | ⬜ |
 | B3 | Stage 8 — Inspector (four sessions) | Ed | ~2.5 w | B2 | `tasks/B` B3 | ⬜ |
 | B4 | Stage 9 — Project window and assets (E3, E5, `.meta` guids) | Ed, SC | ~3 w | A11, B3 | `tasks/B` B4 | ⬜ |
@@ -142,7 +143,7 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 |---|---|---|---|---|---|---|
 | P2 | Offline lessons (Service Worker, "prepare this lesson", `storage.persist()`) | P | ~1 w | after A10 | `tasks/E-growth` P2 | ⬜ |
 | P4 | Per-scenario engine pinning | P | ~1 w | after A10 | `tasks/E-growth` P4 | ⬜ |
-| R9 | Performance telemetry — decide before building | P | 1–2 d | owner | `PLAN.md` §2.5 | 🔒 |
+| R9 | Performance telemetry — anonymous per-session aggregates (decision #27) | P | 1–2 d | — | `PLAN.md` §2.5 | 🧠 decision #27 delegated: yes, minimal and anonymous; Claude plans first (privacy + schema) |
 | R8 | Streaming end to end (manifests from SC; where hashed objects live) | SC, P | 1–2 w | SC manifests, storage decision | `PLAN.md` §2.2, §4.1, §4.4 | ⬜ |
 | R2rt | KTX2 transcode actually called at runtime | P | 1–2 d | — | `PLAN.md` §2.3 | ⬜ |
 | N1 | KTX2 without `'unsafe-eval'` (own transcoder build) | E | 2–3 d | — | `tasks/E-growth` N1 | ⬜ |
@@ -158,8 +159,8 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | G5 | Engine: a caller for `Time._reset()` so `timeScale` does not leak | E | ½ d | — | `ENGINE-GAPS.md` G5 | ✅ 2026-11-11 W2 — `Application.dispose()` now resets `Time` beside the other module resets; a paused (0) or slowed (0.25) scenario no longer leaks its scale or frame count into the next one in the same page. Not reset on `unloadScenario` — dispose is the documented boundary. `tests/TimeResetOnDispose.test.ts` (2 tests, both fail without the fix); engine suite 2876/2876. notes `code-foundations/G5/notes.md` |
 | G5a | `Physics._reset()` has no production caller (same leak class as G5): call it from `Application.dispose()` so physics state cannot outlive a scenario in a reused realm; test it | E | ½ h | — | N3 research | ⬜ |
 | V1 | DNA right-handedness, orbit direction, sprites/shadows — by eye | SC | owner | — | `PLAN.md` §1.1 | ⬜ owner |
-| V2 | `LineRenderer.useWorldSpace` default | E | owner | — | `PLAN.md` §0 | 🔒 |
-| V3 | AtomStructure: ~36 of 118 elements — scope | SC | owner | — | `ISSUES.md` | 🔒 |
+| V2 | `LineRenderer.useWorldSpace` default | E | owner | — | `PLAN.md` §0 | ✅ 2026-11-11 decision #25 delegated: keep `true` — the engine's default (`LineRenderer.ts:148`) already is Unity's; no change |
+| V3 | AtomStructure: all 118 elements (decision #26) — `Scenarios/AtomStructure/scripts/data/elements.ts` gets every element with shell configuration, category, standard atomic mass and one fact, from a cited public source (IUPAC masses, PubChem periodic-table data); a data test that the 118 are complete, ordered and their electron counts equal Z; the scenario's UI copes with periods 6–7 and the f-block | SC | ~1 d | — | `ISSUES.md` | ⬜ decision #26 delegated |
 | V4 | LOD texture variants' VRAM saving, measured on real GPUs | SC, B | owner hw | decision #4 | `PLAN.md` §4.3 | 🔒 |
 | M6.1 | Code graph for virtual-lab (most-edited repo) | P | ½ d | if work there continues | research 2026-11-04 | ⬜ |
 
@@ -176,9 +177,7 @@ plan §6, §6a, §10).
 | # | Decision | Gates |
 |---|---|---|
 | 2 | Cut `v0.2.0` | M1 (A9) |
-| 3 | Back up `design/Article` | M0 |
 | 4 | Student hardware to budget for | M6 (V4, N4 budgets) |
 | 7 | The editor's starter behaviour library | M4 (C4) |
 | 10 | OPFS vs server project store | M3 (R1) |
 | 11 | Who deploys production, and when | M1 (M1.2) |
-| — | `LineRenderer.useWorldSpace` default; AtomStructure scope; R9 telemetry | M6 |
