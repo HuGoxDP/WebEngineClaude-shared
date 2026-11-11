@@ -1,4 +1,5 @@
 // Shared between the bde23fc tree and the HEAD tree: identical file in both.
+import * as fs from "node:fs";
 import { GameObject } from "../../src/engine/core/GameObject";
 import { Behaviour } from "../../src/engine/core/Behaviour";
 import { Component } from "../../src/engine/core/Component";
@@ -49,7 +50,11 @@ import { AssetDatabase } from "../../src/engine/core/assets/AssetDatabase";
 import { RenderSettings } from "../../src/engine/core/RenderSettings";
 import { MissingComponent, MissingValue } from "../../src/engine/core/serialization/MissingComponent";
 
-export const OUT = "/tmp/claude-0/-home-user/18df1101-ad89-5883-a34b-4290928909de/scratchpad/myout";
+// Where the probes write their diagnostic JSON. Was a hardcoded absolute path in one
+// Claude-cloud session's scratchpad; now an env override (VL_PROBE_OUT) defaulting to
+// `out/` beside the probes, created on first use, so a probe runs in any tree.
+export const OUT = process.env.VL_PROBE_OUT ?? "./out";
+fs.mkdirSync(OUT, { recursive: true });
 
 @Serializable({ typeName: "Compat.Settings" })
 export class CompatSettings {

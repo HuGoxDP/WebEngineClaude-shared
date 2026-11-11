@@ -1,4 +1,4 @@
-import { test, vi } from "vitest";
+import { test, expect, vi } from "vitest";
 import * as fs from "node:fs";
 import { SceneManager } from "../../src/engine/core/SceneManager";
 import { GameObject } from "../../src/engine/core/GameObject";
@@ -19,6 +19,14 @@ function makePrefab(): Prefab {
     clearScene();
     return prefab;
 }
+
+// Triage (A5a, 2026-11-11): "failed" on master only through the environment coupling (OUT was
+// one session's scratchpad). What it observes is correct on master and pinned below: the linked
+// scene saves as version 2, a missing prefab is kept as a placeholder that re-saves verbatim,
+// the instance's override survives the round trip, and versions other than 1 and 2 are refused
+// with a clear message. `afterPrefabReturns.target` (a reference into the instance not
+// re-resolving once the prefab returns) is recorded but NOT asserted — it is the one observation
+// whose correctness needs the serializer review; see the A5a notes.
 
 test("missing prefab and versions", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -86,4 +94,24 @@ test("missing prefab and versions", () => {
     catch (e) { out.goV3 = "refused: " + String((e as Error).message); }
 
     fs.writeFileSync(`${OUT}/probe-missing.json`, JSON.stringify(out, null, 1));
+
+    expect(out.linkedVersion).toBe(2);
+    expect(out.expandVersion).toBe(2);
+    expect(out.isPrefabAssetMissing).toBe(true);
+    expect(out.placeholderLinkVerbatim).toBe(true);
+    expect(out.saveWarnings).toEqual([]);
+    // The instance's override survives the whole round trip.
+    expect((out.afterPrefabReturns as any).instanceWeight).toBe(7);
+    // A reference into the missing instance does not resolve while it is missing...
+    expect((out.afterLoad as any).target).toBeNull();
+    // ...and the placeholder load says so.
+    expect((out.loadWarnings as string[]).some(s => s.includes("is not loaded"))).toBe(true);
+    // Format versions other than 1 and 2 are refused, everywhere, with a message that says so.
+    // A file with NO version field is accepted — it predates the field and reads as version 1.
+    expect((out.versions as any).vMissing).toBe("accepted");
+    for (const key of ["v3", "v2_5", "s3", "v0", "vNull", "v99"] as const) {
+        expect((out.versions as any)[key]).toMatch(/^refused: /);
+    }
+    expect(out.prefabV3).toMatch(/^refused: /);
+    expect(out.goV3).toMatch(/^refused: /);
 });
