@@ -2,10 +2,11 @@
 
 | | |
 |---|---|
-| Repo / branch | WebEngineTS · `claude/scenario-platform-architecture-24f9fy` |
+| Repo / branch | WebEngineTS · `A7-changelog-backfill` (W1) |
 | Model | **Sonnet** |
 | Size | ½ day |
 | Depends on | A1–A6 landed (so their entries are already in `[Unreleased]`) |
+| Status | **Done 2026-11-11 W1** — `docs(changelog): backfill E3, E5, E6, E7, E10, E13 and the September serializer fixes` |
 | Blocks | A9 |
 
 ## Why
