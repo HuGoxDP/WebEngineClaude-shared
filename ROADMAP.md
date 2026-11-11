@@ -109,7 +109,7 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 | B5 | Scenarios on their own origin | P | — | — | `tasks/B` B5 | ✅ superseded by the sandboxed player (`PLAN.md` §2.9, 2026-10-27) — close the card |
 | B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5a (HTTPS config) | `tasks/B` B6, `PLAN.md` §2.6 | 📐 plan ready (Claude, 2026-11-10): most of B6 already shipped in virtual-lab release 2 (93608dd); the plan hardens it — HTTPS guard, rotation/transfer, approve bound to version, BOLA sweep — `code-foundations/B6/plan.md`; owner questions #16–19 assumed at their recommendation |
 | B7 | Stage 10 — Build, Build And Run, Publish | Ed | ~2 w | B0, B4, B6, A8 | `tasks/B` B7 | ⬜ |
-| R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | ⬜ decision #10 delegated: OPFS first |
+| R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | ✅ 2026-11-12 W1 — OPFS behind the same `ProjectStore` interface: the wizard offers both stores (a disk folder for git workflows, `projects/<id>` in the browser's own store for every modern browser), browser projects are remembered by id, reopen with no permission prompt and report *missing* — never an empty project — when site data is cleared; Safari < 26 (no `createWritable`) keeps the honest *unsupported* state. `ng build` exit 0, e2e 172 checks green. Notes `code-foundations/R1/{research,plan}.md` |
 | M3.1 | Retire ScenarioCreator as the authoring path (keeps KTX2, LOD, manifests) | SC | ½ d | B7 | `tasks/B` | ⬜ |
 
 ## M4 — Editor milestone 2: behaviour and Play, as in Unity *(~10–12 weeks)*
