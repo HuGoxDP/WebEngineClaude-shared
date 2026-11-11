@@ -44,3 +44,35 @@ global-setup until the stack was brought back up.
    each, then re-run `import:assets` and the five specs.
 2. If they still red with complete archives and manifests in the store, the tarball itself is
    at fault: restore the previous tarball in `virtual-lab/frontend/` and ATTENTION.
+
+## Resolution (2026-11-11, same claim) — GREEN
+
+The red subset was environmental, not the tarball. Three causes, all in the worker's setup:
+
+1. **Stale containers** — the stack predated the P3b/P5a merges (nginx config, frontend image).
+   `docker compose down` + `up -d --wait` on the merged `main` rebuilt it. (Also the Docker daemon
+   had stopped; restarted.)
+2. **Missing scenario archive** — `ReleaseScenarios` had ten `*.scenario.json` sidecars but no
+   archive for the streaming scenario. `npm run build -- --scenario solar-system-scenario` (and
+   `Molecules`) in `ScenarioCreator`, then `build-manifest.mjs --scenario …` for each, then
+   `import:assets` re-registered the manifests.
+3. **Missing fixtures junction** — the admin specs resolve `SMALL_ARCHIVE` through
+   `.workers/ScenarioCreator/ReleaseScenarios/test/` (the shared junction, not the worker
+   worktree); it did not exist. Created with `mklink /J`. One further failure — the golden path
+   asserting an *unpublished* bench scenario is a 404 anonymously — came from `publish:release`
+   having published every release row including the benches; unpublished `benchscene3-solarsystem`
+   via `PUT /api/catalog/:id {"isPublished": false}`.
+
+Final run on the rebuilt stack, same tarball (`frontend/WebEngineTS-0.1.0.tgz`, eb7f314):
+
+| Check | Result |
+|---|---|
+| backend unit | 288 / 288 |
+| backend Postgres suite (vl-db.lock) | 1487 / 1487 |
+| frontend `ng test` | 767 / 767 |
+| browser e2e — full suite | **141 passed · 3 skipped · 0 failed (15.0m), exit 0** |
+
+Manifest-path numbers inside the run: solar-system first frame ZIP 44.7 s vs manifest 42.3 s,
+draw calls 27/27, textures 20/20 (VRAM 96.8 MB ZIP vs 224.8 MB manifest — SC-G2's lazy fix
+landed), molecules manifest 1410 ms / 3 draw calls. Verdict on the tarball: **safe to ship** — no
+code change in this task, no follow-up row needed.
