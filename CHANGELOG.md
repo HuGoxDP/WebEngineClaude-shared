@@ -199,6 +199,16 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+### 2026-11-11 (platform, later)
+- **The browser e2e runs, with the editor in the stack (M2.1).** The suite that could not run
+  without a Playwright browser now runs end to end against `docker compose -f docker-compose.yml
+  -f docker-compose.editor.yml`: 91 passed / 2 skipped on the full suite, and 45/1 on the heavy
+  specs once the catalog was re-published after a `down -v` (an empty-store detour that reads
+  like product breakage — the check that tells them apart is written down). The single failure is
+  a hardware-bound budget: the manifest path's first frame takes ~100 s against the spec's 60 s
+  on software WebGL (the correctness half passes); that speed is the streaming lane's problem
+  (E-G2a / R8). How to run it all lives in `docs/e2e-with-editor.md`.
+
 
 ### 2026-11-11
 - **The platform can back itself up, and the restore is proven (P5a).** A `backup` service in the
@@ -217,6 +227,13 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 - **Fixed:** a comment continuation in `.env.example` that had lost its `#`, which
   `docker compose`'s env parser rejected; a failed backup no longer leaves a manifest-less
   directory behind; a backup failure during the run is loud and leaves no partial evidence.
+
+### 2026-11-11 (later still)
+- **The pre-compressed serving is now proved on the wire (P3b).** The P3 anomaly was a harness
+  effect: an in-page fetch sends no `Accept-Encoding` under Playwright, and Playwright's
+  request context decompresses transparently. A raw `node:http` request sees the truth, and
+  `e2e/tests/compression.spec.ts` pins it: `Content-Encoding: gzip`, at least 2:1 smaller,
+  `gunzip` of the compressed body equal to the identity one byte for byte.
 
 ### 2026-11-11 (later)
 - **The static assets are served pre-compressed (P3).** The frontend image now pre-compresses
