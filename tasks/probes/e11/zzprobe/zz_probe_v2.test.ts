@@ -1,9 +1,15 @@
-import { test, vi } from "vitest";
+import { test, expect, vi } from "vitest";
 import * as fs from "node:fs";
 import { SceneManager } from "../../src/engine/core/SceneManager";
 import { SceneSerializer } from "../../src/engine/core/serialization/SceneSerializer";
 import { Prefab } from "../../src/engine/core/serialization/Prefab";
 import { OUT, clearScene, buildPrefabSource } from "./compatFixtures";
+
+// Triage (A5a, 2026-11-11): "failed" on master only through the environment coupling (OUT was
+// one session's scratchpad). The behavior it observes is correct on master: everything is
+// written as format version 2 — a legacy (version-1) prefab resaves as 2, a scene holding a
+// prefab instance saves as 2, and a prefab made now is 2 — and the unknown component's
+// reference data survives inside the scene.
 
 test("default-mode saves that come out as version 2", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -33,4 +39,12 @@ test("default-mode saves that come out as version 2", () => {
     out.newPrefabFileVersion = (file as any).version ?? "absent";
     fs.writeFileSync(`${OUT}/head-made.prefab.json`, JSON.stringify(file));
     fs.writeFileSync(`${OUT}/probe-v2.json`, JSON.stringify(out, null, 1));
+
+    expect(out.legacyPrefabResaveVersion).toBe(2);
+    expect(out.defaultSceneVersionWithLegacyPrefabInstance).toBe(2);
+    expect(out.newPrefabFileVersion).toBe(2);
+    // The unknown component keeps its type and its reference data inside the scene.
+    const ghost = out.missingComponentDataInScene as any;
+    expect(ghost.type).toBe("Ghost.Pointer");
+    expect(ghost.fields.follow.$type).toBe("GameObjectRef");
 });

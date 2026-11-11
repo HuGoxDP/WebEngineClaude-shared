@@ -12,9 +12,9 @@ were re-checked. The engine moves faster than any list describing it.
 
 | # | Gap | Found in | Found against | Detail |
 |---|---|---|---|---|
-| G2 | Streamed asset path reports ~2.8× the texture VRAM of the ZIP path for the same scenario — **partly closed 2026-11-10 (ROADMAP P7 + SC-G2)**: the content half is fixed — solar-system's redundant fallbacks (six planets whose `.glb` loads, plus the unreferenced `saturn_ring.png`) now ship `Lazy`, measured 273.8 → 224.8 MB with the same 20 textures and 27 draw calls. The remaining 128 MB is ONE engine-side live `Texture` (the retained skybox pano) — ROADMAP **E-G2a** | testv/virtual-lab | `0.1.0-local.1794342651370` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
+| G2 | Streamed asset path reports ~2.8× the texture VRAM of the ZIP path for the same scenario — **CLOSED 2026-11-11 (P7 + SC-G2 + E-G2a)**: content half fixed (redundant fallbacks ship `Lazy`, 273.8 → 224.8 MB), engine half fixed (`Resources.getUrl` releases the zero-reference prefetched object; a path asked for as bytes never wanted its decoded `Texture2D`), streaming e2e now solar-system ZIP vs manifest = 96.8 / 96.8 MB, 20/20 textures, 27/27 draw calls | testv/virtual-lab | `0.1.0-local.1794365596074` | `testv/virtual-lab/docs/upstream/webenginets.md` §1 |
 | G4 | Texture orientation depends on the file format: the image path uploads `flipY = true`, glTF and KTX2 use `false`, so a de-embedded map samples upside down and a KTX2 A/B compares two different pictures | ScenarioCreator | `0.1.0-local.1787408668962` | `ScenarioCreator/docs/ENGINE-GAPS.md` §6 |
-| G5 | `Time.timeScale` survives `Application.dispose()` and the next scenario load — `Time._reset()` (`Time.ts:280`) has no caller, so a paused or slowed scenario leaks its scale into the next one in the same page | testv/virtual-lab | `0.1.0-local.1792706134341` | `testv/virtual-lab/docs/upstream/webenginets.md` §6 (the platform runs every scenario, restarts included, in a fresh player frame — player-isolation, virtual-lab 2bf3a12 — so the scale cannot leak there; the engine fix, a `Time._reset()` caller, is still open for hosts that reuse one realm) |
+| G5 | `Time.timeScale` survives `Application.dispose()` and the next scenario load — `Time._reset()` (`Time.ts:280`) has no caller, so a paused or slowed scenario leaks its scale into the next one in the same page | testv/virtual-lab | `0.1.0-local.1792706134341` | `testv/virtual-lab/docs/upstream/webenginets.md` §6 (the platform runs every scenario, restarts included, in a fresh player frame — player-isolation, virtual-lab 2bf3a12 — so the scale cannot leak there; the engine fix landed 2026-11-11 — `Application.dispose()` calls `Time._reset()` beside the other module resets (ROADMAP G5)) |
 
 **G2 has a diagnosis (2026-09-05), and it is not an engine leak.** Streamed scenarios eagerly
 decode every non-`Lazy` manifest asset — `Scenario._preloadCriticalAssets` then
@@ -45,9 +45,14 @@ untouched, so no pixel changed).
 `skybox/stars_panorama.jpg` is the only 8192×4096 asset and the scenario consumes it via
 `Resources.getUrl` + `Cubemap.fromEquirectangular` — on the ZIP path that fetches straight into the
 cubemap conversion with no engine `Texture` left behind; on the manifest path the eager prefetch
-decodes the skybox as a `Texture2D` and the resource cache keeps it. Fix in the engine: release the
-raw texture after the conversion, or keep `getUrl` from materializing a `Texture2D` for an asset
-the prefetch already decoded.
+decodes the skybox as a `Texture2D` and the resource cache keeps it.
+
+**Fixed (2026-11-11, E-G2a):** `Resources.getUrl` releases every zero-reference cache entry for the
+path it is asked about before handing out the URL — a host asking for bytes has declared it does not
+want the decoded object, and a texture the scenario actually loaded (reference count above zero) is
+untouched. Streaming e2e after the fix: **96.8 / 96.8 MB, 20/20 textures, 27/27 draw calls** — the
+manifest path measures exactly like the ZIP path. `tests/GetUrlReleasesUnused.test.ts` pins it;
+notes `code-foundations/E-G2a/notes.md`.
 
 **G4 is half-closed, deliberately.** `Texture.flipVertically` (2026-08-22) lets content state the
 orientation through the public API instead of reaching into the Three.js texture, which closes the
