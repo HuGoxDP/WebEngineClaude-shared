@@ -78,7 +78,7 @@ backend switch under `Rigidbody`/`Collider`/`Joint` with the same public API; se
 after the `KHR_physics_rigid_bodies` / `KHR_collision_shapes` drafts. Avoid Jolt's multithreaded build
 (needs cross-origin isolation, impossible inside an LMS iframe).
 
-**N4 — Render adapter stage 1 → WebGPU** *(Opus; weeks)* `design/render-adapter-plan.md` stage 1
+**N4 — Render adapter stage 1 → WebGPU** *(Opus; weeks)* `design/render-adapter-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/render-adapter-plan.md`) stage 1
 (resource handles) done whole, never in fragments. Then `WebGPURenderer` (it falls back to WebGL2 by
 itself): port every `ShaderMaterial`, `onBeforeCompile` and post-processing pass to TSL; pin three's
 version (its WebGPU API breaks almost every release). WebGL2 stays the default until WebGPU covers the
@@ -91,11 +91,16 @@ an accessible name on `GameObject`; `ariaNotify` with a live-region fallback for
 single-pointer alternatives for drags (WCAG 2.2 SC 2.5.7). Procurement needs it (DSTU EN 301 549; ADA
 Title II deadlines 2027–2028).
 
-**N6 — UV convention C3 / G4** *(Opus; after a visual harness)* `design/unity-coordinates-plan.md`;
-changes every texture's orientation, so only with `design/coordinate-check/` run by eye.
+**N6a — Texture-orientation harness** *(Sonnet; 1–2 days; stage 0 of N6)* A headless Chromium grid of
+textured tiles (engine primitives, glTF, PNG, KTX2, sprite, UI) read back by machine as identity /
+flipV / flipH / rot180 and pinned, so N6 has a before/after reference nobody has to look at. Plan:
+`code-foundations/N6a/plan.md`.
+
+**N6 — UV convention C3 / G4** *(Opus; after N6a)* `design/unity-coordinates-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/unity-coordinates-plan.md`);
+changes every texture's orientation, so only with N6a's `npm run orientation-check` before and after.
 
 **N7 — Canvas UI stage 1** *(Sonnet; when the editor's UI tools are scheduled)* Layout dirty flags →
-rotation/scale → layout groups (`design/canvas-ui-roadmap.md`).
+rotation/scale → layout groups (`design/canvas-ui-roadmap.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/canvas-ui-roadmap.md`)).
 
 ---
 

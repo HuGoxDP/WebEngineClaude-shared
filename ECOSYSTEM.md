@@ -52,7 +52,8 @@ already exists there:
 - `WebEngineTS-Benchmarks/tasks/webenginets.md`
 
 Each full entry needs evidence — a file, a line, a measurement — and a note on what the consumer
-does instead. The engine answers all three in `WebEngineTS/design/upstream-answers.md`.
+does instead. The engine answers each in the **Closed** table of `ENGINE-GAPS.md` (the older
+`design/upstream-answers.md` was deleted in `a3fe342`; history only).
 
 **Re-verify before reporting or acting.** Of the nine entries once spread across those lists, six
 were already fixed by the time they were re-checked. The lists describe the build they were

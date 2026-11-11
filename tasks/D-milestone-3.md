@@ -1,7 +1,7 @@
 # Phase D — editor milestone 3: prefabs with links, settings windows, Unity-style undo
 
 Specification: `WebEngineTSEditor/docs/unity-editor-plan.md` §5 "Префабы", §6 stages 14–16;
-`WebEngineTS/design/prefab-instances-plan.md` (E11, done in the engine). ~6 editor weeks + engine
+`design/prefab-instances-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/prefab-instances-plan.md`) (E11, done in the engine). ~6 editor weeks + engine
 support. Decisions that govern this phase: **Q1** (link mode in project files from stage 14, Build
 expands) and **Q2** (component ids, card A5) — vision doc, sections "Вопрос 1/2".
 
