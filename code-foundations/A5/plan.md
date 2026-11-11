@@ -214,6 +214,93 @@ variant of a variant.
 ## Decided During Build
 _Filled by /code-foundations-build — one row per decision an agent made or question it raised:_
 | # | Phase | Decision or question | Source | Status |
+|---|---|---|---|---|
+| B-1 | 1 | `ensureIds` derives component ids only once the readers exist (Phase 3), not in Phase 1: `PrefabDiff._ensureComponentIds` is implemented and unit-tested, but not called from `ensureIds` yet. Deriving earlier puts ids into written output ahead of the writers that own the format — a minted id appears in a re-saved changes list (`tests/PrefabInstances.test.ts` "saving a rebuilt instance in link mode writes back the same changes" failed with exactly that) and a legacy `~c:` one in a prefab file; neither is idempotent until writer and reader agree. Phase 1 is byte-neutral (DW-1.4 passes); the DW-1.2 assertions are pinned against the helper itself. | `tests/PrefabInstances.test.ts` idempotence guard | done in Phase 1, wire in Phase 3 |
+| B-2 | 1 | The copy rule mirrors nodes mechanically: `_stamp` (instance root) and `unpackPrefab` clear component ids exactly where node ids are cleared; `EngineObject.Instantiate` and the clipboard path get null ids for free because the plain (non-link) serializer writes no ids yet. | research D-16, code | done |
+| B-3 | 1 | `SceneCtx.mintedComponents` mirrors `minted` (shared with `outer`, `mintLive` decides live-vs-beside), so Phase 2's writers can read a component's id "as this pass writes it" the way `_nodeIdOf` does for nodes. | plan Phase 1 "Produces" | done |
+| B-4 | 2 | Two writers-phase gates mirror nodes mechanically: the component writer writes under the node writer's own `withId` flag (so a plain scene and the clipboard path gain nothing), and `ComponentRef`'s `cid` only exists in link passes (`componentId` closure is link-gated; `_enclosingCtx` passes are link by construction). `PrefabDiff._equal` ignores a `cid` when both refs are ComponentRefs and everything else matches — the cid names the component the type and index already name, so a file saved before it does not read as changed. | Phase 2 writers, suite evidence | done |
+| B-5 | 2 | `_borrowIds` borrows component ids by position from the match tree and marks the node in `SceneCtx.borrowedComponents`; `_mintComponentIds` skips marked nodes. Without it an object compared with a prefab by position minted ids the prefab tree does not carry, and every reference on it read as an override (`tests/PrefabIdentity.test.ts` "objects without node ids", 3 tests). | suite evidence | superseded by B-6 (the same coverage, without a separate set) |
+| B-6 | 3 | Where ids are minted, final: (a) with a fresh node id, in `_mintAddedIds` — an added object's components are the instance's own; (b) for what the match tree does not cover, in `_giveAllIds`' `_mintUncoveredComponents` — an added component on a node the prefab has, where the pass knows the tree; (c) in `ensureIds`, for a prefab file's tree and its root. Minting "every component of every id'd node" in every pass gave the instance side ids the prefab tree could not know — a tree built without ever going through `ensureIds` (a test `bind`, an old file) has none — so every save minted a new one and an override could vanish. `_serializeInstance`, the scene's link writer, runs the same `_giveAllIds` pass a comparison does, or an added component is written with no id at all. | suite evidence: idempotence + override-preservation tests | done |
+| B-7 | 3 | `_matchComponentIds` (the pass that lets the match tree's components decide) gives the twin's id only to a component that has none of its own: a list that lost a component in front has shifted, and the twin at the same position is a different component — overwriting the live id there made a comparison match the wrong pair (found via the DW-2.3 example: a removal of the wrong Tag). Marking as covered still happens for every twin position. | DW-2.3 example generation | done |
+| B-8 | 3 | The comparison matches by id and falls back to type + occurrence for an id that names nothing here — a tree whose ids were minted in another namespace, or one from before ids. Reads (references) are stricter: a `cid` that resolves to nothing is null, never a positional neighbour (DW-3.2). Apply-side changes read by the id when it resolves and by the address written beside it otherwise, as the plan's reader rule says. | plan Phase 3/4 text | done |
 ---
+
 ## Execution Log
-_To be filled during /code-foundations-build_
+
+### Phase 1 — ids on their own (Standard gate) — DONE
+Commit `fa7af72` (WebEngineTS), tests `tests/ComponentIds.test.ts` (7).
+`Component._prefabComponentId`, `SerializedComponent.id`, `PrefabOverride.componentId?`,
+`PrefabRemovedComponent.componentId?`; minting in `_mintAll`'s passes (`_mintComponentIds`,
+`_giveComponentId`, `_componentIdOf`, `SceneCtx.mintedComponents`); load-side assignment in
+`_attachComponent`; clears on unpackPrefab and `Prefab._stamp`; `PrefabDiff._ensureComponentIds`
+(derivation, legacy `~c:<nodeId>:<type>:<n>` after the fold) implemented and unit-tested but
+NOT wired into `ensureIds` — see B-1: it lands with the readers in Phase 3.
+
+### Phase 2 — writers (Full gate) — DONE
+Commit `4a69551` (WebEngineTS), tests `tests/ComponentIdsFormat.test.ts` (5).
+Component `id` written under the node writer's `withId` gate; `cid` on `ComponentRef` in link
+passes beside `component` + `index` (`SerializeContext.componentId`, link-gated closure);
+component-id borrowing from the match tree in `_borrowIds` + `borrowedComponents`; cid-insensitive
+ref comparison in `PrefabDiff._equal`. Full gate review (writer-scoped; the Collider and nested
+side-by-side cases run at Phase 4/5 where they are decidable): gates mirror nodes, borrow is
+positional and never overwrites a live id, minting never overwrites, `_enclosingCtx` is link by
+construction. `tests/PrefabInstances.test.ts` idempotence test adapted to save-twice form (first
+save of a pre-ids file adds ids; every save after writes the same bytes).
+
+### Phase 3 — readers — DONE (with the Phase 4 comparison change it forced)
+Commit `c82766b` (WebEngineTS) + the id-overwrite fix, tests `tests/ComponentIdsLegacy.test.ts`
+(3), format examples `code-foundations/A5/format.md`.
+- Readers: `ComponentRef` by `cid` first (unresolvable → null, never a neighbour, DW-3.2), else
+  type + occurrence; old-file addresses to `RectTransform`/`Transform` index ≥ 1 retarget to 0
+  (`legacyComponentIndex`) on every read path; overrides/removals resolve `componentId` on the
+  addressed node and read by the address beside it otherwise; duplicate ids on one node →
+  first wins + one warn.
+- `ensureIds` is wired: component ids derived where its nodes have them — `~c:` legacy for files
+  without them (deterministic across loads), minted for a tree that never had them.
+- The comparison (Phase 4's first change, pulled forward because a silent reference loss is
+  worse than the pre-A5 behaviour): `_compareComponents` matches by id, else by type +
+  occurrence, and writes `componentId` beside the readable address; `_equal` treats two refs
+  that differ only in a cid as the same value. Full-gate review re-ran the Collider shape (two
+  Tags, first removed, prefab edits the second) end to end and the nested side-by-side shape.
+- DW-3.3 verified by extraction, not asserted in the suite: `git archive bde23fc | tar -x -C
+  <tmp>` (the E11 compat fixtures built, saved, reloaded and dumped) under the base `cd0f4d7`
+  and under this branch — **the two dumps are byte-identical**. (Against `bde23fc` itself they
+  differ, as designed: `bde23fc` predates M0.2a's load-order change; the plan's baseline is
+  `cd0f4d7`.) Scratch probe kept out of the repo.
+- DW-2.3: `format.md` examples are the writer's own output (a link with a removed and an
+  overridden component, and a `ComponentRef` with `cid`).
+
+### Phase 4 — prefab shapes by id (Full gate) — DONE
+Commit `f45a0be` (WebEngineTS), tests `tests/PrefabComponentIds.test.ts` (4).
+The comparison (Phase 4's first change) had been pulled into the Phase 3 commit because leaving
+references silently lost was worse than the pre-A5 behaviour; this phase pinned the shapes
+around it:
+- DW-4.1: the card's verified misbehaviour — remove the first of two colliders, the prefab
+  edits the second, the instance reads the edit; the removal names the prefab's first by
+  `componentId` with `componentIndex: 0`.
+- DW-4.2: reordering components the instance added round-trips through a link; the prefab's
+  own stays inexpressible (unchanged).
+- DW-4.3: two instances of one nested prefab side by side, one with its second component
+  removed — the other is untouched (no cross-match).
+- DW-4.4: `revertOverride` of a removal restores the right component by id, with the prefab's
+  values.
+
+### Phase 5 — a file from before ids (Full gate) — DONE
+Commit `f45a0be` (WebEngineTS), tests in `tests/ComponentIds.test.ts` (3 more).
+- DW-5.1: an unknown component keeps its id through a load and a save (both the live
+  `MissingComponent` and the written file).
+- DW-5.2: legacy `~c:` ids are minted when written — through the prefab's own memo, so its
+  file and every link to it agree and a second write of the same tree writes the same ids. The
+  tree in memory keeps what readers match by. A link save of an instance of a file from before
+  ids writes minted ids and is idempotent (save → load → save, same bytes).
+- DW-5.3: **partial, by evidence rather than by assertion**. The fixtures: the DW-3.3
+  extraction re-ran as save → load → save and the base/branch dumps are identical; no plain
+  scene gains an id by construction (`withId`-gated writer) and `tests/ComponentIds.test.ts`
+  pins it. The ten ScenarioCreator production scenes are NOT in this worktree — they are built
+  at publish time and live in virtual-lab's catalogue — so the per-scene check could not run
+  here; flagged for the owner as a follow-up (a row would be a P-repo task).
+- DW-5.4: the e11 probes, extracted into both trees — the pass/fail sets are identical on base
+  `cd0f4d7` and on this branch (26 passed, 5 pre-existing failures: `zz_probe_missing`,
+  `zz_probe_overrides` "getOverrides on objects without node ids", `zz_probe_shadow`,
+  `zz_probe_untouched`, `zz_probe_v2` — all failing on base too, so not A5 regressions).
+- DW-5.5: `npm run typecheck`, `npm test` (2864 tests), `npm run build` green.
