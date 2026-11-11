@@ -38,3 +38,13 @@ route's acceptance rules (PNG/JPEG, 16:10, ≥800 px, ≤5 MB, ≤8192 px) are p
 `preview-image`'s unit tests. The script's own output is verified per row: `imageUrl` becomes
 `/previews/<sha256>.png`, and `curl -sI` on it answers 200 with `image/png` and the platform's
 cache policy.
+
+## The run (2026-11-11, on the 8044 stack under `vl-db.lock`)
+
+`node e2e/scripts/make-covers.mjs` covered **every published row**: the ten production scenarios
+(`solar-system`, `optics-lenses`, `molecules`, `mechanics-incline`, `orbital-mechanics`,
+`gas-theory`, `dna-protein-synthesis`, `crystal-lattices`, `electric-circuits`, `atom-structure`)
+plus `benchscene2-complexmodel`, which the same pass reached — it is published, so it is
+student-visible. Each row's `imageUrl` is now `/previews/<sha256>.png`, served 200 `image/png`
+same-origin (~0.5 MB per cover; `benchscene3-solarsystem` stays unpublished from M2.2's fixture
+work and is not covered, matching rows a student never sees).
