@@ -29,6 +29,7 @@ waits on it can proceed.
 | 21 | N3: a separate size budget for the lazily loaded `dist/WebEngineTS.rapier.js` (Rapier WASM ~586 KB gzip) | **Yes**, its own budget; the standalone budget (450 KB) stays | N3 | **Yes** — delegated (2026-11-11) |
 | 22 | N3: default physics backend | **cannon-es until the in-engine re-measurement passes, then Rapier**; cannon kept one more release | N3 | **As recommended** — delegated (2026-11-11) |
 | 23 | N3: add `'wasm-unsafe-eval'` to the editor's CSP so it can step Rapier | **Yes, only when the editor adopts Rapier** (a virtual-lab follow-up row) | N3 | **Yes, when needed** — delegated (2026-11-11) |
+| 24 | P6: where do the ten catalog covers come from? (W1 parked P6 on it; filed on its branch as #21, renumbered — #21–23 are N3's) | **(b) A worker generates one cover per scenario from its own assets** (skybox or largest texture, downscaled to the preview limit) and uploads it through `POST /api/scenarios/:id/preview`; no off-origin URLs | P6 | **(b)** — delegated (2026-11-11) |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a
