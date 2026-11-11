@@ -26,6 +26,9 @@ waits on it can proceed.
 | 18 | B6: do publish keys expire? | **No**; the key list flags keys unused for 180 days | B6 (assumed) | **No** — delegated: the owner told Claude to decide by recommendation (2026-11-10) |
 | 19 | B6: issue author keys on production only after P5b with `REQUIRE_HTTPS=true` | **Yes** | B6, P5b | **Yes** — delegated: the owner told Claude to decide by recommendation (2026-11-10) |
 | 20 | B1: scene lighting toggle on by default for every scene (with a "no light in the scene" hint), instead of the card's "on when the scene has a light" — the editor's own light never lit the engine scene, so an unlit scene already looks black | **Yes** | B1 (assumed) | **Yes** — delegated: the owner told Claude to decide by recommendation (2026-11-10) |
+| 21 | N3: a separate size budget for the lazily loaded `dist/WebEngineTS.rapier.js` (Rapier WASM ~586 KB gzip) | **Yes**, its own budget; the standalone budget (450 KB) stays | N3 | **Yes** — delegated (2026-11-11) |
+| 22 | N3: default physics backend | **cannon-es until the in-engine re-measurement passes, then Rapier**; cannon kept one more release | N3 | **As recommended** — delegated (2026-11-11) |
+| 23 | N3: add `'wasm-unsafe-eval'` to the editor's CSP so it can step Rapier | **Yes, only when the editor adopts Rapier** (a virtual-lab follow-up row) | N3 | **Yes, when needed** — delegated (2026-11-11) |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a

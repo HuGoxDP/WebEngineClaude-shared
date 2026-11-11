@@ -147,7 +147,7 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | R2rt | KTX2 transcode actually called at runtime | P | 1–2 d | — | `PLAN.md` §2.3 | ⬜ |
 | N1 | KTX2 without `'unsafe-eval'` (own transcoder build) | E | 2–3 d | — | `tasks/E-growth` N1 | ⬜ |
 | N2 | meshopt + KTX2 inside glTF | E | 1–2 d | N1 | `tasks/E-growth` N2 | ⬜ |
-| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | 🧠 Opus-level design: Claude plans first — |
+| N3 | Rapier behind the physics API | E | 3 d spike + ~2 w | — | `tasks/E-growth` N3 | 📐 plan ready (Claude, 2026-11-11): `code-foundations/N3/plan.md` — spike first (phases 1–3, go/no-go by D-9 criteria; no-go stops the plan), then a backend seam with cannon-es kept one release; Rapier as a lazily loaded `dist/WebEngineTS.rapier.js`; picking-only scenarios never load it |
 | N4 | Render adapter stage 1 → WebGPU | E | weeks (Opus) | — | `tasks/E-growth` N4, `PLAN.md` §1.4 | 🧠 Opus-level design: Claude plans first — |
 | N5 | Accessibility: hidden DOM twin of the Canvas UI | E | ~2 w | — | `tasks/E-growth` N5 | 📐 plan ready (Claude, 2026-11-11): `code-foundations/N5/plan.md` — hidden DOM twin of native controls under one root, EventSystem keeps the keyboard, two-way focus sync, Canvas-drawn focus ring, default-on (`Accessibility.enabled = false` opts out), 12 phases incl. a real-browser accessibility-tree check |
 | N6 | UV convention C3 / gap G4 | E | Opus | a visual harness first | `tasks/E-growth` N6 | 🧠 Opus-level design: Claude plans first — |
@@ -155,6 +155,7 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 | R2 | Editor Angular 19 → 21, zoneless | Ed | 2–3 d | — | `tasks/E-growth` R2 | ⬜ |
 | R4 | Realtime co-editing | Ed, P | later (Opus) | R1, D3 | `tasks/E-growth` R4 | ⬜ |
 | G5 | Engine: a caller for `Time._reset()` so `timeScale` does not leak | E | ½ d | — | `ENGINE-GAPS.md` G5 | ⬜ |
+| G5a | `Physics._reset()` has no production caller (same leak class as G5): call it from `Application.dispose()` so physics state cannot outlive a scenario in a reused realm; test it | E | ½ h | N3 research | ⬜ |
 | V1 | DNA right-handedness, orbit direction, sprites/shadows — by eye | SC | owner | — | `PLAN.md` §1.1 | ⬜ owner |
 | V2 | `LineRenderer.useWorldSpace` default | E | owner | — | `PLAN.md` §0 | 🔒 |
 | V3 | AtomStructure: ~36 of 118 elements — scope | SC | owner | — | `ISSUES.md` | 🔒 |
