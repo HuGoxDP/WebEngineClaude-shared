@@ -59,9 +59,10 @@ orientation through the public API instead of reaching into the Three.js texture
 rule violation and unblocks the measurement. The convention itself is **not** settled: KTX2 forces
 `flipY = false` and cannot do otherwise, so unifying means moving the whole engine — including all
 twelve primitive UV generators — to a top-left origin. That changes rendered output in content
-nobody looks at before it ships, so it needs the visual harness in
-`WebEngineTS/design/coordinate-check/` first. Plan and staging:
-`WebEngineTS/design/unity-coordinates-plan.md`.
+nobody looks at before it ships, so it needs a before/after reference first: the machine-read
+orientation harness of ROADMAP `N6a` (the old by-eye `design/coordinate-check/` was deleted in
+`a3fe342` and checked handedness, not textures). Plan and staging:
+`design/unity-coordinates-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/unity-coordinates-plan.md`).
 
 ## Closed
 
@@ -79,7 +80,7 @@ test are named here so a re-report can be answered without re-deriving anything.
 | KTX2 skybox impossible (E1) | `Cubemap.fromEquirectangular(string \| Texture2D)` |
 | Dirty-transform switch write-only (E2) | `Transform.dirtyTransformsEnabled` |
 | `maxSize` a silent no-op on KTX2 / GLB (E3) | Documented, plus a once-per-run warning. Deliberately not implemented |
-| Parameter channel into scenarios (E4) | Rejected; `WebEngineTS/design/scenario-parameters-decision.md` |
+| Parameter channel into scenarios (E4) | Rejected; `design/scenario-parameters-decision.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/scenario-parameters-decision.md`) |
 | A scenario could open the diagnostics overlay | `MemoryProfiler.diagnosticsAllowed` host lock |
 | No way to see what a texture transcoded to | `MemoryReport.renderer.textureFormats` |
 | Asset URLs joined instead of resolved | `StreamingAssetSource._resolveUrl` uses `new URL()` |

@@ -61,5 +61,5 @@ Unlocks drawing the editor's Scene view through the engine (so lines, particles,
 post-processing appear in Scene), camera previews, asset thumbnails. Public API in Unity's shape
 (`RenderTexture`, `Camera.targetTexture`), engine types only (no `THREE` in signatures); the Three.js
 render target stays internal. Respect the render-adapter plan's rule: do not half-abstract resources —
-read `WebEngineTS/design/render-adapter-plan.md` first and make this fit stage 1 rather than add a
+read `design/render-adapter-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/render-adapter-plan.md`) first and make this fit stage 1 rather than add a
 second path.

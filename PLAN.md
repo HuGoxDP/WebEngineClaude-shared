@@ -97,7 +97,7 @@ minimaps and cheaper post-processing. The editor now asks for it as E8 (§1.5): 
 arbitrary camera into a target, for a Scene view drawn by the engine and for camera previews.
 
 ### 1.4 Adapter generalization, stages 1–4 *(weeks)*
-`WebEngineTS/design/render-adapter-plan.md`. Stage 0 is done. Stage 1 (resource handles) is the
+`design/render-adapter-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/render-adapter-plan.md`). Stage 0 is done. Stage 1 (resource handles) is the
 large one and the real prerequisite for WebGPU. **Do not start it in fragments** — each stage must
 leave exactly one way to reach the GPU, or the `instanceof THREE.Mesh` checks the engine relies on
 start failing for whichever objects took the new path.
@@ -141,9 +141,9 @@ graphify `PreToolUse` guard); (2) owner check in a new root session: introduce a
 ### Deferred, with the condition that revives each
 | Item | Revives when |
 |---|---|
-| Canvas UI Stage 1 (`design/canvas-ui-roadmap.md`) | the editor's UI tools are scheduled (its plan, "After") — the editor's own panels are Angular and do not need it |
+| Canvas UI Stage 1 (`design/canvas-ui-roadmap.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/canvas-ui-roadmap.md`)) | the editor's UI tools are scheduled (its plan, "After") — the editor's own panels are Angular and do not need it |
 | Unity parity Stages 2–4 (`design/unity-parity-plan.md`) | **revived in part by §1.5**: Stage 2's sidecar ids are E3/E5 and the `.meta` item in §4; Stage 4's prefabs are E11 |
-| Texture UV convention C3 (`design/unity-coordinates-plan.md`) | someone runs a visual harness for UVs; it changes every texture's orientation |
+| Texture UV convention C3 (`design/unity-coordinates-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/unity-coordinates-plan.md`)) | someone runs a visual harness for UVs; it changes every texture's orientation |
 | WebGPU backend | §1.4 Stage 1 lands |
 | OffscreenCanvas | a measurement shows main-thread render cost matters |
 
@@ -273,12 +273,12 @@ here instead.
 
 | Document | Repo | What it is |
 |---|---|---|
-| `design/render-adapter-plan.md` | WebEngineTS | §1.4, staged |
-| `design/canvas-ui-roadmap.md` | WebEngineTS | UI toolkit, 884 lines |
+| `design/render-adapter-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/render-adapter-plan.md`) | WebEngineTS | §1.4, staged |
+| `design/canvas-ui-roadmap.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/canvas-ui-roadmap.md`) | WebEngineTS | UI toolkit, 884 lines |
 | `design/unity-parity-plan.md` | WebEngineTS | serialization/editor architecture, 838 lines |
 | `design/asset-streaming-proposal.md` | WebEngineTS | streaming design |
 | `design/unity-coordinate-spaces.md` | WebEngineTS | **closed** — the coordinate contract reference |
-| `design/unity-coordinates-plan.md` | WebEngineTS | texture UV convention (C3), open |
+| `design/unity-coordinates-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/unity-coordinates-plan.md`) | WebEngineTS | texture UV convention (C3), open |
 | `design/handoff-boundary.md` | WebEngineTS | why engine feature work paused for consumers |
 | `design/audit/` | WebEngineTS | historical audit, 3.5k lines |
 | `.github/docs/*.md` | WebEngineTS | API reference, 24 files |
@@ -292,4 +292,4 @@ here instead.
 Gap reporting keeps its existing split on purpose: the **index** is `ENGINE-GAPS.md` here, the
 **evidence** stays in the repo that found it (`ScenarioCreator/docs/ENGINE-GAPS.md`,
 `testv/virtual-lab/docs/upstream/`), and the engine answers in
-`WebEngineTS/design/upstream-answers.md`.
+`design/upstream-answers.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/upstream-answers.md`).
