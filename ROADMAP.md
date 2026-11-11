@@ -143,7 +143,7 @@ have their windows, and undo/redo behaves like Unity's across every edit.
 |---|---|---|---|---|---|---|
 | P2 | Offline lessons (Service Worker, "prepare this lesson", `storage.persist()`) | P | ~1 w | after A10 | `tasks/E-growth` P2 | ⬜ |
 | P4 | Per-scenario engine pinning | P | ~1 w | after A10 | `tasks/E-growth` P4 | ⬜ |
-| R9 | Performance telemetry — anonymous per-session aggregates (decision #27) | P | 1–2 d | — | `PLAN.md` §2.5 | 🧠 decision #27 delegated: yes, minimal and anonymous; Claude plans first (privacy + schema) |
+| R9 | Performance telemetry — anonymous per-session aggregates (decision #27) | P | 1–2 d | B6 | `PLAN.md` §2.5 | 📐 plan ready (Claude, 2026-11-11): `code-foundations/R9/plan.md` — extends the live `scenario_sessions` (2026-08) instead of a new pipeline: end beacon carries time-to-running, fps p50/p05, GPU *class*, core/memory buckets; per-field validation, 180-day detail retention, moderator hardware table with a 5-session floor; no engine change |
 | R8 | Streaming end to end (manifests from SC; where hashed objects live) | SC, P | 1–2 w | SC manifests, storage decision | `PLAN.md` §2.2, §4.1, §4.4 | ⬜ |
 | R2rt | KTX2 transcode actually called at runtime | P | 1–2 d | — | `PLAN.md` §2.3 | ⬜ |
 | N1 | KTX2 without `'unsafe-eval'` (own transcoder build) | E | 2–3 d | — | `tasks/E-growth` N1 | ⬜ |
