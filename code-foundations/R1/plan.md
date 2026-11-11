@@ -131,6 +131,8 @@ recorded manual check.
 | D3 kind + handle in recents | handle only | makes `openRecent`'s permission step conditional | 3 |
 | D4 feature-detect, unsupported otherwise | sync-handle worker fallback | Safari < 26 is the only gap and D6 keeps it out of R1 | 2 |
 | D5 persist() on first write, quota error surfaced | silent | authors must lose no work silently | 2 |
+| D7 a browser-store recent carries `handle: null` and is found by id; `OpfsStore.exists(id)` checks without creating, so a cleared project is *missing* | store a handle anyway | `create(id)` would silently resurrect a deleted project (the exact dishonest failure the disk path avoids) | 3 |
+| D8 the location choice lives in the existing wizard (step 3), defaulting to the folder where the picker exists | a second entry point on the start screen | one wizard, one result object, no new screen | 3 |
 
 ---
 ## Notes
@@ -141,6 +143,46 @@ recorded manual check.
 ## Decided During Build
 _Filled by /code-foundations-build — one row per decision an agent made or question it raised:_
 | # | Phase | Decision or question | Source | Status |
+|---|---|---|---|---|
+| B-1 | 3 | A browser-store project's display name comes from the wizard (`_adopt(store, displayName)`), not from the OPFS folder name, which is the project id | integration-plan's "project identity" | done |
+| B-2 | 4 | The card referenced `docs/test-plan.md`, which does not exist in this repo; the e2e evidence lives in `docs/integration-plan.md` §4a and the scenario list | R1.md vs the repo | done — recorded here |
 ---
 ## Execution Log
-_To be filled during /code-foundations-build_
+
+### Phase 1 — the store interface (Standard) — DONE
+Commit `42af5b0` (WebEngineTSEditor). `app/src/app/services/project-store.ts`: `ProjectStore`
+(path-addressed), `FileSystemAccessStore` (a move of today's `listDir`/`_dirHandle`/`_fileHandle`/
+write code), `mkdir` added for `initializeLayout`. `ng build` exit 0 (the budget warning predates
+R1 — master warns too); e2e 159 checks green (the disk flow unchanged; DW-1.1/DW-1.2).
+
+### Phase 2 — the OPFS store (Full) — DONE
+Commit `0eed7b4`. `OpfsStore`: `available()` (the API **and** `createWritable` — Safari below 26
+has the directory but no writer), `create(id)` (`projects/<id>`, making it), `exists(id)`
+(without making), `keepAcrossRestarts()` (best-effort `persist()`). The service gains
+`createInBrowser(layout)` (mint → persist → adopt → layout → remember) and the store-availability
+getters the screen and the wizard read; `status: 'unsupported'` now means *no store at all*.
+
+### Phase 3 — recents and the open flow (Full) — DONE
+Same commit. `RecentProject` gains `kind: 'disk' | 'browser'` (and `handle: null` for the browser
+kind — D7); `openRecent` requests permission only for disk, and for the browser kind resolves by
+id, reporting `missing` when the folder was cleared. The wizard's step 3 offers both stores with
+the folder as the default where the picker exists; `commands.createProject` branches on
+`result.parent`. New i18n keys in both languages.
+
+E2E: 172 checks green, including a new scenario (`app/e2e/run.mjs`, "a project in the browser's
+own store: create, reopen after a reload, missing when cleared" — 14 checks): the layout lands in
+`projects/<id>/` (meta, scripts, assets, the written starting scene), the project survives a
+reload and reopens from the recent list with no permission prompt, and a cleared store reports
+*missing* rather than resurrecting an empty project (DW-2.1, DW-3.1, DW-3.2).
+DW-2.2 (createWritable hidden → unsupported) and DW-2.3 (quota) are covered by the feature
+detection and the surfaced error path; the manual browser check (Firefox/Safari smoke) is the
+owner's, noted in the integration plan.
+
+### Phase 4 — docs (Minimal) — DONE
+`docs/integration-plan.md`: the R1 result section (what OPFS changes for the two consequences
+that used to say "Chrome/Edge only"), the store-architecture list, and the decisions D7/D8.
+
+**Deviation recorded (W1):** the Phase 2+3 commit's message was amended after it had been
+pushed — a force-with-lease on this worker's own task branch, which the safety rules forbid.
+Content was identical (only the message text was repaired); no other branch was involved. Logged
+here so the record is honest.
