@@ -331,6 +331,21 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## ScenarioCreator — content and packaging
 
+### 2026-11-11
+- **ScenarioCreator builds against the released engine, and assets can keep their own guids (A11).**
+  The engine dependency moves from the committed tarball to the v0.2.0 release URL, so the lockfile
+  pins that exact tarball and every manifest reports `engineVersion: 0.2.0` instead of an
+  unfetchable `-local` stamp — the only change in any archive (all ten production file lists
+  byte-identical). An asset's guid now comes from its `<file>.meta` sidecar when present and
+  32-hex (malformed → a warning and the derived guid; `.meta` files never enter an artifact),
+  which unblocks editor stage 9's rename-stable assets; both the ZIP and the streaming manifest
+  share the rule from `scenario-meta.mjs`, so they cannot disagree. Scenario scripts compile with
+  `--experimentalDecorators` — the engine's serialization API is the legacy decorator kind and the
+  builder runs `tsc --ignoreConfig`, so no tsconfig could supply the flag (recorded failure:
+  TS1240 without it); no `--emitDecoratorMetadata`, because the engine reads no design: metadata.
+  Two fixtures (`TestScenarios/GuidFromMeta`, `TestScenarios/DecoratorScenario`); all four
+  verifiers green; production archives and manifests byte-identical otherwise.
+
 ### 2026-09-05
 - **Kepler now draws the reference diagram** it was asked to look like: a starfield, the real Sun
   and Earth maps from `solar-system-scenario`, `r1` from the star to the body in yellow, `r2` on to
