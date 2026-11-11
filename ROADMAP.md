@@ -65,7 +65,7 @@ production scenarios are re-published and pass the e2e.
 | A7 | Backfill engine `CHANGELOG.md` (E3/E5/E6/E7/E10/E13, 2026-09-10) | E | ½ d | A5 | `tasks/A7` | ⬜ |
 | B0 | Engine E1: the loader reads `entryScene` (+ SC writes it, `PLAN.md` §4.9) | E, SC | ½ d | — | `tasks/B-milestone-1` | ✅ `Scenario.run()` builds `entryScene` after `awake()` (ZIP + streaming), references preloaded; SC writes it from `scenario.meta.json`. Branch `B0-entry-scene`. The editor template must drop its manual load when B7 writes `entryScene`. |
 | A8 | Editor takes the new engine; opens files through the version check | Ed | 1 d | A4 | `tasks/A8` | ✅ 2026-11-10 — the editor takes engine `0.1.0-local.1794329867` (packed from engine master by hand, editor-only; tarball + lockfile committed) and opens scenes through the engine's version API (A4): a file this build cannot read gets the new `scene.tooNew` message (en/uk), a malformed one keeps `scene.invalid`, and a refusal leaves selection/history/scene untouched. All outside reads funnel through `_loadSceneText`. Writing unchanged (v1, expand). `grep 'version !== 1' app/src` empty; `ng build` exit 0; e2e 159 checks all green (142 pre-existing passed unchanged on the new engine + 17 new reader checks). Notes `code-foundations/A8/notes.md` |
-| A9 | Cut `v0.2.0` | E | ½ d | A5–A8, owner | `tasks/A9` | 🔒 decision #2 |
+| A9 | Cut `v0.2.0` | E | ½ d | A5–A8, owner | `tasks/A9` | ⬜ decision #2 delegated: yes, tag after A5–A8 are ✅ |
 | A10 | Platform on the release: URL dependency, `/engine/<version>/…` immutable, prefab v2 accepted | P | 1–2 d | A9 | `tasks/A10`, `PLAN.md` §2.8 | ⬜ |
 | A11 | ScenarioCreator on the release; `.meta` guids; `--experimentalDecorators` | SC | 1–2 d | A9 | `tasks/A11` | ⬜ |
 | M1.1 | Take the profiler out of `solar-system`; re-publish | SC | ½ h | A11 | `PLAN.md` §4.10 | ⬜ |
@@ -84,7 +84,8 @@ scenario, the catalog shows real covers, and the G2 diagnosis is confirmed and f
 | P5b | Deploy P5a to production, enable HTTPS, try one restore there | P | owner | P5a | `PLAN.md` §2.12 | ⬜ owner |
 | P6 | Catalog covers (`image_url` for the ten scenarios) | P | ½ d | — | `PLAN.md` §2.4 | ⬜ |
 | P7 | Confirm G2 (`liveTextures` vs `textures` in the streaming e2e) | P | ½ d | — | `PLAN.md` §2.1 | ✅ 2026-11-10 W2 — confirmed on the platform (streaming e2e, engine `0.1.0-local.1794342651370`): textures 20/20 (GPU uploads), estimatedTextureVramBytes 96.8 MB (ZIP) vs 273.8 MB (manifest) = 2.83× (live `Texture` objects), draw calls 27/27 — the diagnosis holds, redundant prefetch not a leak; SC-G2 unblocked. Engine bumped in virtual-lab/frontend (was 6 days stale); the frontend lock had to be re-pinned or the Docker build EINTEGRITYs onto a 2-week-old image with no sandboxed player. notes `code-foundations/P7/notes.md` |
-| SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ⬜ |
+| SC-G2 | Stop shipping redundant fallback textures / mark them `Lazy` | SC | ½ d | P7 | `PLAN.md` §4.2 | ✅ 2026-11-10 W2 — the six planets whose `.glb` loads (Mercury, Venus, Mars, Jupiter, Saturn, Moon) plus the unreferenced `saturn_ring.png` ship `Lazy` in solar-system's `streaming.priorities`; the ZIP path is untouched, so pixels are unchanged (streaming e2e: textures 20/20, draw calls 27/27) while the manifest path dropped 273.8 → 224.8 MB. The remaining 128 MB is ONE engine-side `Texture` (the retained skybox pano) — filed as E-G2a, not a content problem. notes `code-foundations/SC-G2/notes.md` |
+| E-G2a | The streaming prefetch retains a full-size `Texture` for an asset the host consumes via `Resources.getUrl` + `Cubemap.fromEquirectangular`: `skybox/stars_panorama.jpg` is 8192×4096 (128 MB live on the manifest path, absent on the ZIP path) — G2's remaining excess. Engine fix: release the raw texture after the cubemap conversion, or make `getUrl` on a prefetched asset not materialize a `Texture2D` | E | ½ d | SC-G2 | — | ⬜ |
 | M2.1 | Run the eleven browser e2e specs with the editor override (`npx playwright install`) | P | ½ d | — | `PLAN.md` §2.7 | ⬜ |
 | M2.2 | Full virtual-lab checks on the engine tarball P7 committed (`frontend/WebEngineTS-0.1.0.tgz`, eb7f314): backend unit + Postgres suite (in `vl-db.lock`), `ng test`, the browser e2e — the platform's next deploy ships it, ahead of A10. Red → fix forward or restore the previous tarball, ATTENTION | P | ½ d | — | Claude review 2026-11-10 | ⬜ |
 | P3 | Brotli pre-compression of `.js`/`.wasm`/`.json` | P | ½ d | — | `tasks/E-growth` P3 | ⬜ |
@@ -105,7 +106,7 @@ key into a draft an admin accepts — no ScenarioCreator involved.
 | B5 | Scenarios on their own origin | P | — | — | `tasks/B` B5 | ✅ superseded by the sandboxed player (`PLAN.md` §2.9, 2026-10-27) — close the card |
 | B6 | Author publish keys + drafts an admin accepts (+ Opus security review) | P | ~1.5 w | P5a (HTTPS config) | `tasks/B` B6, `PLAN.md` §2.6 | 📐 plan ready (Claude, 2026-11-10): most of B6 already shipped in virtual-lab release 2 (93608dd); the plan hardens it — HTTPS guard, rotation/transfer, approve bound to version, BOLA sweep — `code-foundations/B6/plan.md`; owner questions #16–19 assumed at their recommendation |
 | B7 | Stage 10 — Build, Build And Run, Publish | Ed | ~2 w | B0, B4, B6, A8 | `tasks/B` B7 | ⬜ |
-| R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | 🔒 |
+| R1 | Project store outside Chromium (OPFS first) — decide before the first real authors | Ed | ~1–2 w | — | `tasks/E-growth` R1, decision #10 | ⬜ decision #10 delegated: OPFS first |
 | M3.1 | Retire ScenarioCreator as the authoring path (keeps KTX2, LOD, manifests) | SC | ½ d | B7 | `tasks/B` | ⬜ |
 
 ## M4 — Editor milestone 2: behaviour and Play, as in Unity *(~10–12 weeks)*
@@ -118,7 +119,7 @@ Play inside the editor, and the published scenario behaves the same on the platf
 | C1 | Stage 11 — dockable windows, tabs, layouts | Ed | ~1.5 w | M3 | `tasks/C` C1 | ⬜ |
 | C2 | Engine E2 — edit mode (`@ExecuteInEditMode`) | E | 3–5 d (Opus design) | — | `tasks/C` C2 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/C2/plan.md` — process-wide mode flag, `@ExecuteAlways`/`@ExecuteInEditMode`, `Application.enterEditMode/enterPlayMode/updateEditMode`; note for C5: Play must reload the scene |
 | C3 | Engine E4 — type registry accepts a replacement class | E | 1–2 d | — | `tasks/C` C3 | ⬜ |
-| C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | 🔒 decision #7 |
+| C4 | Stage 12 — scripts + the starter library of ten behaviours | Ed | ~3.5 w | C2, C3 | `tasks/C` C4 | ⬜ decision #7 delegated: the list in the C4 card |
 | C5 | Stage 13 — Play and Game view (spike first) | Ed | ~2.5 w | C4 | `tasks/C` C5 | ⬜ |
 | C6 | Engine E8 — `RenderTexture` (camera into a target); optional for M4 | E | 2–3 w (Opus design) | — | `tasks/C` C6, `PLAN.md` §1.3 | 📐 plan ready (Claude, 2026-11-10): `code-foundations/C6/plan.md` — RenderTexture extends Texture over a WebGLRenderTarget, engine-typed backend calls only (no second GPU path), target cameras by depth before the screen camera; shares Application.ts with C2 (second to merge syncs first) |
 
