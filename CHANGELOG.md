@@ -15,6 +15,13 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-11-12
+
+- **`v0.3.0` released** — `TypeRegistry.replace` (C3) and `Application.dispose()` resetting `Time` (G5).
+  Cut by hand on the owner's request: GitHub Actions were switched off the same day (no billable
+  GitHub features), so `release.yml`'s steps ran locally and the release was created through the
+  API with all six assets. Consumers still pin `v0.2.0` until A10b.
+
 ### 2026-11-10
 - **`Prefab.revert` no longer wakes a fresh instance as a scene root (M0.2f).** Reverting a top-level
   instance that sits under a parent rebuilt it with `instantiate()` into the scene — where it woke
