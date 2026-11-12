@@ -200,10 +200,10 @@ before any scene exists (lazy default scene, no throw).
 - OUT: new features.
 
 **Done when:**
-- [ ] DW-5.1: every reviewer finding is either fixed with a regression test or recorded in the notes with why it is not a defect.
-- [ ] DW-5.2: base-vs-branch play-mode callback logs identical (command and diff output in the notes).
-- [ ] DW-5.3: bench table (before/after, rounds) in the notes; median difference within the noise band M0.3a recorded.
-- [ ] DW-5.4: `npm run typecheck`, `npm test`, `npm run build` exit 0; `test result` counts in the notes.
+- [x] DW-5.1: every reviewer finding is either fixed with a regression test or recorded in the notes with why it is not a defect. (9 findings: 4 fixed, 5 recorded — the table in `notes.md`)
+- [x] DW-5.2: base-vs-branch play-mode callback logs identical (command and diff output in the notes). (89 lines, SHA256 `ff3e655b…` on both)
+- [x] DW-5.3: bench table (before/after, rounds) in the notes; median difference within the noise band M0.3a recorded. (this machine's band is ±25% — the gate-free Phase 1 measured 0.74–0.97 of the base — so no regression is demonstrable here; recorded with the follow-up)
+- [x] DW-5.4: `npm run typecheck`, `npm test`, `npm run build` exit 0; `test result` counts in the notes. (177 files / 2922 tests)
 
 ### Phase 6: Docs and roadmap
 **Skills:** code-foundations:code-clarity-and-docs
@@ -215,9 +215,9 @@ before any scene exists (lazy default scene, no throw).
 **Goal:** the change is recorded where C4/C5 and the owner look.
 
 **Done when:**
-- [ ] DW-6.1: engine CHANGELOG *Added* (`@ExecuteAlways`, `@ExecuteInEditMode`, `Application.enterEditMode/enterPlayMode/updateEditMode`, Cinemachine `@ExecuteAlways`) and *Changed* (static `Application.isPlaying` now Unity's meaning; `Scenario.run` refuses edit mode). No measured number changes (say so).
-- [ ] DW-6.2: C5 note in `tasks/C-milestone-2.md`: "Play must use the reload flow of `code-foundations/C2/research.md` D6 — `loadScenarioFromBuffer` destroys every loaded scene, and registries span scenes"; C4 note: `OnValidate` not provided (research D9).
-- [ ] DW-6.3: ROADMAP C2 row → `✅ <date> W<n>` + what landed; `notes.md` with the build notes, DW-1.1 grep, DW-5.2/5.3 evidence.
+- [x] DW-6.1: engine CHANGELOG *Added* (`@ExecuteAlways`, `@ExecuteInEditMode`, `Application.enterEditMode/enterPlayMode/updateEditMode`, Cinemachine `@ExecuteAlways`) and *Changed* (static `Application.isPlaying` now Unity's meaning; `Scenario.run` refuses edit mode). No measured number changes (say so).
+- [x] DW-6.2: C5 note in `tasks/C-milestone-2.md`: "Play must use the reload flow of `code-foundations/C2/research.md` D6 — `loadScenarioFromBuffer` destroys every loaded scene, and registries span scenes"; C4 note: `OnValidate` not provided (research D9).
+- [x] DW-6.3: ROADMAP C2 row → `✅ <date> W<n>` + what landed; `notes.md` with the build notes, DW-1.1 grep, DW-5.2/5.3 evidence.
 
 ---
 ## Test Coverage
@@ -272,3 +272,7 @@ _Filled by /code-foundations-build — one row per decision an agent made or que
 |---|---|---|
 | 1 | done (`5f8f86c`) | `_PlayMode.ts` (leaf), static `isPlaying` + idempotent switches, both decorators + `_executesInEditMode`, exports; 7 tests. |
 | 2 | done (`340bea9`) | Gate in `ScriptableBehaviour`: cached opt-in, one `_lifecycleAllowed()` predicate, four early returns; `GameObject` untouched (verified). 11 tests in `tests/EditModeLoad.test.ts`. Full suite 173 files / 2894 tests green; `npm run typecheck` and `npm run build` clean. |
+| 3 | done (`bbe433a`) | `GameObject`/`Scene._wakeForPlay()` + the pass in `enterPlayMode` (TODO removed); `Scenario.run` guard on the leaf module; both Cinemachine classes `@ExecuteAlways`. 10 tests. Full suite 174 files / 2904 tests green. |
+| 4 | done (`01be3eb`) | `Application.updateEditMode`: clamped delta, scene update/lateUpdate, destroy sweep, layout, LOD, LineRenderer; throws in play; lazy scene OK. 5 tests. Full suite 175 files / 2909 tests green. |
+| 5 | done (`cbfda31`) | Independent adversarial review: 4 defects fixed (silent half-woken pass, play-mode switch inside an edit frame, raw `dt` to the destroy sweep, re-read `activeScene`), 5 findings recorded with reasons. Bench inconclusive on this machine (±25% band); base-vs-branch play logs identical (SHA256 `ff3e655b…`). 13 tests. Full suite 177 files / 2922 tests green. |
+| 6 | done (this commit) | Engine `CHANGELOG.md` Added/Changed/Fixed; ROADMAP row ✅; C5 and C4 notes in `tasks/C-milestone-2.md`; `code-foundations/C2/notes.md`. |

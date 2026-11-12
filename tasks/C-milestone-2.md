@@ -27,6 +27,24 @@ In the editor, `awake/start/update` of user scripts must not run on an object ju
   Behaviour added in edit mode gets no `awake`; switching to play runs `awake → onEnable → start`;
   `@ExecuteInEditMode` gets them in edit mode.
 
+**Status: done (W1, 2026-11-12)** — merged into `WebEngineTS` `master`. What landed: a process-wide mode
+(`_PlayMode`), static `Application.isPlaying` in Unity's sense, `enterEditMode()` / `enterPlayMode()` /
+`updateEditMode(dt)`, `@ExecuteAlways` / `@ExecuteInEditMode` (own class, not inherited), the gate inside
+`ScriptableBehaviour`'s four lifecycle entries, the load-order wake pass on `enterPlayMode`, and
+`CinemachineBrain` / `CinemachineVirtualCamera` opted in. Build notes, the DW list and the evidence are in
+`code-foundations/C2/notes.md`; the design decisions in `code-foundations/C2/research.md`.
+
+**Input from C2 for C5 (Play)**: Play must use the reload flow of `code-foundations/C2/research.md` D6 —
+`loadScenarioFromBuffer` destroys every loaded scene, and registries span scenes; save `serializeScene`,
+clear, `enterPlayMode()`, then deserialize (Stop: unload/clear, `enterEditMode()`, deserialize the
+snapshot). The in-place wake pass exists for the card's test and for simple hosts, but an in-place Stop
+leaves the edit world with play-mode state, which is what "a value changed during play is gone after Stop"
+rules out. Drive the editor's own frames with `updateEditMode(dt)`.
+
+**Input from C2 for C4 (Code)**: no `OnValidate` hook is provided (research D9). A script that wants to
+react to an inspector edit must either poll in `update` under `@ExecuteAlways` or call into the editor
+directly; adding `OnValidate` is a separate row if the editor needs it.
+
 ## C3 — Engine E4: the type registry accepts a replacement class *(engine; Sonnet; 1–2 days)*
 Script reload registers a new constructor under the same `typeName`; `TypeRegistry.register` refuses a
 different constructor today (it guards against accidental collisions). Add an explicit
