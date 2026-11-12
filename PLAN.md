@@ -90,11 +90,17 @@ Build and Publish expand them, so archives keep carrying version 1 (as Unity's p
 prefab links). Prefab files a script instantiates at run time are still version 2, which is why the
 platform needs the version-2 reader anyway.
 
-### 1.3 `RenderTexture` *(~2–3 days)*
+### 1.3 `RenderTexture` *(~2–3 days) — **shipped as C6, 2026-11-12***
 The one genuinely missing Unity primitive for this domain (`NavMesh`, `Terrain`, `Tilemap` are
 irrelevant; `CharacterController` is marginal). Unlocks the editor viewport, picture-in-picture,
 minimaps and cheaper post-processing. The editor now asks for it as E8 (§1.5): rendering an
 arbitrary camera into a target, for a Scene view drawn by the engine and for camera previews.
+
+Shipped: `RenderTexture` owns a `THREE.WebGLRenderTarget` the way `Texture` owns a `THREE.Texture`
+(D1 — **no backend handle**, so §1.4's stage 1 still has exactly one way to reach the GPU), the
+frame seam gained `renderScene(..., target)` and `readPixels`, and a target is not an asset in this
+release (C6r5). The follow-ups are the research's list: screen stacking, `cullingMask`, per-camera
+LOD and post, an RT asset, live UI, async readback, and `createQuad`'s winding.
 
 ### 1.4 Adapter generalization, stages 1–4 *(weeks)*
 `design/render-adapter-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/render-adapter-plan.md`). Stage 0 is done. Stage 1 (resource handles) is the
@@ -104,9 +110,10 @@ start failing for whichever objects took the new path.
 
 ### 1.5 What the editor needs from the engine
 **Implemented 2026-10-10..13, waiting on §1.2 to reach anyone:** E3, E5, E6, E7, E10, E11, E13.
-**Open:** E2 (edit mode, 3–5 days), E4 (replace a registered class, 1–2
-days), E8 (render target, 2–3 weeks), E9 (gizmos), E12 (animator assets). The list below is the
-original order, kept for its reasons. The editor's plan (`WebEngineTSEditor/docs/unity-editor-plan.md` §4) lists thirteen asks, E1–E13,
+**Implemented 2026-11-12 (C6): E8 — render a camera into a target** (`RenderTexture`,
+`Camera.targetTexture`, `Camera.render()`, `Texture2D.readPixels`). **Open:** E9 (gizmos),
+E12 (animator assets); E2 and E4 landed earlier. The list below is the original order, kept for
+its reasons. The editor's plan (`WebEngineTSEditor/docs/unity-editor-plan.md` §4) lists thirteen asks, E1–E13,
 each with the Unity behaviour it blocks and the evidence it was checked against. In the order the
 editor reaches them:
 
@@ -120,6 +127,7 @@ editor reaches them:
 4. **E2 — edit mode** (script lifecycle does not run; `@ExecuteInEditMode` opts in) and **E4 — the
    type registry accepts a replacement class.** Together they are script reloading and Play.
 5. **E8 — render a camera into a target** (§1.3). 2–3 weeks; improves Play, does not block it.
+   **Done 2026-11-12 (C6, `✅`)** — see §1.3.
 6. **E10** render settings saved with the scene, **E11** prefab identity and instance links,
    (**E1**, the loader reading `entryScene`, landed in B0). Later: E9, E12, E13.
 

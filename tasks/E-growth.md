@@ -79,7 +79,10 @@ after the `KHR_physics_rigid_bodies` / `KHR_collision_shapes` drafts. Avoid Jolt
 (needs cross-origin isolation, impossible inside an LMS iframe).
 
 **N4 — Render adapter stage 1 → WebGPU** *(Opus; weeks)* `design/render-adapter-plan.md` (deleted in `a3fe342`, read it with `git show a3fe342^:design/render-adapter-plan.md`) stage 1
-(resource handles) done whole, never in fragments. Then `WebGPURenderer` (it falls back to WebGL2 by
+(resource handles) done whole, never in fragments. **C6 (2026-11-12) added one resource to convert with the
+others:** `RenderTexture` owns a `THREE.WebGLRenderTarget` exactly the way `Texture` owns a `THREE.Texture` and
+`Cubemap` a `THREE.CubeTexture` — the colour texture *is* the base `_internalThreeTexture`, and no backend handle
+type was introduced, so stage 1 has exactly one way to reach the GPU to replace. Then `WebGPURenderer` (it falls back to WebGL2 by
 itself): port every `ShaderMaterial`, `onBeforeCompile` and post-processing pass to TSL; pin three's
 version (its WebGPU API breaks almost every release). WebGL2 stays the default until WebGPU covers the
 students' devices (missing on most Linux, Firefox Android, Intel Macs).
