@@ -48,8 +48,10 @@ already merged elsewhere), so the note and the two corrected consequences now la
   is pre-existing).
 - **The e2e suite** (`E2E_PLAYWRIGHT_DIR=<virtual-lab e2e> E2E_BROWSER_CHANNEL=chromium`, the build served
   by `python3 -m http.server` on 8043 because 8044 belongs to the platform's catalog):
-  **234 checks green (exit 0)**; the same suite on `origin/master` (a detached build in this worktree) is **215**,
-  so this task added 19 — the three scenarios' 7 + 4 + 8 checks.
+  **234 checks green (exit 0)** on the branch as built; the same suite on `origin/master` (a detached build in this
+  worktree) is **215**, so this task added 19 — the three scenarios' 7 + 4 + 8 checks. After merging `origin/master`
+  (B1's navigation and orientation-cube scenarios landed meanwhile) the same run is **274 checks green (exit 0)**, which
+  is the number `README.md` records.
   The three new scenarios: the quota one 8/8, the no-store one 4/4, the no-writer one 7/7 (all three also
   run green in isolation through `ONLY=`).
 - **DW-1.1's second half** (each test fails when its gate is removed): the no-writer scenario was run once
