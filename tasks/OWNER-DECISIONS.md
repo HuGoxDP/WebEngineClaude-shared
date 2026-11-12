@@ -30,6 +30,9 @@ waits on it can proceed.
 | 22 | N3: default physics backend | **cannon-es until the in-engine re-measurement passes, then Rapier**; cannon kept one more release | N3 | **As recommended** — delegated (2026-11-11) |
 | 23 | N3: add `'wasm-unsafe-eval'` to the editor's CSP so it can step Rapier | **Yes, only when the editor adopts Rapier** (a virtual-lab follow-up row) | N3 | **Yes, when needed** — delegated (2026-11-11) |
 | 24 | P6: where do the ten catalog covers come from? (W1 parked P6 on it; filed on its branch as #21, renumbered — #21–23 are N3's) | **(b) A worker generates one cover per scenario from its own assets** (skybox or largest texture, downscaled to the preview limit) and uploads it through `POST /api/scenarios/:id/preview`; no off-origin URLs | P6 | **(b)** — delegated (2026-11-11) |
+| 25 | V2: `LineRenderer.useWorldSpace` default | **`true`**, Unity's default and already the engine's (`LineRenderer.ts:148`) — no change | V2 | **`true`** — delegated (2026-11-11) |
+| 26 | V3: AtomStructure scope — ~36 of 118 elements today | **All 118**, from a cited public source, with a completeness test | V3 | **All 118** — delegated (2026-11-11) |
+| 27 | R9: collect performance telemetry from the platform? | **Yes, minimal and anonymous**: per-session aggregates only (scenario, engine version, first-frame time, frame-time percentiles, a coarse GPU class), no account, no IP, no free-form strings, bounded retention — it also answers decision #4 (real student hardware) without a lab | R9, V4 | **Yes, minimal and anonymous** — delegated (2026-11-11) |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a
