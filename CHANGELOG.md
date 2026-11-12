@@ -206,6 +206,44 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+### 2026-11-12
+- **Author publish keys and drafts an admin accepts (B6).** Most of the card's surface already
+  shipped as "Nocturne release 2"; this task hardened it and finished it. What landed:
+  - keys are `vlk_` + 32 random bytes (base64url, 43 chars) and only their SHA-256 is stored;
+    the bootstrap comparison hashes both sides to fixed 32-byte digests, so it no longer
+    branches on the expected token's length; a start-up warning names an `ADMIN_TOKEN` shorter
+    than 32 characters (the value is never printed);
+  - `REQUIRE_HTTPS=true` refuses a presented credential with `403 https_required` before
+    anything is resolved (nginx maps `X-Forwarded-Proto`, `docker-compose.https.yml` publishes
+    8443 and turns it on; everywhere else the switch is off, so today's behaviour is unchanged);
+  - `POST /api/keys/:id/rotate` — a new token, same label and role, one transaction that moves
+    every `scenarios.owner_key_id` and revokes the old key — and `PUT /api/scenarios/:id/owner`
+    for the one thing rotation cannot do: a moderator hands one scenario to another key without
+    orphaning it;
+  - an approve is bound to the version the moderator reviewed: the admin UI sends
+    `currentVersion.id` and a swap under it is a 409 `Архів змінився після перевірки` that
+    reloads the card instead of publishing unseen bytes (scripts that omit it keep today's
+    behaviour); the journal's era filter keeps a scenario's previous owner out of the new
+    owner's history; covers have their own per-key counter (`AUTHOR_PREVIEWS_PER_HOUR`, 30);
+  - `/admin` shows who owns each row, counts what a key owns, and rotates a key from the access
+    page with a one-time dialog; sign-in is refused outside a secure context.
+  - **Security suite**, per the card's review focus: the §7 rights table as one `describe` per
+    row (every "Ні" cell asserted with the status and the database untouched), a BOLA sweep that
+    enumerates Express's own stack (26 `:id` routes) so a future route cannot forget the owner
+    check, the alias fields an author may and may not send, and a `console.*` capture over a
+    whole key life cycle that fails if a token or its SHA-256 is written.
+  - **Adversarial review** (`.claude-shared/code-foundations/B6/security-review.md`): one medium
+    finding — a key revoked while a request was in flight still wrote (a 31 MB upload landed
+    71 s after the revocation, because the principal was resolved once at the start of the
+    request and write routes re-checked only ownership). Fixed: `auth.requireLiveKey` re-reads
+    the key row, locked, as the first statement of every write transaction, and the archive
+    route also reads it unlocked before the store commits bytes. Three low findings became
+    follow-up rows.
+  - Checks, one green run: backend **1658/1658** (fail 0, skipped 0), frontend **770/770**
+    plus `ng build` and `check:csp`, e2e `admin-moderation admin-workflow draft-preview` **20
+    passed**. Docs: `docs/publish-api.md` is the author contract for the editor's Publish (B7);
+    `docs/privacy.md` states the journal's retention as assumed.
+
 ### 2026-11-11 (platform, later)
 - **The browser e2e runs, with the editor in the stack (M2.1).** The suite that could not run
   without a Playwright browser now runs end to end against `docker compose -f docker-compose.yml
