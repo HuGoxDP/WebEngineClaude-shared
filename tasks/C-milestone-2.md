@@ -75,6 +75,17 @@ viewport; write the result into the editor plan.
 applies at once and is gone after Stop; the edit-mode scene is byte-identical after Stop.
 
 ## C6 — Engine E8: render a camera into a target (`RenderTexture`) *(engine; Opus design + Sonnet; 2–3 weeks; optional for milestone 2)*
+
+**Status: delivered 2026-11-12 (W3).** `RenderTexture` extends `Texture` and owns a
+`THREE.WebGLRenderTarget` the way `Texture` owns a `THREE.Texture` — decision D1, so no second way to reach
+the GPU exists and N4's stage 1 converts it with the other resources. Delivered: the resource with a lazy GPU
+image and an immutable descriptor; `Camera.targetTexture` + `Camera.render()` + the loop's target pass before
+the screen camera; `Texture2D.readPixels` through `RenderTexture.active`; the material colour slots widened;
+targets counted in the memory report's render-target figure. Public API in Unity's shape, engine types only.
+Frame order and pixels for content without a target are unchanged (byte-identical to `06aeaf5` in a
+screenshot pair). 8 phases, 10 commits; `npm run typecheck`, `npm test` (2999) and `npm run build` green.
+Notes and the screenshot table: `code-foundations/C6/notes.md`. The research's follow-ups are the roadmap
+rows C6r1–C6r8.
 Unlocks drawing the editor's Scene view through the engine (so lines, particles, UI, LOD and
 post-processing appear in Scene), camera previews, asset thumbnails. Public API in Unity's shape
 (`RenderTexture`, `Camera.targetTexture`), engine types only (no `THREE` in signatures); the Three.js
