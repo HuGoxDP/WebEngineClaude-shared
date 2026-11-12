@@ -153,6 +153,12 @@ and attaches it (D5).
 - DW-5.3: the repo's own Stage 12 box and the test plan are updated; the ROADMAP row is ✅ with the
   library list this task ships.
 
+## Execution Log
+
+| Phase | Result | Notes |
+|---|---|---|
+| 1 | done (`eaab306`, `WebEngineTSEditor/C4-editor-scripts-and-library`) | Monaco in a lazy chunk (initial bundle +10 kB, inside the existing budget warning); the editor API rather than the `monaco-editor` entry, because the full entry pulls the codicon CSS and its `.ttf`, which this build has no loader for; the two Monarch grammars imported by specifier (a relative path 404s, chunks are served from `/editor/`); the file is opened before the tab switches, so the panel mounts once in `ngAfterViewInit`; the workspace routes a double-click by kind and the scene's dirty guard never applies to a script. e2e: 11 checks in a new scenario, the full suite green apart from the known "one tab per project" menu-click flake (passes in isolation, passes in the R1r runs). DW-1.3 (the import map) moved to Phase 2: the map must point `"WebEngineTS"` at a bundle the app also imports, which needs the D4 tarball bump. |
+
 ## Ordering note
 Phases are strictly serial: each builds the surface the next one drives (a tab, then a module pipeline, then
 diagnostics, then content). Phase 1 is the only one that lands nothing a user would call a script feature —
