@@ -109,21 +109,6 @@ Before any author key or login exists, a teacher's script must not run on the AP
   from inside the player gets nothing from the platform origin; every published scenario still runs.
 
 ## B6 — Platform: author publish keys and drafts *(virtual-lab; Sonnet + Opus security review; ~1 week + 3–4 days)*
-
-**Status: delivered 2026-11-12 (W3).** The §7 rights table stands as specified, and the card's
-review focus was tested and adversarially reviewed — but the schema the card names was already
-superseded before this task started: **migration `006` was replaced by `009`** (`publish_keys`
-with `role`, `audit_events`; keys as SHA-256 only) **and `pending_archive_sha256` by `010`/`013`**
-(a pending draft is a `scenario_versions` row in `state='pending'`, accepted by
-`POST /api/scenarios/:id/versions/:vid/accept`), so what shipped is "same rights, different
-code": Nocturne release 2 (`93608dd`) delivered the keys, drafts and accept/reject; this task
-(`B6-platform-publish-keys-harden`, virtual-lab `b87104e`) hardened and finished them — `vlk_`
-tokens with a constant-time bootstrap compare, `REQUIRE_HTTPS` + the nginx map + 8443, key
-rotation and scenario transfer, an approve bound to the reviewed version, the journal's era
-filter, a per-key cover limit, ownership in the list and a rotate action in `/admin`, and the
-security suite (rights table / BOLA sweep / escalation / logs). Review's one medium finding is
-fixed. Follow-ups: B6r1–B6r3. `code-foundations/B6/security-review.md`,
-`docs/publish-api.md` for B7.
 Exactly as `unity-editor-plan.md` §7 specifies: migration `006` (`publish_keys` with `token_hash`
 SHA-256, `label`, `created_at`, `last_used_at`, `revoked_at`; `scenarios.owner_key_id`;
 `pending_archive_sha256` + author/time/size/engine version), the rights table (author key: create
