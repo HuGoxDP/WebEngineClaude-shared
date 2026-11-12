@@ -104,12 +104,12 @@ edit, then destroyed (gets `onDisable` + `onDestroy` — pairing); `isolateCallb
 unaffected; built-in `Behaviour` in edit mode still gets `onAwake`/`onEnable`.
 
 **Done when:**
-- [ ] DW-2.1: test (card): in edit mode `addComponent(Logger)` on an active object → log empty; `update` via `scene._update()` → log empty.
-- [ ] DW-2.2: test: edit-mode `deserializeScene`, `EngineObject.Instantiate`, `Prefab.instantiate` and a link-mode instance with a script → no script callback; fields and references are restored (same values as a play-mode load).
-- [ ] DW-2.3: test: `@ExecuteAlways` logger in edit mode → `awake, onEnable` at add, `start, update` on `scene._update()`, `lateUpdate` on `scene._lateUpdate()`, nothing on `scene._fixedUpdate()`, `onDisable, onDestroy` on `destroyImmediate`; same for `@ExecuteInEditMode`.
-- [ ] DW-2.4: test: in edit mode Camera, DirectionalLight, MeshRenderer, Canvas+UIImage, HorizontalLayoutGroup, LODGroup, BoxCollider added → each is in its registry exactly as in play mode (compare registry membership both modes).
-- [ ] DW-2.5: test: the pairing cases above (never-woken destroyed → no `onDisable`/`onDestroy`; play-woken then edit-destroyed → both).
-- [ ] DW-2.6: full suite green with no existing test changed.
+- [x] DW-2.1: test (card): in edit mode `addComponent(Logger)` on an active object → log empty; `update` via `scene._update()` → log empty. (`EditModeLoad.test.ts` — "a script added to an active object runs nothing, and neither does a frame")
+- [x] DW-2.2: test: edit-mode `deserializeScene`, `EngineObject.Instantiate`, `Prefab.instantiate` and a link-mode instance with a script → no script callback; fields and references are restored (same values as a play-mode load). (four tests: plain scene load, instantiate + prefab instance, link-mode instance with `count`/`target` restored)
+- [x] DW-2.3: test: `@ExecuteAlways` logger in edit mode → `awake, onEnable` at add, `start, update` on `scene._update()`, `lateUpdate` on `scene._lateUpdate()`, nothing on `scene._fixedUpdate()`, `onDisable, onDestroy` on `destroyImmediate`; same for `@ExecuteInEditMode`. ("an opted-in script runs the whole lifecycle in edit mode — never fixedUpdate", "@ExecuteInEditMode opts in exactly as @ExecuteAlways does", plus the prefab-instance variant)
+- [x] DW-2.4: test: in edit mode Camera, DirectionalLight, MeshRenderer, Canvas+UIImage, HorizontalLayoutGroup, LODGroup, BoxCollider added → each is in its registry exactly as in play mode (compare registry membership both modes). ("the built-ins register in edit mode exactly as they do in play")
+- [x] DW-2.5: test: the pairing cases above (never-woken destroyed → no `onDisable`/`onDestroy`; play-woken then edit-destroyed → both). (both tests, plus `enabled = false` both modes)
+- [x] DW-2.6: full suite green with no existing test changed. (173 files / 2894 tests green, typecheck and build clean)
 
 ### Phase 3: Transitions — wake pass on `enterPlayMode`, Scenario guard, Cinemachine
 **Skills:** code-foundations:cc-defensive-programming
@@ -262,6 +262,13 @@ before any scene exists (lazy default scene, no throw).
 ## Decided During Build
 _Filled by /code-foundations-build — one row per decision an agent made or question it raised:_
 | # | Phase | Decision or question | Source | Status |
----
+|---|---|---|---|---|
+| 1 | 2 | `GameObject._awakeComponent` / `_runDeferredAwakes` need no change: verified both funnel through `ScriptableBehaviour._systemAwake` / `_onEnabledChanged`, which the gate covers. The plan's fallback (gate the bypassing route) was not needed. | plan scope, Phase 2 | done |
+| 2 | 2 | A link-mode save only states version 2 when the scene really holds a prefab link, so DW-2.2's link case binds a guid (`AssetDatabase._bindGuid`) and instantiates a real prefab rather than saving plain objects with `prefabs: "link"`. | DW-2.2 | done |
+| 3 | 2 | Editing out of edit mode is *not* asserted by a test: no wake pass exists until Phase 3, so a script added while gated must not be observed waking. Phase 3 owns DW-3.x. | plan OUT line | done |
+
 ## Execution Log
-_To be filled during /code-foundations-build_
+| Phase | Result | Notes |
+|---|---|---|
+| 1 | done (`5f8f86c`) | `_PlayMode.ts` (leaf), static `isPlaying` + idempotent switches, both decorators + `_executesInEditMode`, exports; 7 tests. |
+| 2 | done (`340bea9`) | Gate in `ScriptableBehaviour`: cached opt-in, one `_lifecycleAllowed()` predicate, four early returns; `GameObject` untouched (verified). 11 tests in `tests/EditModeLoad.test.ts`. Full suite 173 files / 2894 tests green; `npm run typecheck` and `npm run build` clean. |
