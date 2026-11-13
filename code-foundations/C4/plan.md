@@ -161,6 +161,8 @@ and attaches it (D5).
 
 | 2 | done (`2acf332` engine, `795763f` runtime) | The engine bump first, gated on the whole e2e (285 green). Then the runtime: Babel transpile (`ESNext`, legacy decorators), the engine's own pre-link rules over Blob URLs, `import()` + `register`/`replace`, and the scene loaded **after** the scripts. The import map gives one engine instance and one three; the initial bundle falls from 1.87 MB to 480 kB. New e2e scenario (10 checks) green. Three deviations from the plan, recorded in the notes (D3 becomes Babel; DW-1.3 lands here; DW-2.3 moves to phase 5). |
 
+| 3 | done (`59bb0d3`) | `ConsoleService.push` with a jump target, the Console row's click-through to the Code tab (via a `showRequest` signal), Babel's `loc` reported as a diagnostic, a module that fails to transpile left out of the link so the loaded class survives, `MissingComponent` surfaced (title from `originalType`, its `originalFields` read-only, the inspector's filter admits it) and the scene rebuilt through `SceneService.loadFromJSON` so the panels refresh. Two scenarios, 12 checks. Full suite 319/327 with every failing scenario passing in isolation — load flakiness; the merge waits for a quiet run. |
+
 ## Ordering note
 Phases are strictly serial: each builds the surface the next one drives (a tab, then a module pipeline, then
 diagnostics, then content). Phase 1 is the only one that lands nothing a user would call a script feature —

@@ -88,3 +88,44 @@ is no zone abstraction — D1), a double-click routed by kind, i18n in both lang
 - 3.4 MB of vendored engine/three files in `src/assets/engine/`. The alternative (the self-contained
   standalone bundle) brings back two copies of three, which is a warning today and an `instanceof` trap
   tomorrow.
+
+## Phase 3 — diagnostics, jump-to-line, and "Missing script" (`59bb0d3`)
+
+### The bug the tests caught (and it was mine)
+
+My first rebuild *replaced the world by hand* — serialize the live scene, destroy every root,
+deserialize — and the panels were never told: the hierarchy kept rendering the destroyed objects, and a
+click on such a row selected one whose components were already gone, so the Inspector showed a bare
+Transform. `SceneService.loadFromJSON` is the editor's own "replace the world" operation (clear +
+deserialize + `_refresh`), and using it fixed the whole class of bug. The lesson: a runtime that rebuilds
+the world must go through the editor's own mutation API, not around it.
+
+### The other findings, and how each was closed
+
+- `console.error` cannot report a *script* diagnostic: the source it derives is a call-stack frame, which
+  for a transpile error points at this service. `ConsoleService.push(entry)` takes the file and line with
+  the message, and the row's `source` becomes a button.
+- The Code tab has to be *shown* by a click in the Console panel, which cannot reach the workspace. A
+  `showRequest` signal on `CodeEditorService` plus an effect in the workspace does it — the effect is
+  signal-driven (no DOM), which is the rule C4's Phase 1 established after an effect-driven mount crashed
+  the renderer.
+- Babel's `loc` is on the thrown error; the message carries the same location as
+  `…/file.ts: Unexpected token (3:6)`, so the row shows the human-readable one.
+- A module that fails to transpile is left out of the link entirely — the class the project already loaded
+  stays registered, which is the whole of DW-3.1's "a broken script never breaks the scene".
+- `MissingComponent` was invisible: the inspector's filter (`TypeRegistry.getTypeName(c) !== null`) dropped
+  it precisely because it is the placeholder for a name the registry has *no* entry for. It now carries
+  `.originalType` as its title, a "Missing script" tag, and its `.originalFields` as read-only rows.
+
+### Checks
+
+The two scenarios are 12 checks green: the Console names the file and the line; the row is clickable and
+opens the file at that line; the component survives the broken save with its saved value and the scene file
+is untouched; the placeholder is titled, marked, shown read-only and saves back unchanged.
+
+The full suite: **319 of 327**, with the 8 failures in five scenarios that pass in isolation every time and
+whose signatures change between runs (30 s timeouts on `.work` and on a hierarchy row, "Unexpected end of
+JSON input", a `page.goto` connection refusal when the static server died between runs). This machine runs
+three workers, Docker and my own browser runs; the same suite was 285 green earlier in this task's life on
+a quieter machine. Per the Debug rule the merge waits for one fully green run, so Phase 3 stays on the task
+branch.
