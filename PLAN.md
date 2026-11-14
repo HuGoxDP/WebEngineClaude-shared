@@ -241,8 +241,9 @@ editor.** Stages 0–5 are done (`CHANGELOG.md`). The plan, with a parity table 
 2. **Stop shipping redundant fallback textures, or mark them `Lazy`** — the cause of G2. Every
    solar-system planet declares a `.glb` *and* a loose albedo, and the streamed path decodes both
    because prefetch covers everything not marked `Lazy`. See `ENGINE-GAPS.md` G2.
-3. **The LOD-variant VRAM claim is unmeasured** — texture variants shipped, the saving was never
-   measured.
+3. **The LOD-variant VRAM claim — measured 2026-11-14 (ROADMAP V4)** on an RTX 3050 and an Intel UHD: capping
+   solar-system at 1024 cuts its GPU memory 88% / 83%, ~96% of it the 8192×4096 skybox, which the engine's estimate
+   misses. Rows E-V4a, SC-V4a; `code-foundations/V4/notes.md`.
 4. **Open question: where hashed objects live** — a directory beside the archive, or
    content-addressed storage. Needs a decision before streaming ships.
 5. **Re-check the ten scenarios after the handedness fix** — the content half of §1.1.
