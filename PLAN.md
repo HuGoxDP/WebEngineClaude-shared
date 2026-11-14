@@ -42,7 +42,7 @@ The consumer with real users is the platform. **What the editor is for was decid
 (§3): teachers author scenarios on the site, in an editor that looks and works like Unity's. That
 makes editor-justified engine work a real requirement rather than a guess — the list is §1.5.
 
-**Two items need a human, not an agent:** the visual scenario pass (§1.1) and the
+**Two items needed a human, not an agent** (the first is closed, V1): the visual scenario pass (§1.1) and the
 `LineRenderer.useWorldSpace` default (§1.2).
 
 **Screenshots are available to an agent.** `WebEngineTS/scripts/shoot.mjs` drives the locally
@@ -58,10 +58,10 @@ Nine of ten screenshotted through `WebEngineTS/scripts/shoot.mjs`; no scenario h
 the mirror by hand. It also turned up a defect static analysis had missed entirely — **Optics,
 Circuits and Kepler rendered no 3D at all** (fixed in ScenarioCreator, see `CHANGELOG.md`).
 
-**Still open, and it does need eyes:** confirming the DNA helix reads *right-handed* and the
-solar-system orbits *prograde*. Both are derived and both screenshot cleanly, but neither can be
-called from a still frame — the helix needs a judgement about which strand is in front, and orbital
-sense needs two frames. Sprites, billboards and shadow direction are also unchecked.
+**Closed 2026-11-14 (ROADMAP V1, Claude, delegated):** the helix is right-handed and the orbits prograde, each read as a number
+from what the engine draws and confirmed on a frame; sprites face the camera unmirrored and shadows fall along the light. No
+scenario uses sprites or shadows. Evidence, harness and the two engine defects found on the way (row M0.2h):
+`code-foundations/V1/notes.md`.
 
 ### 1.2 First release, `v0.2.0` — delivery before features *(~2–3 weeks)*
 The engine has E3, E5, E6, E7, E10, E11 and E13 and a version-2 reader; the platform, the editor and
