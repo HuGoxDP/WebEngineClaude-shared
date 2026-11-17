@@ -129,3 +129,79 @@ JSON input", a `page.goto` connection refusal when the static server died betwee
 three workers, Docker and my own browser runs; the same suite was 285 green earlier in this task's life on
 a quieter machine. Per the Debug rule the merge waits for one fully green run, so Phase 3 stays on the task
 branch.
+
+## The boot regression Debug found, and the fix
+
+The suites above were blamed on the machine. They were not: the import map that landed with phase 2
+(DW-1.3) served the engine as an **external** module, and page boot went from ~0.85 s to ~3.0 s
+(measured: 859–932 ms with the engine bundled, ~3000 ms with the map). Thirty seconds is the harness's
+whole timeout, and a page that takes three of them to boot makes every scenario a coin toss. The evidence
+that it was mine and not the load: the same suite was **285 green on this machine** in the engine-bump
+gate, before the map existed, and the failing scenarios still pass one at a time.
+
+The map existed for one reason — a script and the app must share **one** engine instance, so the classes a
+script registers are the ones the app's `TypeRegistry` resolves. That survives without it:
+
+- `index.html` has no import map again; `angular.json` has no `externalDependencies` again (the engine is
+  bundled, initial 1.98 MB, inside the existing budget warning).
+- `ScriptRuntimeService`'s constructor publishes the app's own engine namespace on
+  `globalThis.__wetsEngine`.
+- `rewriteEngineImports` turns a script's `import|export … from 'WebEngineTS'` into
+  `const { … } = globalThis.__wetsEngine` (star-as → `const ns = globalThis.__wetsEngine`, `export` →
+  the destructure plus an `export { … }`). The specifier the engine hands a blob URL for is therefore the
+  one module instance, exactly as the map made it — one `TypeRegistry`, one `three`.
+
+Three things came out of the same pass:
+
+- **The last import binding was dropped.** The clause capture `([\s\S]*?\s+from\s+|)` swallowed the
+  trailing ` from ` (the printed match showed `clause = "{ ScriptableBehaviour, Serializable } from "`),
+  so the second name parsed as empty and vanished. The pattern is now
+  `/(import|export)\s+([\s\S]*?)(?:\s+from\s+)?(["'])(WebEngineTS)\3/g` and the clause is split after
+  stripping its braces. A compile of a real script found it: the class never reached the registry and the
+  component showed as `MissingComponent`.
+- **Unchanged modules are not re-imported.** `_loaded` keeps each file's compiled code; when nothing
+  registered or replaced a class, the world is not rebuilt at all (`SceneService.loadFromJSON` only on
+  `changed`), so a save with a comment edit costs a transpile and no reload.
+- **The 3.4 MB of vendored engine/three files in `src/assets/engine/` are dead.** Nothing referenced
+  them once the bundle carries three again, and `angular.json` copied them into every build. Both the
+  directory (21 files) and the `assets` entry are gone; the record of why they were there stays in phase
+  2's notes above.
+
+`@babel/standalone` (3 MB, the largest lazy chunk) is now preloaded from `AppComponent`'s constructor
+while the start screen is up, so the first project open does not wait on it.
+
+Local-only note for the next run: the static server on 8043 serves the build under `/editor/`, so that
+build is `ng build --base-href /editor/`. The default `ng build` (`<base href="/">`) boots a blank page
+there — three 404s and an empty `<body>`.
+
+### Checks
+
+The three C4 scenarios are green (10 + 7 + 5 checks) and boot measures 846–870 ms on the final build.
+The last full-suite run on it was 341 checks with exactly one failure — the recovery scenario, which
+passes 16/16 in isolation, the same load-flake signature the earlier runs showed.
+
+## C4r4 folded in (2026-11-17, offline run)
+
+Claude's review of the bundled-engine rewrite (review-claude-2026-11-14.md, row C4r4) is folded in:
+`script-runtime.service.ts` builds **one engine shim per page load** — a Blob module whose source is
+`const e = globalThis.__wetsEngine; export const { …every named key… } = e; export default e.default;` —
+and the bare `"WebEngineTS"` specifier is rewritten to that URL with the engine's own token regex
+(`Scenario._ENGINE_IMPORT_RE`, copied verbatim). Every form then binds by construction: sibling-first,
+comment-first, default, default+named, namespace, `export * from`, `export { X } from`, dynamic
+`import()`. The previous clause-level destructure emitted `from undefined` for any statement before the
+engine import (F1) and served only one form (F2).
+
+F3: `fresh` is closed under **importers** (reverse-dependency closure over `deps`), so editing `Base.ts`
+re-imports `Enemy.ts` against the new Base class. F4: a module whose code **and** dependency closure are
+unchanged keeps its Blob URL (`_loaded` now holds `{code, url}`), so an untouched base is never evaluated
+twice; URLs are revoked when a module is replaced or leaves the project.
+
+Two e2e scenarios prove it: every import form with one marker per form, and Base/Enemy edit
+propagation through the probe's `scriptClass(name)` tokens (`debug-probe.ts`: a token per class object,
+`parent` = the script class it extends) — the importer's parent token moves with a base edit and stays
+with an importer-only edit. Regression discipline: the import-form rewrite was pre-verified in Node
+(16/16 checks over the copied functions); the browser failing-first/passing pair was NOT completed —
+2026-11-17 had no network on this machine (every adapter "Media disconnected"), Google-Fonts DNS
+timeouts added ~14 s to every page boot, and `ng build` output goes to `app/dist/browser`, discovered
+late. Local state at run end: editor at bf29d14 on `C4-editor-scripts-and-library`, `tsc --noEmit`
+clean, nothing pushed, merge not attempted.
