@@ -295,6 +295,11 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
     files), build + `check:csp` green. Notes `code-foundations/HO1/notes.md`.
   - Follow-ups already on the ROADMAP: P5b (`--https` + restore inside the check), R3
     (editor in the kit), M1.2 (release handoff on a fresh `origin/main`).
+- **Release handoff (M1.2).** Update procedure + what's-new section in `docs/self-host.md`:
+  admins now have a documented backup-first update path (backup + verify → pull →
+  `up -d --build` → health check), and the stale 4-volume list is fixed (5 volumes —
+  `previews` was missing). `selfhost-check` green on a fresh `origin/main` (11/11,
+  `main@8aed400`). Report `code-foundations/M1.2/report.md`.
 
 ### 2026-11-12
 - **Author publish keys and drafts an admin accepts (B6).** Most of the card's surface already
