@@ -15,6 +15,31 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-11-18
+
+- **⚠ measurable — `filter.mesh = m` now draws, in any assignment order (M0.2h).** The
+  renderer drew only a mesh it saw at wake time through `sharedMesh`: the `mesh` setter
+  stored a clone and nulled `sharedMesh` while `_syncGeometry` read only `sharedMesh`, so
+  setter assignments were never drawn; the renderer read its filter only at
+  `onAwake`/`updateMesh`, so a mesh assigned after `addComponent(MeshRenderer)` on an
+  active object stayed invisible; edits through the `mesh` getter (Unity's per-object
+  copy) never reached the screen; assign-while-inactive + reactivate never drew — Kepler's
+  `SweptArea` does exactly that, so its swept-area sectors were silently missing from
+  renders, and now render. Unity's semantics are ported: the setter assigns the reference,
+  the getter clones once, and the renderer follows the filter's current mesh through push
+  observers (`Mesh._markDirty` → lazy observer set; zero per-frame allocation, no polling).
+  Null assignment undraws (static empty geometry + bounds reset), `onEnable` re-syncs, and
+  the instance leaks in both setters are fixed (the old owned instance is destroyed).
+  Serialization of mesh-setter assignments works — late `resolvePendingAssets` writes
+  become visible; SceneSerializer order untouched. Checks: 18 new regression tests (14 red
+  before the fix), full suite **3017/3017** (185 files), typecheck + build green, pixel
+  re-check **5/5 DRAWN** through the V1 harness, adversarial review PASS (zero issues).
+  Known limitations (destroyed-mesh edits, filter removal, getter-instance serialization,
+  StaticBatching of instance-only filters) in `code-foundations/M0.2h/report.md`.
+  **Consumers receive it via `release:local` — pending a quiet window** (W1/W2 active on
+  editor branches; the A10b/M1.2 rows own the consumer bumps). Notes
+  `code-foundations/M0.2h/notes.md`.
+
 ### 2026-11-12 (later)
 
 - **A camera can render into a texture (C6, engine E8).** `RenderTexture` + `RenderTextureFormat`,
