@@ -20,7 +20,7 @@ being deployed. `deploy.mjs:159` spreads that result into `rollbackRelease`, who
 `up` then target the new release again. D-10: it "brings the **previous** release record up".
 The previous id has to be read from the release record (`state.sh read`) *before* `up`, and the
 deploy must refuse (gate, exit 4) when there is no previous record and the host is not a fresh
-install. Test: the rollback's `up.sh` call receives the previous id, and it is not the new id. The
+install. Test: the rollback's `up.sh` call receives the previous id, and it is not the new id.
 DW-4.2 tests at `13d01b8` never assert the rollback target, and in the rehearsal both "releases"
 are the same healthy stack, so exit 10 comes out as expected.
 
@@ -140,3 +140,30 @@ The DW-4.1 test's title lists `preflight → … → ship → … `, but its `de
 with no preflight, no ship (`pipeIn`) and no smoke. The exit-5 test's title says the rollback is
 asked for, and it asserts the opposite. Per the Testing rules, fix the assertions to the plan's
 DW text, not the titles to the code.
+
+## Addendum 2026-11-14 — phase 5 commit `4fd6f33` and W3's working tree
+
+Read after W3's phase-5 commit (`4fd6f33`) and its uncommitted working tree as of
+2026-11-14T13:48Z. The working tree moves on R1 (the rollback target is `previous` from the
+record), R2 (`runSmoke` exists), R3 (images go through `pipeIn`), R4 (`state(write)` with
+`nextState`) and R8 (the separator comes from the transport). Those items stay open until they
+are committed with their regression tests. One new item:
+
+**R14. The smoke never looks at production.**
+- `smokeRunner(e2eDir, expectCommit, url)` (`ops/deploy/deploy.mjs:198`) returns
+  `async ({ previous = false }) => …`. It ignores the `url` and `expectedCommit` that
+  `steps.mjs` passes in, and uses the URL captured when it was built.
+- That URL is `http://127.0.0.1:${cfg.FRONTEND_PORT ?? 80}` (`deploy.mjs:273`).
+  `FRONTEND_PORT` is not a `deploy.env` key: `parseDeployEnv` rejects it and does not return
+  it. So a real ssh deploy always smokes port 80 **on the worker machine**. That can come out
+  green against a local stack while production is broken.
+- Plan Phase 4: the smoke runs "against `<scheme>://DEPLOY_DOMAIN`, scheme from
+  `shared/deploy.json`". Only the local transport (rehearsal) may use a local URL, and the
+  transport should supply it.
+- The commit pin comes from `--smoke-expect-commit`, which is optional and defaults to empty.
+  The deploy knows `commits.vl`, so the pin must be that, never a flag.
+- With W3's uncommitted `runSmoke(context, { url, expectedCommit })`, `previous` is always
+  false. The rollback's smoke would then demand the *new* commit from the previous release
+  (always red, exit 11), or nothing at all when the flag is absent.
+- Test: the recording `spawn` sees `E2E_BASE_URL=http://<DEPLOY_DOMAIN>` (redacted in the log)
+  and `SMOKE_EXPECT_COMMIT=<new sha>` on deploy, `<previous sha>` on rollback.
