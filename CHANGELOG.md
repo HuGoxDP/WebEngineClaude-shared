@@ -300,6 +300,11 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
   `up -d --build` → health check), and the stale 4-volume list is fixed (5 volumes —
   `previews` was missing). `selfhost-check` green on a fresh `origin/main` (11/11,
   `main@8aed400`). Report `code-foundations/M1.2/report.md`.
+- **LTI registration guide for admins (P1b).** `docs/self-host.md` gains «Робота як
+  LTI-інструмент (Moodle)»: one-link + manual registration, env vars, keys, troubleshooting.
+  Verified end to end on the local `lti-demo` Moodle 5.0.2 (launch, grade passback 85/100,
+  replay 409). The KSU registration itself is done by the university's admins. Report
+  `code-foundations/P1b/report.md`.
 
 ### 2026-11-12
 - **Author publish keys and drafts an admin accepts (B6).** Most of the card's surface already
