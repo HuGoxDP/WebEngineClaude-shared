@@ -221,6 +221,56 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+### 2026-11-18
+- **Self-host kit (HO1).** There is no production access (owner, 2026-11-17): the university
+  downloads the repo, builds it with Docker and runs it on its own server. What landed:
+  - `docs/self-host.md` (Ukrainian, for the university's admins): requirements, install with
+    generated `DB_PASSWORD`/`ADMIN_TOKEN` and the bootstrap moderator, update = pull + rebuild
+    (the volumes are kept), backup/restore → `docs/backup-restore.md`, HTTPS →
+    `docker-compose.https.yml`, editor → `docker-compose.editor.yml`, logs/stop/reset, and
+    `npm run selfhost-check` as the "does my install work?" command;
+  - `npm run selfhost-check` (`scripts/selfhost-check.mjs`): clones a ref into a temp dir,
+    writes the `.env` a first-time admin writes (32-byte hex secrets, never printed),
+    `up -d --build` on a renamed stack (`vl-selfcheck`, `vlcheck_*` volumes, `VLCheck*`
+    containers, spare port 8051), waits `/api/health` (db connected + build identity),
+    takes one backup and **verifies it by reading it back** (`scripts/lib/verify-backup.mjs`:
+    gunzip the dump, count `CREATE TABLE`, parse the manifest, walk every volume tar —
+    the `verified` marker is written only on success), runs the e2e smoke, tears down
+    (restart policy disabled first — the OPS1 resurrection lesson). Refuses without its
+    lock directory (`--lock`) or with a busy port; `--keep` leaves the stack for inspection;
+  - the fresh-install smoke (`e2e/playwright.smoke.config.ts`, `smoke-setup.ts`,
+    `tests/smoke.spec.ts`, `npm run smoke` in e2e): seven read-only assertions on an empty
+    catalog — health/build, SPA boot without console errors, engine bundle headers, the
+    player guard, catalog JSON, 401 without a credential, bootstrap moderator with
+    `ADMIN_TOKEN` (skipped with a reason when unset). The main suite's empty-catalog refusal
+    is untouched;
+  - two fixture-caught bugs fixed in the read-back: the tar header checksum is **octal**
+    (parsed as decimal it rejected every real tar whose sum carries an 8 or 9), and a tar
+    whose last entry promises more bytes than the archive holds is a named truncated-tail
+    failure, not a pass.
+  - An adversarial review then demonstrated 7 defects; all fixed (`2b546bc`, `0d5566a`).
+    User-visible: **restore now refuses a backup without the `verified` marker** — before
+    any spawn, dry-run and `--yes` included — so only a read-back-verified backup can be
+    restored; `docs/backup-restore.md` gained the verify step
+    (`node scripts/lib/verify-backup.mjs <dir>`). The rest harden the check itself: teardown
+    runs whenever `up` was attempted (even on failure/timeout) before the clone is removed;
+    every manifest volume is cross-checked against its archive; mid-header truncation is a
+    named failure; a stale marker is removed at verify entry; the lock must be a directory;
+    all compose-interpolated env vars are scrubbed from child envs so the generated `.env`
+    is the single source. The smoke reads the engine version from `frontend/package.json`
+    (no hardcoded 0.2.0) and defaults to base URL 8051, not the lab's 8044.
+  - Checks: `npm run test:scripts` **42/42** (28 baseline + 14 defect tests) and
+    `node --test backup/restore.test.mjs` **4/4**; **live `selfhost-check` GREEN, 11/11
+    steps** twice — the second at `0d5566a` under a deliberately poisoned shell env
+    (`FRONTEND_PORT`/`DB_PASSWORD`/`BACKUP_DIR` exported): the scrub held, the stack bound
+    8051, the poison backup dir was never created, zero vlcheck containers/volumes left;
+    smoke also 7/7 against the local lab stack on a spare port; backend full suite
+    (unit + Postgres integration) **1666/1666, 0 skipped**; frontend **770/770** (50 files,
+    21.9 s on the idle machine — the earlier 4 reds were load-induced timeouts in untouched
+    files), build + `check:csp` green. Notes `code-foundations/HO1/notes.md`.
+  - Follow-ups already on the ROADMAP: P5b (`--https` + restore inside the check), R3
+    (editor in the kit), M1.2 (release handoff on a fresh `origin/main`).
+
 ### 2026-11-12
 - **Author publish keys and drafts an admin accepts (B6).** Most of the card's surface already
   shipped as "Nocturne release 2"; this task hardened it and finished it. What landed:
