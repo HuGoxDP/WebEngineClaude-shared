@@ -75,3 +75,105 @@ Plan: `code-foundations/B1/plan.md` § Phase 6. Branch `B1-component-gizmos` in 
 
 Phase 7 (scene lighting, draw modes, grid; the platform check; the catalog scenario),
 8 (docs and the row's ✅).
+
+## Review fold-in (B1r/B1r2/B1r3/B1r4) — 2026-11-18
+
+The four review rows are folded into B1 (ROADMAP marked ✅ there). All 10 findings of
+`review-claude-2026-11-13-phase6.md` are fixed; all 8 e2e proofs it lists are implemented and
+green; the DW-6.1…6.4 assertions are unchanged.
+
+### What landed per row
+
+- **B1r (placement)** — `commands.service.ts` gains a shared `_placeUnder`:
+  `setParent(p, false)` + local zero/identity/unit scale (Unity's `SetParentAndAlign`); root
+  creates still land at the pivot. DW-1.2 now has its e2e (below); DW-1.3 asserts the exact
+  D-3 `PrimitiveMesh` kind/args and the exact Unity collider type per kind.
+- **B1r2 (scale seat)** — a single selected object's scale handle is seated at the object's
+  own rotation (proxy quaternion) and forced to local space whatever the Local/Global toggle
+  (`ScaleTool.ToolGUI` semantics); the e2e discriminator is `seatDot` against an unrotated
+  reference cube (fails pre-fix ≈ 1). The wizard taken-name flake fix is re-applied as a poll
+  (50 × 100 ms on `.wiz-error`), assertions unchanged.
+- **B1r3 (noErrors)** — narrowed to the performance note only: a line carrying
+  `GL Driver Message` **and** `Performance`, or `GPU stall due to ReadPixels`. A real
+  Error-severity GL fault fails the suite again.
+- **B1r4 (phase-6 findings)** — the 10 findings plus the probe contract (below): circles and
+  the capsule wireframe at the object's position with `lossyScale`, `_circlePoint('yz')`
+  corrected, normalised object basis for the spot cone and directional rays, collider
+  `center` rotated/scaled as a local point, per-instance component lookup (two colliders of
+  one type draw both), `isActiveAndEnabled` for icons and gizmos, `TypeRegistry` naming in
+  the icons, icons over the whole scene, selected drawn brighter, power-of-two vertex pools
+  (no 8192 truncation), debug leftovers removed.
+
+### Two extra defects found and fixed
+
+1. **The review gate found a quaternion bug in `component-gizmos.ts`**: `_rotateInto`'s
+   cross terms self-cancelled (`q.z*x − x*q.z`), so rotations silently did nothing. Two-line
+   fix, verified numerically against three `Matrix4.makeRotationFromQuaternion` over 1000
+   random unit quaternions — max error 5.6e-16.
+2. **The e2e run found a src bug in `commands.service.ts`**: `createEmpty`/`createWith`
+   reparented through `_placeUnder` without a scene notify, so the Hierarchy rendered the
+   GameObject twice (root row + child row). Fix: `this._scene.notify()` after the local TRS
+   reset.
+
+### Probe API additions (`debug-probe.ts` / `viewport.service.ts`)
+
+- `gizmoInfo(name, kind?)` → `DrawnInfo[]` — `{ kind` (the component type name)`, extent,
+  center, half, circles[{center, normal, radius}], selected }`, engine space, whole scene,
+  deep-copied. The `GizmoKind` drawer kinds stay internal; `Drawn.typeName` was added.
+- `iconCounts()` — counts per component type (Camera / DirectionalLight / PointLight /
+  SpotLight / AudioSource); `{}` when the master switch is off.
+- `transformOf(name)` — now whole-scene, plus `localPosition` / `localRotation` /
+  `localScale`; the world `scale` field is now `lossyScale`.
+- `setComponentEnabled(goName, typeName, index, enabled)` — the write path for component
+  enablement: the serializer does not persist `Behaviour.enabled` and the Inspector's
+  enable checkbox is a static placeholder.
+- Icons/gizmos draw brighter when selected (twin pools, 50 % lerp to white); vertex pools
+  grow power-of-two; AudioSource draws one XY circle per distance (ponytail — upgrade path:
+  3 great circles).
+
+### E2e additions (0 existing checks removed)
+
+- **DW-1.2 scenario**: root-at-pivot via Hierarchy "+"; a context-menu child at local zero
+  under a transformed parent; "+" with a child selected still creates at root.
+- **DW-1.3 strengthened**: exact `PrimitiveMesh` kind + args, exact Unity collider types;
+  Plane/Quad have none.
+- **B1r4 proofs scenario** (seeded scene JSON): point light at (5, 2, −3) → 3 circles of
+  `range`; audio at (−4, 1, 6) → XY circle r = 500; capsule at scale 2 → half-height
+  doubling; spot rotated X90 → end circle centre/normal/radius = `range·tan(angle/2)`; box
+  `center` local, scaled + rotZ90; two BoxColliders draw distinctly, disable-first via the
+  probe; an inactive parent draws no gizmo/icon with exact icon counts; an unselected light
+  icon renders in the production bundle and the `selected` flag flips.
+- **B1.4 scale-seat tail** (B1r2's discriminator, above).
+
+### Run-hardening (no assertion weakened)
+
+- Deterministic offline Google Fonts via `context.route` fulfill — immune to the
+  `ERR_NETWORK_CHANGED` network blip.
+- Recovery-copy poll 50 × 300 ms.
+- B1.6 saves before reload (the autosave recovery dialog raced the Gizmos chip).
+- B1.4/B1r4 frame-settle polls (rAF × 2, ≤ 120 iterations) replace fixed waits under load.
+
+### Final counts
+
+- Full e2e: **380 PASS / 0 FAIL, exit 0** (previous green baseline 331).
+- `npm run e2e:build` — exit 0; wizard fixture 6 PASS; zip
+  sha256 = `3e63625856db77cc02cd67705169afd2783cacd8135acd03a2f26d64a0376999`;
+  pixels-lit / pixels-dark / catalog SKIP (the phase-7 exports are not yet authored).
+- `npx tsc` exit 0; production `ng build` exit 0 (the pre-existing budget warning).
+
+### Phase-7 support already landed (uncommitted, separate commit)
+
+- `app/e2e/platform-pixels.mjs` (new) — luminance probe on the standalone bundle; CLI
+  `<scenario> [--min/--max/--x/--y]`, exit 0/1/2.
+- `app/e2e/scenariocreator-check.mjs` — fixture loop over wizard-project / pixels-lit /
+  pixels-dark / catalog, zip + sha256 lines, per-fixture cleanup, skip-with-note for absent
+  exports.
+
+### Deviations (fold-in)
+
+- **AudioSource draws one XY circle per distance**, not 3 great circles (ponytail; upgrade
+  path recorded above).
+- **`iconCounts()` counts per component type, not per object** — the menu toggles are
+  per-type, which is what DW-6.1 asserts.
+- **`transformOf`'s world scale is now `lossyScale`** (was the local scale) — the honest
+  world-space number; local values are exposed alongside.
