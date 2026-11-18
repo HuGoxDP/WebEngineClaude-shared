@@ -4,7 +4,7 @@ Task row: `C4` (M4, editor), claimed by W1 as `C4-editor-scripts-and-library`. P
 (phases 1–5); research: `research.md` (D1–D6). The repo's own plan of record is
 `WebEngineTSEditor/docs/unity-editor-plan.md` §3.2 and its Stage 12 box.
 
-**Status:** phases 1–2 landed on the task branch; phases 3–5 pending.
+**Status:** phases 1–3 + C4r4 landed on the task branch; the debug gate is green (**371/371**, 2026-11-18); phase 4 in build, phase 5 pending.
 
 ## Phase 1 — the Code tab (`eaab306`)
 
@@ -205,3 +205,68 @@ with an importer-only edit. Regression discipline: the import-form rewrite was p
 timeouts added ~14 s to every page boot, and `ng build` output goes to `app/dist/browser`, discovered
 late. Local state at run end: editor at bf29d14 on `C4-editor-scripts-and-library`, `tsc --noEmit`
 clean, nothing pushed, merge not attempted.
+
+## 2026-11-18 — debug gate green; DW-2.4 refuted; phase 4 in build
+
+### The debug gate: first fully green full suite — 371 PASS / 0 FAIL
+
+Run history: #1 305/14, #2 317/3, #3 ~311/7 (all late-suite locator timeouts), #4 **371/371** after the two
+fixes below. Evidence: `evidence/e2e-full-green-2026-11-18.log`.
+
+- **Fix 1 (`a4c29c2`, editor) — two C4r4 scenarios were wrong, not the code they check.** (a) The
+  import-forms fixture `Forms.ts` used `@Serializable`/`@SerializedField` without importing them: the module
+  threw `ReferenceError: Serializable is not defined` at evaluation, Forms never registered, the inspector
+  showed Missing script, all 7 markers empty. With `Serializable, SerializedField` added to the WebEngineTS
+  import, all seven import forms bind (browser-verified: markers `"true,true,true,true,true,true,true"`).
+  The shim rewrite was already correct. (b) `editScript()` clicked the Project panel folder tree twice per
+  scenario, but the first edit leaves the bottom pane on the Code tab and app-project only mounts while its
+  own tab is active; it now clicks the Project tab first.
+- **Fix 2 (`5b973a1`, editor) — close each scenario's browser contexts; the T2 root cause.** `newPage()`
+  opened a fresh browser context per scenario and nothing closed it: ~30 live editors (WebGL renderer, rAF
+  loop, workers) accumulated in one browser process. Measured over 14 project opens: "Open folder" to
+  visible `.work` grew **192 ms → 20463 ms** with contexts held; with each context closed after its scenario
+  the same 14 opens stayed **250–890 ms**. The runner now closes every `browser.contexts()` after each
+  scenario (failure screenshot first) and resets `lastPage`. No timeout raised, no retry added, no check
+  weakened. This is ROADMAP row T2's late-suite flakiness cause — every previously failing scenario had
+  passed in isolation.
+
+Environment that worked: build `MSYS_NO_PATHCONV=1 npm run build -- --base-href /editor/` (Git Bash
+otherwise rewrites `/editor/` into a Windows path and the page blanks); `app/dist/browser` served by an
+ad-hoc static server on `http://localhost:8044/editor/`; suite run with
+`E2E_PLAYWRIGHT_DIR=/e/Projects/WebstormProjects/WebEngine/.workers/W1/virtual-lab/e2e E2E_BROWSER_CHANNEL=chromium LANG=C.UTF-8`.
+
+### DW-2.4 refuted — ScenarioCreator already compiles legacy decorators
+
+The research note (Worker+CSP/D5 paragraph) and `unity-editor-plan.md`'s Stage 12 box claimed
+`build-package.mjs` runs `tsc` without `--experimentalDecorators`. Stale: `build-package.mjs:196` passes
+`--experimentalDecorators` (with `--ignoreConfig`), fix commit `229480d` ("fix: compile scenario scripts
+with legacy decorators"), present in both the W1 worktree and the primary checkout. **No ScenarioCreator
+change needed; C4 stays editor-only.**
+
+Build proof: `node build-package.mjs --scenario DecoratorScenario` in `.workers/W1/ScenarioCreator` exit 0,
+no tsc errors; ZIP `ReleaseScenarios/test/DecoratorScenario.zip` (gitignored) contains `scripts/Scenario.js`
+with legacy emit `__decorate([ SerializedField() …` and
+`__decorate([ Serializable({ typeName: "DecoratorFixture.Spinner" }) …`. The fixture uses `@Serializable`,
+`@SerializedField`, `@Range`. `git status` clean before and after.
+
+Engine decorators are legacy: `WebEngineTS/tsconfig.json:16` `experimentalDecorators: true`;
+`Decorators.ts:50-51` class decorator `(target: T): T`, `:219-220` field decorator `(target, propertyKey)`.
+No `emitDecoratorMetadata` needed. Consuming projects need `experimentalDecorators: true` — ScenarioCreator's
+CLI already supplies it.
+
+Caveat: ScenarioCreator's installed `node_modules/WebEngineTS` is an older local pack
+(`0.1.0-local.1793745537109`, ~2026-11-11) while the editor's is `0.1.0-local.1794476123298` (~2026-11-12);
+its `package.json` pins the v0.2.0 release URL, so `npm ci` there would swap the engine. Not a blocker for
+the DW-4.2 build check, but the check compiles against whatever is installed.
+
+### Phase 4 dispatched (in build) — the library of ten
+
+Binding decisions at dispatch: ten sources copied into the project as `scripts/library/<Name>.ts` (D5);
+names Rotator, Mover, Clickable, ToggleVisibility, ShowTextOnClick, QuizQuestion, Timer, FollowPath,
+LookAtCamera, PlayAnimation; async add path in `CommandsService` (write → reloadScripts → re-find target
+after `_rebuildScene` clears selection → attach → re-select); Library section in the Add Component dialog,
+entries already in the project not offered twice; the written `.ts` is permanent (scene-only undo).
+Clickable via `Input.getMouseButtonDown(0)` + `Camera.main.screenPointToRay` + `Physics.raycast` (no
+`OnMouseDown` exists; needs a Collider); FollowPath via `FieldType.Array` of Vector3 waypoints +
+`Vector3.moveTowards` (no spline type); PlayAnimation tolerant of a missing Animation/Animator sibling.
+All ten feasible with the installed engine's public API; no engine change, no new dependency.

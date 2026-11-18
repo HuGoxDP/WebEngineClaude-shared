@@ -43,3 +43,8 @@
 - **The bundle budget.** Monaco is large; it must be a lazy route/chunk or the 3 MB error budget fails the build. Mitigation: dynamic `import()` in the Code tab component only.
 - **Worker + CSP.** If Monaco's `ts.worker` needs anything beyond `worker-src blob:`, the editor will not run on the platform. Mitigation: prove it in a local build before the e2e depends on it; the `scenariocreator-check.mjs` chain must still build a project containing library scripts, and the repo's own note flags `build-package.mjs` running `tsc` **without `--experimentalDecorators`** (`unity-editor-plan.md:447–450`) — a script using `@SerializedField` may not build there. That is a real gate for D5's library sources, and it is a *ScenarioCreator* repo problem this task can only report, not fix.
 - **The "one engine instance" rule.** If the map's shim and Angular's bundle disagree, `TypeRegistry` refuses the second registration (that is why C3 exists). Mitigation: the shim is the app's own module, so there is exactly one instance.
+
+**Correction (2026-11-18):** the Worker+CSP risk's `--experimentalDecorators` claim is stale.
+`build-package.mjs:196` passes the flag since ScenarioCreator `229480d`; build proof
+(`node build-package.mjs --scenario DecoratorScenario`) exit 0 with legacy `__decorate` emit in the ZIP.
+DW-2.4 resolved-refuted — no ScenarioCreator change needed. See `notes.md` § 2026-11-18.

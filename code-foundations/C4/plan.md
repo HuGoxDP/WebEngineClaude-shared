@@ -83,8 +83,9 @@ deserialises into real components instead of `MissingComponent`.
   default (the class was replaced, not duplicated: `TypeRegistry` still has one entry for the name).
 - DW-2.3: e2e — a scene saved with the class name loads into the same component after a reload of the editor
   (the blob URLs are re-made each load; nothing is cached across sessions).
-- DW-2.4: `tsc` in ScenarioCreator still builds a project whose scripts use decorators — if it does not, the
-  finding is parked as an ATTENTION row and the library sources are generated accordingly.
+- DW-2.4: **resolved — refuted (2026-11-18).** `tsc` in ScenarioCreator builds decorator scripts: the flag
+  is already passed (`build-package.mjs:196`, commit `229480d`); build proof exit 0. No ATTENTION row, no
+  ScenarioCreator change.
 
 ### Phase 3: Errors in the Console with jump-to-line, and "Missing script" (Standard)
 **File scope:** `app/src/app/services/console.service.ts`, `app/src/app/panels/code/`,
@@ -166,6 +167,12 @@ and attaches it (D5).
 | 2a | done (boot fix, this branch) | Debug found phase 2's import map had tripled page boot (0.85 s → 3.0 s) and with it the suite's timeouts; DW-1.3 is **reversed** — the engine is bundled again and a script's `WebEngineTS` import is rewritten to `globalThis.__wetsEngine` (the app's own instance), which is what the map was for. Same pass: the clause regex dropped the last import binding, unchanged modules are no longer re-imported (the world rebuilds only when a class registers/replaces), the 3.4 MB of vendored `src/assets/engine/` are deleted with their `assets` entry (dead once the bundle carries three), and `@babel/standalone` is preloaded at boot. Details in `notes.md`. |
 
 | 2b | done (C4r4 fold-in, this branch) | F1+F2: one engine shim per page load re-exports the app's namespace (`export default e.default` included) and the specifier is rewritten with the engine's own `Scenario._ENGINE_IMPORT_RE`, so sibling-first, comment-first, default, namespace, `export *`, `export { X } from` and dynamic `import()` all bind; F3: `fresh` is closed under importers; F4: a module keeps its Blob URL while its code and dependency closure are unchanged (URLs revoked on replace/removal). Two e2e scenarios: every import form with one marker each, and Base/Enemy propagation via the probe's `scriptClass` tokens. `notes.md` records what an offline 2026-11-17 run could not verify. |
+
+| Debug | done (`a4c29c2`, `5b973a1`, this branch) | First fully green full suite: **371/371** (runs #1 305/14, #2 317/3, #3 ~311/7, #4 green). `a4c29c2`: the import-forms fixture used decorators without importing them (7 empty markers), and `editScript()` must click the Project tab before the tree. `5b973a1`: the runner never closed browser contexts — ~30 live editors degraded 14 project opens 192→20463 ms; closing every context per scenario keeps them 250–890 ms. **ROADMAP T2 cause fixed**; no timeout raised, no retry, no check weakened. Evidence: `evidence/e2e-full-green-2026-11-18.log`. |
+
+| DW-2.4 | resolved — refuted (2026-11-18) | ScenarioCreator already passes `--experimentalDecorators` (`build-package.mjs:196`, commit `229480d`); `node build-package.mjs --scenario DecoratorScenario` exit 0, legacy `__decorate` emit in the ZIP. The research note's missing-flag claim is stale; C4 stays editor-only. Caveat: ScenarioCreator's installed engine pack is older than the editor's — see `notes.md` 2026-11-18. |
+
+| 4 | in build (dispatched 2026-11-18) | Library of ten copied as `scripts/library/<Name>.ts` (D5); async add in `CommandsService` (write → reloadScripts → re-find target → attach → re-select); Library section in Add Component, no duplicate offers; scene-only undo. Clickable via raycast (no `OnMouseDown`), FollowPath via `FieldType.Array` waypoints + `moveTowards`, PlayAnimation tolerant of a missing animator. All ten feasible on the installed engine's public API. Details: `notes.md` 2026-11-18. |
 
 ## Ordering note
 Phases are strictly serial: each builds the surface the next one drives (a tab, then a module pipeline, then
