@@ -15,6 +15,17 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-11-19
+
+- **M0.2hr1 — MeshFilter self-assign no longer destroys the assigned mesh (both setters; Unity parity).**
+  `filter.mesh = filter.mesh` (the Unity edit idiom after editing through the getter) and
+  `filter.sharedMesh = filter.mesh` destroyed the very instance being stored — the object undrew and
+  the mesh ended up destroyed; a second filter holding the copy as its `sharedMesh` lost it on the
+  owner's swap. Both setters now keep the instance alive on self-assign (`mesh =` keeps ownership,
+  `sharedMesh =` relinquishes it); a swap to a different mesh or to `null` still destroys the owned
+  instance. 5 regression tests (RED→GREEN); suite **3022/3022** (185 files), typecheck + build clean,
+  adversarial review PASS. Report `code-foundations/M0.2hr1/report.md`.
+
 ### 2026-11-18
 
 - **⚠ measurable — `filter.mesh = m` now draws, in any assignment order (M0.2h).** The
