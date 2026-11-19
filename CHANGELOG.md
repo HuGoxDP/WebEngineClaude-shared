@@ -246,6 +246,22 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+### 2026-11-19
+- **The self-host check proves HTTPS and restore (`P5b`).** `npm run selfhost-check --https`
+  starts the stack with `docker-compose.https.yml` + a self-signed cert and judges the wire:
+  plain request → **301 to the https URL** (scheme/host/port/path/query preserved) and HSTS
+  on https answers only; a bad `HTTPS_REDIRECT_PORT` makes nginx refuse to start (exit 1),
+  an unset one leaves plain serving untouched. One backup is taken **and restored inside the
+  check in both modes** (proof row back after restore); `verify-backup` now FAILs a backup
+  with no `volumes/` instead of skipping it; the smoke runs over TLS (`E2E_INSECURE_TLS`
+  opt-in, `ignoreHTTPSErrors`, node:https probes). `docs/self-host.md`: `--https` usage and
+  the real-certificate admin steps (mount at `/etc/nginx/tls/`, renewal). Checks:
+  `test:scripts` **88/88** (42 baseline +46), backend unit 308/308 + Postgres 1666/1666,
+  frontend 770/770 + build + `check:csp`, browser e2e 136 passed / 19 skipped (documented
+  policy); live gate **GREEN 12/12 plain and 13/13 --https** on a task-branch clone,
+  teardown clean. Adversarial review: functional PASS, 2 coverage gaps fixed (`7fce7d2`),
+  re-review PASS. Report `code-foundations/P5b/report.md`.
+
 ### 2026-11-18
 - **Self-host kit (HO1).** There is no production access (owner, 2026-11-17): the university
   downloads the repo, builds it with Docker and runs it on its own server. What landed:
