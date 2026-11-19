@@ -17,6 +17,21 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ### 2026-11-19
 
+- **M0.2hr5 — the V1 pixel probe's case 5 now exercises the real Kepler SweptArea order; stale coverage claims corrected.**
+  The M0.2h-era case 5 deactivated the object *before* adding the components — a wake-time-read
+  duplicate of case 3, not the Kepler pattern it claimed to cover. Rewritten: MeshFilter + MeshRenderer
+  added while active, `setActive(false)`, `sharedMesh = Mesh.createCube(2)` while inactive,
+  `setActive(true)` (Kepler assigns `sharedMesh`, not `.mesh`). Harness **5/5 DRAWN** on the HEAD bundle.
+  Measured: deleting `MeshRenderer.onEnable` re-sync alone does NOT fail the case — the push notify
+  (`set sharedMesh` → `_notifyRenderer` → `updateMesh`, no active gate) syncs while inactive; the
+  onEnable re-sync is a redundant safety net. The discriminating mutation deletes **both** mechanisms
+  (≈ pre-M0.2h wake-time-only reads): cases 4+5 `not drawn rgb(0,0,0)`, cases 1-3 DRAWN; restore 5/5.
+  `MeshFilter.ts:18` field comment corrected ("first write" → "first read of {@link mesh}" — the getter
+  clones, the setter stores the reference). Stale "incl. the Kepler SweptArea pattern" claims amended
+  in `M0.2h/report.md`, `V1/notes.md` and the ROADMAP M0.2h cell (historical honesty: annotated, not
+  rewritten). Comment-only engine change — no behavior delta; suite **3026/3026** (185 files),
+  typecheck + build clean. Report `code-foundations/M0.2hr5/report.md`.
+
 - **M0.2hr2 — destroying a MeshFilter undraws immediately; a replacement filter is found; bounds changes reach the renderer.**
   A destroyed `MeshFilter` kept being drawn (or a replacement was never found — the renderer re-found its
   filter only when the cache was `null`, not destroyed), and `mesh.bounds = ...` / `mesh.recalculateBounds()`

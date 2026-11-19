@@ -122,6 +122,12 @@ Pixel-tested in `setters.js` (UnlitMaterial magenta cubes, centre pixel read thr
   probes `setters.js` (original 4 cases) and `setters-m02h.js` (copy + case 5).
 - Result: all four original cases DRAWN (were: cases 3 and 4 not drawn); case 5 — the
   SweptArea pattern, `mesh` assigned while `setActive(false)` then reactivated — also DRAWN.
+  (Correction 2026-11-19, M0.2hr5: that description of case 5 was wrong — the probe
+  deactivated the object *before* adding the components, a wake-time-read duplicate of
+  case 3, not the Kepler order. Case 5 now covers the real SweptArea pattern: MeshFilter +
+  MeshRenderer added while active, `setActive(false)`, `sharedMesh = Mesh.createCube(2)`
+  while inactive, `setActive(true)`; key `keplerOrder+reactivate`, re-verified 5/5 DRAWN.
+  See `code-foundations/M0.2hr5/report.md`.)
 
 | Assignment | Before M0.2h | After M0.2h |
 |---|---|---|
@@ -129,7 +135,8 @@ Pixel-tested in `setters.js` (UnlitMaterial magenta cubes, centre pixel read thr
 | `filter.sharedMesh = m`, then renderer + `.material` | yes | DRAWN |
 | `filter.mesh = m`, then renderer + `sharedMaterial` | **no** | DRAWN |
 | renderer first, then `filter.sharedMesh = m` | **no** | DRAWN |
-| inactive: `filter.mesh = m` + renderer, then `setActive(true)` | (broken in Kepler) | DRAWN |
+| inactive: `filter.mesh = m` + renderer, then `setActive(true)` (probe order — not the real Kepler order; corrected by M0.2hr5, next row) | (broken in Kepler) | DRAWN |
+| real Kepler order (M0.2hr5): components added active, deactivate, `filter.sharedMesh = m`, reactivate | (broken in Kepler) | DRAWN |
 
 - Raw logs: `C:/Users/HuGox/AppData/Local/Temp/opencode/w3/m02-pixel-run1.txt` (4-case),
   `m02-pixel-run2.txt` (5-case). Only console noise: a favicon 404 and a Canvas2D
