@@ -4,7 +4,7 @@ Task row: `C4` (M4, editor), claimed by W1 as `C4-editor-scripts-and-library`. P
 (phases 1–5); research: `research.md` (D1–D6). The repo's own plan of record is
 `WebEngineTSEditor/docs/unity-editor-plan.md` §3.2 and its Stage 12 box.
 
-**Status:** phases 1–3 + C4r4 landed on the task branch; the debug gate is green (**371/371**, 2026-11-18); phase 4 in build, phase 5 pending.
+**Status:** phases 1–3 + C4r4 landed on the task branch; the debug gate is green (**371/371**, 2026-11-18); phases 1–4 + C4r4 landed on the task branch; phase 4 review + phase 5 (adversarial review, DW-2.3, docs) next.
 
 ## Phase 1 — the Code tab (`eaab306`)
 
@@ -270,3 +270,25 @@ Clickable via `Input.getMouseButtonDown(0)` + `Camera.main.screenPointToRay` + `
 `OnMouseDown` exists; needs a Collider); FollowPath via `FieldType.Array` of Vector3 waypoints +
 `Vector3.moveTowards` (no spline type); PlayAnimation tolerant of a missing Animation/Animator sibling.
 All ten feasible with the installed engine's public API; no engine change, no new dependency.
+
+## 2026-11-19 — phase 4 done (`dc9b099`)
+
+The library of ten landed: `app/src/app/library/*.ts` (ten source constants, public overrides, explicit
+FieldTypes, engine public API only), `library.service.ts` (catalog; installed = file on disk OR class
+already provided by project scripts), `addLibrary` in `CommandsService` (write → `reloadScripts` →
+re-find by name after the rebuild → `_history.record` attach → re-select; the file is permanent, undo
+scene-only), the Library section in Add Component, and an Array-of-Vector3 waypoint editor in
+`component-section.component.ts` for FollowPath.
+
+Two findings beyond the plan:
+- The component registry is not signal-backed, so `LibraryService.offered` reads
+  `ScriptRuntimeService.classNames` to keep the picker reactive after a reload.
+- Dedupe needed the reverse rule too: a class the project's own scripts provide (at any path) must never
+  be offered by Library, else it shadows the author's script — caught by the phase-2 regression scenario.
+
+Checks: `ng build --base-href /editor/` exit 0 (initial 1.99 MB, inside budget); `ONLY="library:"` 34 PASS
+(source copied, speed editable, rotates in play, stop restores pose, second behaviour attaches, no
+duplicate-registration advisory); wizard scenario PASS (exports Rotator on Camera, feeds DW-4.2);
+`npm run e2e:build` PASS — DW-4.2 passed outright, no ATTENTION row; all ten extracted sources compile
+under ScenarioCreator flags (`--strict --experimentalDecorators`, bundler resolution) exit 0; C4 script
+regressions (phase-2 swap, broken script, missing script, import forms, base module, script file) green.
