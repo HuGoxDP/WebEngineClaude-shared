@@ -4,7 +4,9 @@ import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-const R = "C:/Users/HuGox/WebstormProjects/WebEngine";
+import { fileURLToPath } from "node:url";
+// Workspace root = three levels up from V1/ (V1 -> code-foundations -> .claude-shared -> root).
+const R = path.resolve(fileURLToPath(new URL("../../..", import.meta.url)));
 const require = createRequire(path.join(R, "virtual-lab/e2e/package.json"));
 const { chromium } = require("playwright");
 const args = process.argv.slice(2);

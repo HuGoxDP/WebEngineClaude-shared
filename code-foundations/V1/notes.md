@@ -107,7 +107,30 @@ Pixel-tested in `setters.js` (UnlitMaterial magenta cubes, centre pixel read thr
   - The JSDoc admits the deviation (`MeshRenderer.ts:150`, "In Unity, MeshRenderer automatically
     picks up MeshFilter changes. In this engine, call `updateMesh()` explicitly").
   - Every scenario happens to assign before adding the renderer, so none is visible-broken today.
+    (Correction 2026-11-18: the Kepler SweptArea sectors *were* visible-broken — assign-while-inactive + reactivate; fixed by M0.2h, see `code-foundations/M0.2h/notes.md`.)
   - The editor's inspector and any ported Unity code are not that careful.
 - **Not a defect.** A new `StandardMaterial` is drawn only once its shader has compiled (~1–6 s
   here, asynchronous). An object created at run time stays invisible until then. That is the
   engine's compile-without-hitch design and cost this check an hour of false leads.
+
+## M0.2h re-verification (2026-11-18)
+
+- Fixed bundle: worktree `.workers/W3/WebEngineTS`, branch `M0.2h-meshrenderer-sharedmesh`,
+  commit `cfe261f`, `dist/WebEngineTS.standalone.js` (built 2026-11-18 20:15). Served via
+  `run.mjs --engine <path>`; harness root now derived from `import.meta.url` (the hardcoded
+  `C:/Users/HuGox/...` root was stale). Scenario: `solar-system-scenario.zip`, SwiftShader,
+  probes `setters.js` (original 4 cases) and `setters-m02h.js` (copy + case 5).
+- Result: all four original cases DRAWN (were: cases 3 and 4 not drawn); case 5 — the
+  SweptArea pattern, `mesh` assigned while `setActive(false)` then reactivated — also DRAWN.
+
+| Assignment | Before M0.2h | After M0.2h |
+|---|---|---|
+| `filter.sharedMesh = m`, then renderer + `sharedMaterial` | yes | DRAWN |
+| `filter.sharedMesh = m`, then renderer + `.material` | yes | DRAWN |
+| `filter.mesh = m`, then renderer + `sharedMaterial` | **no** | DRAWN |
+| renderer first, then `filter.sharedMesh = m` | **no** | DRAWN |
+| inactive: `filter.mesh = m` + renderer, then `setActive(true)` | (broken in Kepler) | DRAWN |
+
+- Raw logs: `C:/Users/HuGox/AppData/Local/Temp/opencode/w3/m02-pixel-run1.txt` (4-case),
+  `m02-pixel-run2.txt` (5-case). Only console noise: a favicon 404 and a Canvas2D
+  `willReadFrequently` warning; no page errors.
