@@ -292,3 +292,28 @@ duplicate-registration advisory); wizard scenario PASS (exports Rotator on Camer
 `npm run e2e:build` PASS — DW-4.2 passed outright, no ATTENTION row; all ten extracted sources compile
 under ScenarioCreator flags (`--strict --experimentalDecorators`, bundler resolution) exit 0; C4 script
 regressions (phase-2 swap, broken script, missing script, import forms, base module, script file) green.
+
+### Phase 4 batch review — FAIL, two blockers fixed forward (2026-11-19)
+
+The independent review ran every DW item green (library 24/24, script regressions, wizard 23/23,
+e2e:build 6/6, strict tsc on all ten sources) but demonstrated two edge-case defects with probes:
+
+1. **Deleted-mid-add ghost attach** (`a310e89`): with the write in flight, deleting the target object
+   left `findGameObject(name) ?? target` falling back to the destroyed original — component on a dead
+   object, phantom undo entry, destroyed object re-selected. Fix: re-find after the rebuild, abort
+   cleanly when gone (no attach, no history, no selection). Regression: the C4r5 scenario delays the
+   write 1500 ms, deletes mid-flight, asserts no ghost and that the first Ctrl+Z restores the object.
+2. **Zero-byte leftover hides the entry forever** (`efdac04`): `write` creates the entry before
+   `createWritable`, so a quota throw left a 0-byte `scripts/library/<Name>.ts`; after reopen
+   `isInstalled` (file exists) hid it from Library while Scripts had no class to offer. Fix:
+   `isInstalled` = file exists AND the class is registered (stale file stays offered, next add heals
+   it); the catch path removes only a partial file this add itself created, never an author's file.
+   Three regression scenarios: stale-empty heal + author file never overwritten; failed-write partial
+   removed + retry heals; failed write never deletes an existing file.
+
+Failing-first proven on the pre-fix build (7 checks failed), passing after (19/19 C4r5 checks).
+Gate filters green: library (6 scenarios), script (4), import (3), base module (1); ng build exit 0.
+Non-blocking review notes: the 1 MB initial-budget warning is pre-existing (1.99 MB, under the 3 MB
+error budget); same-label adds within 500 ms coalesce into one undo step (history service, low impact);
+`findGameObject` returns the first name match — duplicate-named objects could re-find the wrong one
+(trace-supported, unexecuted; candidate follow-up row).
