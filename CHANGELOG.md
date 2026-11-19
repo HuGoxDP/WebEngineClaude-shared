@@ -17,6 +17,18 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ### 2026-11-19
 
+- **M0.2hr2 — destroying a MeshFilter undraws immediately; a replacement filter is found; bounds changes reach the renderer.**
+  A destroyed `MeshFilter` kept being drawn (or a replacement was never found — the renderer re-found its
+  filter only when the cache was `null`, not destroyed), and `mesh.bounds = ...` / `mesh.recalculateBounds()`
+  notified no observer, so `renderer.localBounds` kept the extents of the last data write (measured: getter
+  edit ×10 + `recalculateBounds()` → mesh max.x 5, renderer 0.5). `MeshFilter.onDestroy` now notifies the
+  renderer after nulling its meshes (immediate undraw); `updateMesh()` re-finds when the cached filter is
+  destroyed; both bounds paths notify through a notify-only observer loop — no `_needsUpdate`, no geometry
+  rebuild. Known limitation preserved (Unity parity): in-place mutation of the live `bounds` getter needs
+  `recalculateBounds()` or re-assign. Closes M0.2h report limitation #2. 4 regression tests (RED→GREEN);
+  suite **3026/3026** (185 files), typecheck + build clean, adversarial review PASS with independent RED
+  re-execution. Report `code-foundations/M0.2hr2/report.md`.
+
 - **M0.2hr1 — MeshFilter self-assign no longer destroys the assigned mesh (both setters; Unity parity).**
   `filter.mesh = filter.mesh` (the Unity edit idiom after editing through the getter) and
   `filter.sharedMesh = filter.mesh` destroyed the very instance being stored — the object undrew and
