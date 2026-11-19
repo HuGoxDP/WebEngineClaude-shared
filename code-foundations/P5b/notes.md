@@ -83,12 +83,39 @@ Decisions as built:
 
 ## Verification
 
-(live gate results appended after the run)
+All at branch HEAD `7fce7d2` (VL) unless noted. Raw logs:
+`C:/Users/HuGox/AppData/Local/Temp/opencode/p5b-live-plain.log`, `p5b-live-https.log`.
 
-Phase-2 unit evidence: `test:scripts` 79 pass / 0 fail; `backup/restore.test.mjs`
-4/4.
+- **Unit:** `npm run test:scripts` **88/88** (42 baseline → +46 new/updated);
+  `node --test backup/restore.test.mjs` **4/4**.
+- **Adversarial batch review of phases 1–2** (`review-phases-1-2.md`):
+  functional **PASS** — live nginx probes: valid port → 301
+  `Location: https://127.0.0.1:8443/some/path?q=1` + HSTS on https answers only;
+  bad port → container Exited(1); unset → empty include, plain 200; injection
+  battery; restore isolation; judge adversarial variants. Initial **FAIL on 2
+  coverage gaps** (`httpProbe`, `fetchHealth`) → fixed in `7fce7d2` → re-review
+  **PASS**.
+- **Static checks:** backend unit **308/308**; frontend `ng test` **770/770**
+  (50 files, statements 96.55%); frontend build ok + `check:csp` ok; e2e tsc:
+  only the 2 pre-existing TS2683 in untouched `viewer.spec.ts:100,374`.
+- **Docker checks (vl-db.lock):** backend Postgres integration **1666/1666**
+  (:55432); full browser e2e on scratch stack :8144 → **136 passed / 19 skipped**
+  of 155 specs (documented skip policy: streaming viewer variants + editor-csp
+  without the editor stack).
+- **LIVE gate (vl-db.lock, task-branch clone @7fce7d2):**
+  - plain: `selfhost-check: steps=12 ok=12 GREEN` — restore proof row back (1),
+    smoke 7 passed (6.1s).
+  - `--https`: `selfhost-check: steps=13 ok=13 GREEN` — https step: 301 →
+    `https://127.0.0.1:8443`, HSTS max-age=31536000; restore proof row back (1);
+    smoke 7 passed (12.2s) over TLS.
+  - Teardown clean, no leftover containers/volumes.
 
 ## Left open
 
-Live selfhost-check both modes + full repo checks run by the gate after this
-phase; results recorded in the report.
+Nothing blocking. Live gate (both modes) and full repo checks done — see above
+and `report.md`. Pre-existing observations, **not P5b**, out of scope:
+
+- 7 ScenarioCreator release archives lack `catalog-metadata.mjs` entries
+  (`publish:release` exits 1 while all 12 catalog scenarios are created+approved).
+- `e2e/tests/viewer.spec.ts` TS2683 ×2 (`:100`, `:374`).
+- `nginx.conf;C` / `csp.conf;C` ignored leftovers in some checkouts.
