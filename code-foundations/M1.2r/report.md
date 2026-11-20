@@ -106,9 +106,11 @@ The doc-grep test is deterministic and needs no Docker/locks (plan §Decision).
 
 ## Review verdict
 
-Pending — adversarial review (doc accuracy vs compose files + live proof,
-mutation check on the section-scoped assertions, M1.2s regression) runs after
-P2; verdict updated at cleanup.
+Adversarial doc-accuracy review **PASS** — R1–R7 and A1–A4 all PASS;
+independent RED mutation reproduced (scripts 93/89/4), live Compose v5.7.0
+probe, restore pair token-equal. Four cosmetic notes, non-blocking, no action.
+Post-merge verification V1–V5 PASS (primary gates re-executed: scripts 93/93 +
+unit 308/308).
 
 ## Commits
 
