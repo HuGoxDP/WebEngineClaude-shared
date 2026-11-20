@@ -285,6 +285,22 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## testv/virtual-lab — the platform
 ### 2026-11-20
+- **M1.2r — plain `docker compose` commands in the self-host guide no longer silently drop the
+  https/editor overlays.** `docs/self-host.md`: the HTTPS and editor sections now tell admins to
+  pin the overlay list in `.env` — `COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml[:docker-compose.editor.yml]`
+  (separator `;` on Windows; live-verified on Docker Compose v5.7.0: `config --services` resolved
+  both files from `.env` alone) — so every plain command (update, rollback, logs, stop, backup)
+  keeps the overlays. Without it, a plain `up -d --build` recreated the stack from
+  `docker-compose.yml` alone: 8443 and `REQUIRE_HTTPS` vanished (`docker-compose.https.yml:19,23`),
+  every Moodle launch failed and bearer tokens were accepted over http again; `/editor/`
+  disappeared and `down` orphaned the editor container. Update step 3 and rollback step 2
+  reference the mechanism (commands stay plain — `.env` is the one source of truth); the restore
+  command's explicit `-f` base+restore pair is kept deliberately (it replaces `COMPOSE_FILE`);
+  «Що нового» dated entry. `scripts/selfhost-check.mjs`: `COMPOSE_FILE` added to the scrubbed
+  compose-interpolated vars (D7 consistency). Verification: new `scripts/test/selfhost-doc.test.mjs`
+  (5 section-scoped doc assertions, no Docker) — RED on the old doc (93 tests, 89 pass, 4 fail),
+  GREEN **93/93**; backend unit **308/308**. No `--https` update leg: the check is fresh-clone
+  only and already overlay-correct on up/teardown. Report `code-foundations/M1.2r/report.md`.
 - **M1.2s — the self-host guide stops overclaiming `/api/health` and gains a rollback procedure.**
   Doc-only (option (b) of the Claude review of M1.2). `docs/self-host.md`: the identity paragraph
   now says `git log -1 --oneline` in the checkout identifies the release (the checkout **is** the
