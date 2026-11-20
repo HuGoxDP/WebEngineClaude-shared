@@ -19,9 +19,11 @@ The card prescribed: delete `MeshRenderer.onEnable` re-sync → case 5 FAILS.
 (`set sharedMesh` `MeshFilter.ts:52` → `_notifyRenderer` `:128-130` →
 `MeshRenderer.updateMesh` `:176-187`) has **no active-state gate**, so it syncs
 geometry while inactive; `onEnable` re-sync is a redundant second safety net.
-Deleting either mechanism alone leaves 5/5 DRAWN. The valid discriminator
-deletes **both** (≈ pre-M0.2h wake-time-only reads): rewritten cases 4+5 fail,
-old case 5 still passes. Deviation lead-visible in `plan.md`; review
+Deleting the `onEnable` re-sync alone leaves 5/5 DRAWN; deleting the notify
+body alone fails case 4 (`rendererFirst+shared`) while case 5 stays DRAWN
+(`onEnable` catches it) — 4/5. The discriminator for case 5 deletes **both**
+(≈ pre-M0.2h wake-time-only reads): rewritten cases 4+5 fail, old case 5 still
+passes. Deviation lead-visible in `plan.md`; review
 re-executes the double mutation independently.
 
 ## What landed
@@ -83,9 +85,10 @@ rebuilt from HEAD before each run). Raw logs
 ## Review
 
 Pending — adversarial review re-executes the double mutation independently
-(fresh rebuild, not trusting P1 logs), verifies single-mutation stays DRAWN,
-comment truth vs getter/setter code, doc claims vs harness JSON, case-5 order
-vs `SweptArea.ts`.
+(fresh rebuild, not trusting P1 logs), verifies onEnable-only deletion stays
+5/5 DRAWN while notify-only deletion fails case 4 only (documents the
+redundancy honestly), comment truth vs getter/setter code, doc claims vs
+harness JSON, case-5 order vs `SweptArea.ts`.
 
 ## Junk checks
 

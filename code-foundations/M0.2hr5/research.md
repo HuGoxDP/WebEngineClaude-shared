@@ -62,8 +62,9 @@ Conclusions:
    true — and stays true for the **rewritten** case 5. That is not a coverage
    hole in the rewrite: the notify push IS the M0.2h fix for this pattern
    (root causes #1-#3 in `M0.2h/report.md`); `onEnable` re-sync (root cause #4)
-   is defense-in-depth that no single-mechanism deletion can expose while the
-   other mechanism lives.
+   is defense-in-depth for case 5: neither single-mechanism deletion fails
+   case 5 while the other mechanism lives (notify-only deletion does fail
+   case 4 — table above).
 2. The rewritten case 5 is still a genuine regression probe: under
    wake-time-only behavior (both mechanisms deleted — the pre-M0.2h world) it
    FAILS, while the old case 5 passes. **The mutation check must delete BOTH

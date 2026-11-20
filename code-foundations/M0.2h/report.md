@@ -82,8 +82,11 @@ inactive-assign+reactivate pixel case covers exactly this pattern.
   assigned while inactive, reactivate) and re-verified 5/5 DRAWN on the HEAD bundle.
   Coverage proof: the push notify (`set sharedMesh` → `_notifyRenderer` →
   `updateMesh`, no active gate) is load-bearing; the `onEnable` re-sync is a
-  redundant second safety net — deleting either alone leaves 5/5 DRAWN, deleting
-  **both** fails cases 4+5 only. Report `code-foundations/M0.2hr5/report.md`.)
+  redundant second safety net. Measured (review re-execution): deleting the
+  `onEnable` re-sync alone leaves 5/5 DRAWN; deleting the notify body alone
+  fails case 4 (`rendererFirst+shared`) while case 5 stays DRAWN via `onEnable`;
+  only deleting **both** fails cases 4+5 — the double mutation is the
+  discriminator for the Kepler case. Report `code-foundations/M0.2hr5/report.md`.)
 - Adversarial review: **PASS, zero issues** — 11 hunt areas, 14 executed probes
   (observer lifecycle, `_markDirty` coverage, hook null-safety, zero-alloc,
   instance lifecycle/double-destroy, `_emptyGeometry`, serialization incl. AssetRef

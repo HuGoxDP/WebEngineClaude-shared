@@ -23,7 +23,7 @@ Gate: Debug (typecheck + full test + build + harness + mutation). DW: rewritten 
 
 File scope: `code-foundations/M0.2h/report.md`, `code-foundations/V1/notes.md`, `ROADMAP.md`, `code-foundations/M0.2hr5/{notes,report}.md`.
 
-- `M0.2h/report.md:76-77`: replace "(the Kepler SweptArea pattern)" claim with an honest correction note: original case 5 deactivated before adding components (wake-time read, duplicate of case 3's mechanism); M0.2hr5 (2026-11-19) rewrote it in the real SweptArea order and re-verified 5/5 DRAWN; note the two sync mechanisms (push notify load-bearing; onEnable re-sync defense-in-depth — neither single deletion fails the pixel case).
+- `M0.2h/report.md:76-77`: replace "(the Kepler SweptArea pattern)" claim with an honest correction note: original case 5 deactivated before adding components (wake-time read, duplicate of case 3's mechanism); M0.2hr5 (2026-11-19) rewrote it in the real SweptArea order and re-verified 5/5 DRAWN; note the two sync mechanisms (push notify load-bearing; onEnable re-sync defense-in-depth — neither single deletion fails case 5, `keplerOrder+reactivate`; notify-only deletion DOES fail case 4, measured later by the review).
 - `V1/notes.md:123-124` + table row :132: same correction — describe what case 5 NOW covers (components added active, deactivate, `sharedMesh` assign, reactivate); keep the historical rows, annotate "order corrected by M0.2hr5". :110 pattern description stays (it is accurate).
 - `ROADMAP.md:66` M0.2h cell tail: "pixel re-check 5/5 DRAWN incl. the Kepler SweptArea pattern" → corrected wording pointing at hr5 (e.g. "pixel re-check 5/5 DRAWN — case-5 order corrected + re-verified by M0.2hr5").
 - `ROADMAP.md:70` M0.2hr5 row → ✅ 2026-11-19 W3 + one-line summary (real-order case 5, double-mutation coverage proof, comment fix, docs corrected).
@@ -33,7 +33,7 @@ Gate: Minimal. DW: no remaining "incl. the Kepler SweptArea pattern"-style claim
 
 ## Review + merge
 
-Adversarial review (review agent): **independently re-execute the double mutation** (fresh rebuild, not trusting P1 logs), verify single-mutation stays DRAWN (documents the redundancy honestly), comment truth vs getter/setter code, doc claims match actual harness JSON outputs, case-5 order matches SweptArea.ts:47-49/:91-92. Full Debug gate on synced branch.
+Adversarial review (review agent): **independently re-execute the double mutation** (fresh rebuild, not trusting P1 logs), verify onEnable-only deletion stays DRAWN while notify-only deletion fails case 4 only (documents the redundancy honestly), comment truth vs getter/setter code, doc claims match actual harness JSON outputs, case-5 order matches SweptArea.ts:47-49/:91-92. Full Debug gate on synced branch.
 Merge engine first (WebEngineTS), then .claude-shared via `wk.sh merge-push` under `merge.lock`; post-merge full gates + graph check in primary repos; delete task branches + `claims/M0.2hr5`; `wk.sh done W3`.
 
 ## Risks
