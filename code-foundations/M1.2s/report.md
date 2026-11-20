@@ -85,8 +85,11 @@ Full per-flag cross-check table: `notes.md`.
 
 ## Review verdict
 
-Adversarial doc-accuracy review (read-only reviewer) per plan §Review:
-pending at report time — verdict appended by the review step.
+Adversarial doc-accuracy review **PASS** — R1–R7 and A1–A4 all PASS; the
+restore command token-verified against the `docker-compose.restore.yml`
+header. One note adopted: detached-HEAD clause added to the update step
+(`df7106c`). Post-merge verification V1–V5 PASS (unit 308/308 re-run in the
+primary worktree, doc truth verified, ROADMAP line ✅).
 
 ## Commits
 
