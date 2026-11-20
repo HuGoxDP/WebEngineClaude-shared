@@ -284,6 +284,20 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+### 2026-11-20
+- **M1.2s — the self-host guide stops overclaiming `/api/health` and gains a rollback procedure.**
+  Doc-only (option (b) of the Claude review of M1.2). `docs/self-host.md`: the identity paragraph
+  now says `git log -1 --oneline` in the checkout identifies the release (the checkout **is** the
+  release — no tags, local rebuild); `/api/health` keeps its real job — liveness (`"db":"connected"`)
+  and restart evidence (`build.startedAt`); `build.version` is the fixed `package.json` `1.0.0` and
+  `build.commit` is null unless `API_COMMIT` is set (nothing sets it) — stated honestly, no build
+  plumbing added. New «Якщо оновлення не вдалося» in «Оновлення»: migrations are forward-only
+  (011 is the point of no return), so rollback = `git checkout <previous commit>` + rebuild +
+  restore of the step-1 backup onto the live stack (`docker-compose.restore.yml` header command
+  adapted: no `-p`, no scratch overlay), dry run first then `--yes`, with destructive/idempotent
+  and data-loss warnings. Commands cross-checked against `restore.mjs`/compose; backend unit
+  **308/308** (no Docker). Report `code-foundations/M1.2s/report.md`.
+
 ### 2026-11-19
 - **The self-host check proves HTTPS and restore (`P5b`).** `npm run selfhost-check --https`
   starts the stack with `docker-compose.https.yml` + a self-signed cert and judges the wire:
