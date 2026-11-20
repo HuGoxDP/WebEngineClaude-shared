@@ -75,6 +75,18 @@ inactive-assign+reactivate pixel case covers exactly this pattern.
 - Pixel re-verification via the V1 harness against the fixed worktree bundle:
   **5/5 DRAWN** — the 4 original V1 cases + inactiveAssign+reactivate (the Kepler
   SweptArea pattern). Logs `w3/m02-pixel-run1.txt` / `run2.txt`.
+  (Correction 2026-11-19, M0.2hr5: the parenthetical claim was wrong — case 5
+  deactivated the object *before* adding the components, so it was a wake-time-read
+  duplicate of case 3's mechanism, not the Kepler order. M0.2hr5 rewrote case 5 in
+  the real SweptArea order (components added active, deactivate, `sharedMesh`
+  assigned while inactive, reactivate) and re-verified 5/5 DRAWN on the HEAD bundle.
+  Coverage proof: the push notify (`set sharedMesh` → `_notifyRenderer` →
+  `updateMesh`, no active gate) is load-bearing; the `onEnable` re-sync is a
+  redundant second safety net. Measured (review re-execution): deleting the
+  `onEnable` re-sync alone leaves 5/5 DRAWN; deleting the notify body alone
+  fails case 4 (`rendererFirst+shared`) while case 5 stays DRAWN via `onEnable`;
+  only deleting **both** fails cases 4+5 — the double mutation is the
+  discriminator for the Kepler case. Report `code-foundations/M0.2hr5/report.md`.)
 - Adversarial review: **PASS, zero issues** — 11 hunt areas, 14 executed probes
   (observer lifecycle, `_markDirty` coverage, hook null-safety, zero-alloc,
   instance lifecycle/double-destroy, `_emptyGeometry`, serialization incl. AssetRef
