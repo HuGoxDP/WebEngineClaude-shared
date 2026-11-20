@@ -84,11 +84,9 @@ rebuilt from HEAD before each run). Raw logs
 
 ## Review
 
-Pending — adversarial review re-executes the double mutation independently
-(fresh rebuild, not trusting P1 logs), verifies onEnable-only deletion stays
-5/5 DRAWN while notify-only deletion fails case 4 only (documents the
-redundancy honestly), comment truth vs getter/setter code, doc claims vs
-harness JSON, case-5 order vs `SweptArea.ts`.
+Full adversarial review **PASS** after one doc-accuracy fix (`f161241`):
+R4 found a false "either alone" claim in the report, corrected; narrow
+re-review D1–D6 all PASS. Post-merge verification V1–V6 PASS.
 
 ## Junk checks
 
