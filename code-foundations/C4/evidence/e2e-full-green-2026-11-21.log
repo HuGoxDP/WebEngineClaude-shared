@@ -1,0 +1,606 @@
+E2E_JOB_START=2026-11-21T16:55:28Z
+<base href="/editor/">
+SERVER_PID=597 (node serve-editor.mjs)
+SERVER_READY=2026-11-21T16:55:29Z served-base-href:
+<base href="/editor/">
+E2E_START=2026-11-21T16:55:29Z
+
+> webengine-editor@0.1.0 e2e
+> node e2e/run.mjs
+
+
+▶ a component script loads, attaches to its object, and swaps on save
+PASS  the scene opened with the object the script drives
+PASS  the component is attached, not a placeholder
+PASS  and its saved field is shown
+PASS  the Code tab opened on the script
+PASS  the file on disk holds the new default
+PASS  the typed file is what was typed
+PASS  the workspace is still open after the swap
+PASS  the object is still there
+PASS  a new object gets the script's new default
+PASS  nothing but the swap advisory in the console
+
+▶ a saved scripted component survives a full editor reload (DW-2.3)
+PASS  the scene was saved with the class name and the edited field
+PASS  a saved scene lets the reload go quietly
+PASS  after the reload the component is the real class
+PASS  and not a Missing script placeholder
+PASS  the saved field value survived the reload
+PASS  the edited script is on disk after the reload
+PASS  a new object gets the freshly compiled class's new default
+PASS  the saved object kept its saved value through the swap
+PASS  nothing but the swap advisory in the console
+PASS  no native dialogs were used
+
+▶ a broken script keeps its class, points at its line, and the scene is intact
+PASS  the Console names the file and the line
+PASS  and the row is clickable
+PASS  the component is still there
+PASS  with its saved value
+PASS  the scene file is untouched
+PASS  the click opened the script
+PASS  the file on disk is the broken one
+
+▶ a component whose class is gone says Missing script and keeps its data
+PASS  the title names the class the scene used
+PASS  and it is marked as a missing script
+PASS  the saved fields are shown read-only
+PASS  and nothing is editable
+PASS  the saved scene keeps the component and its fields
+
+▶ library: add Rotator, edit its speed, and the object rotates in play (DW-4.1)
+PASS  the Library section is there
+PASS  all ten behaviours are offered
+PASS  the source was copied to scripts/library/Rotator.ts
+PASS  the object is still selected after the reload
+PASS  speed shows the shipped default
+PASS  speed is editable
+PASS  the object rotates in play
+PASS  stop restores the pre-play pose
+PASS  the saved scene holds Rotator with the edited speed
+PASS  no page errors
+
+▶ library: second and third adds keep working, nothing offered twice (DW-4.3)
+PASS  Rotator: the source is on disk
+PASS  Rotator: attached to the still-selected object
+PASS  Mover: the source is on disk
+PASS  Mover: attached to the still-selected object
+PASS  Timer: the source is on disk
+PASS  Timer: attached to the still-selected object
+PASS  all three components are on the object
+PASS  Rotator is offered exactly once now
+PASS  Mover is offered exactly once now
+PASS  Timer is offered exactly once now
+PASS  the Library section offers only the seven left
+PASS  filtering shows Rotator once, from Scripts
+PASS  a second Mover attaches from Scripts
+PASS  no page errors, no duplicate-registration advisory
+
+▶ library: deleting the target mid-add aborts cleanly, first undo restores it (C4r5)
+PASS  the written library file stays
+PASS  no ghost object in the hierarchy
+PASS  the destroyed object is not selected
+PASS  no inspector component for the destroyed object
+PASS  Ctrl+Z restores the deleted object as the first undo step
+PASS  the saved scene is clean: Spinner back, no LookAtCamera
+PASS  no page errors
+
+▶ library: a stale empty file stays offered and the add heals it (C4r5)
+PASS  the stale entry is still offered
+PASS  the add heals the empty file
+PASS  the object is still selected
+PASS  the healthy installed file is offered once, from Scripts
+PASS  the author's non-empty library file is never overwritten
+PASS  no page errors
+
+▶ library: a failed write removes its own partial file, the retry heals (C4r5)
+PASS  the failure is shown in the error dialog
+PASS  the partial file this add created is removed
+PASS  the entry is offered again after the failure
+PASS  the retry writes the source and attaches
+PASS  the failure is logged exactly once, nothing else errors
+
+▶ library: a failed write never deletes the author's existing file (C4r5)
+PASS  the author's existing file survives the failed write
+
+▶ every form of the engine import resolves — sibling first, default, namespace, star, dynamic
+PASS  the class from the module that uses every form is attached
+PASS  the class is in the registry
+PASS  the default import bound
+PASS  a named import bound alongside it
+PASS  the namespace import has the engine's exports
+PASS  a sibling import before the engine's still made it in
+PASS  a module that only does export * resolved
+PASS  a module that re-exports a name resolved
+PASS  a dynamic import() resolved
+PASS  no page errors
+
+▶ editing a base module reaches its importer, and leaves the other class its identity
+PASS  both classes registered
+PASS  Enemy extends BaseMover
+PASS  and its parent is the very class the registry holds
+PASS  the base class was replaced
+PASS  the importer was re-linked against the new base
+PASS  the importer was replaced
+PASS  and the untouched base kept its class object
+PASS  the new importer extends that same class, not a second copy
+PASS  the scene still holds the object
+PASS  nothing but the swap advisories in the console
+
+▶ a script file opens in the Code tab, edits, and saves
+PASS  a script file is listed in the project panel
+PASS  the Code tab opened
+PASS  the file's text is in the editor
+PASS  the scene is not marked unsaved by opening a source
+PASS  the file on disk is the one opened
+PASS  editing marks the file unsaved
+PASS  and the scene still is not
+PASS  saving clears the file's mark
+PASS  the file on disk holds the edit
+PASS  the edited file is still there after a reload
+PASS  no page errors
+
+▶ an outside edit to a script recompiles on focus
+PASS  the outside edit recompiles the script
+PASS  no dialog was needed
+PASS  a new object gets the outside edit's default
+PASS  no native dialogs were used
+PASS  nothing but the swap advisory in the console
+
+▶ an outside edit to an open dirty script asks; keep mine and reload both respected
+PASS  the Code tab is clean after opening
+PASS  the buffer is dirty
+PASS  changed in both places, it asks
+PASS  keep mine keeps my buffer
+PASS  and the disk still holds the outside edit
+PASS  the same change is not asked about again
+PASS  the buffer is still mine and still dirty
+PASS  a new outside change asks again
+PASS  reload takes the disk text into the buffer
+PASS  the reloaded buffer is not marked unsaved
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ saving over an outside-changed script asks before it overwrites
+PASS  saving over an outside change asks
+PASS  cancel leaves the disk untouched
+PASS  and the buffer stays dirty
+PASS  it asks again while the file is still changed outside
+PASS  confirming writes my buffer
+PASS  the mark is cleared
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ a double save coalesces: one reload, no spurious import error, no self-overwrite ask (C4 review R4)
+PASS  the buffer is dirty before the double save
+PASS  the second save does not ask to replace the editor's own write
+PASS  a focus check mid-save does not ask either
+PASS  the class is swapped to the newest code
+PASS  the mark is cleared
+PASS  the disk holds the newest code
+PASS  a new object gets the newest default
+PASS  no Console error row
+PASS  one reload for the double save (the open's plus one)
+PASS  no spurious import-failure note
+PASS  nothing but the swap advisory in the console
+PASS  no native dialogs were used
+
+▶ a script file that vanished mid-reload is skipped silently
+PASS  no read error reached the Console
+PASS  the editor is still usable
+PASS  an object can still be created
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ a script read failure other than a vanished file reaches the Console
+PASS  the failure reached the Console as an error
+PASS  the row names the read, not a compile
+PASS  the row is a jump to the file
+PASS  no page errors
+PASS  no native dialogs were used
+
+▶ the running engine is the installed tarball (BuildInfo)
+PASS  the installed engine is a stamped build
+PASS  the page publishes its engine's BuildInfo
+PASS  the running builtAt is the installed package's
+PASS  the running version is the installed package's
+PASS  the running engine is a build, not sources
+PASS  no page errors
+
+▶ start screen: no workspace without a project; open, close, recent, forget
+PASS  no workspace before a project
+PASS  no menus on the start screen
+PASS  the start screen is shown
+PASS  the recent list starts empty
+PASS  an empty folder asks before it is set up
+PASS  the workspace appears
+PASS  the project name is shown
+PASS  the scenario layout was created
+PASS  closing returns to the start screen
+PASS  the project is in the recent list
+PASS  a recent project reopens
+PASS  after a reload nothing opens by itself
+PASS  but the project is remembered
+PASS  a project can be removed from the list
+PASS  removing it left the folder alone
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ opening folders: not a project, an existing project, a missing folder
+PASS  a folder with other files is not set up silently
+PASS  cancelling changes nothing
+PASS  making it a project adds the layout and keeps the files
+PASS  an existing project opens without questions
+PASS  its main scene is loaded
+PASS  saving writes back to that scene, not a new empty one
+PASS  a deleted folder is reported, not opened
+PASS  and the start screen stays
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ unsaved changes: closing asks, saving never silently replaces a scene
+PASS  closing with unsaved changes asks
+PASS  with three ways out
+PASS  cancelling keeps the project open
+PASS  saving over another scene asks first
+PASS  cancelling leaves the scene as it was
+PASS  confirming replaces it
+PASS  a saved scene closes without asking
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ honest saving: the mark, Save from the dialog, the gizmo, closing the tab
+PASS  a fresh project is saved
+PASS  the tab title has no mark
+PASS  an edit makes it unsaved
+PASS  the tab title says so
+PASS  and so does the tree's root row
+PASS  saving clears it
+PASS  the tooltip says when
+PASS  selecting does not make it unsaved
+PASS  the move tool's X handle is on screen
+PASS  pressing a handle without dragging is not an edit
+PASS  and does not deselect the object
+PASS  dragging the gizmo moved the object
+PASS  and made the scene unsaved
+PASS  Ctrl+Z puts it back
+PASS  saved again before leaving
+PASS  a saved scene lets the tab go quietly
+PASS  unsaved work makes the browser ask first
+PASS  Save in the dialog writes the scene before closing
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ 3d objects: the six primitives, undo, persistence, and the gizmo on top (B1.1)
+PASS  the pivot starts at the origin
+PASS  Cube: created and selected
+PASS  Cube: sits at the pivot
+PASS  Cube: one undo step removes it
+PASS  Cube: redo brings it back
+PASS  Sphere: created and selected
+PASS  Sphere: sits at the pivot
+PASS  Sphere: one undo step removes it
+PASS  Sphere: redo brings it back
+PASS  Capsule: created and selected
+PASS  Capsule: sits at the pivot
+PASS  Capsule: one undo step removes it
+PASS  Capsule: redo brings it back
+PASS  Cylinder: created and selected
+PASS  Cylinder: sits at the pivot
+PASS  Cylinder: one undo step removes it
+PASS  Cylinder: redo brings it back
+PASS  Plane: created and selected
+PASS  Plane: sits at the pivot
+PASS  Plane: one undo step removes it
+PASS  Plane: redo brings it back
+PASS  Quad: created and selected
+PASS  Quad: sits at the pivot
+PASS  Quad: one undo step removes it
+PASS  Quad: redo brings it back
+PASS  reopen: all six are in the scene
+PASS  the file stays format version 1
+PASS  Cube: a PrimitiveMesh with its kind
+PASS  Cube: an inlined material
+PASS  Cube: Unity's collider
+PASS  Sphere: a PrimitiveMesh with its kind
+PASS  Sphere: an inlined material
+PASS  Sphere: Unity's collider
+PASS  Capsule: a PrimitiveMesh with its kind
+PASS  Capsule: an inlined material
+PASS  Capsule: Unity's collider
+PASS  Cylinder: a PrimitiveMesh with its kind
+PASS  Cylinder: an inlined material
+PASS  Cylinder: Unity's collider
+PASS  Plane: no collider (Unity's MeshCollider is a recorded deviation)
+PASS  Quad: no collider (Unity's MeshCollider is a recorded deviation)
+PASS  the gizmo's X arrow is drawn over the cube
+PASS  no page errors
+
+▶ recovery: unsaved work survives a crash; giving it up is remembered
+PASS  nothing is written while nothing is unsaved
+PASS  a recovery copy appears while there are unsaved changes
+PASS  the Project panel does not show it
+PASS  saving removes it
+PASS  reopening offers the unsaved work back
+PASS  restoring brings the objects back
+PASS  and the scene is still unsaved, as it is
+PASS  the copy is still offered after another crash
+PASS  refusing deletes it
+PASS  and the scene is the saved one
+PASS  a copy exists again
+PASS  Don't save deletes the copy
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ one tab per project; changes made outside the editor
+PASS  a second tab cannot open the same project
+PASS  it stays on the start screen
+PASS  once the first tab lets go, the second can open it
+PASS  a clean scene reloads quietly when the file changes
+PASS  and stays clean
+PASS  changed in both places, it asks
+PASS  keeping mine keeps my edit
+PASS  and it does not ask again about the same change
+PASS  reloading takes the disk version
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ a project in the browser's own store: create, reopen after a reload, missing when cleared
+PASS  step three offers both stores
+PASS  the folder is the default
+PASS  the project opens
+PASS  one project folder in the browser store
+PASS  the layout is in the browser store
+PASS  the identity is what was typed
+PASS  the starting scene was written
+PASS  after a reload nothing opens by itself
+PASS  the browser project is remembered
+PASS  a browser project reopens
+PASS  a cleared project is reported missing, not reopened empty
+PASS  and the workspace did not open
+PASS  no page errors
+
+▶ a browser with no createWritable is offered no browser store, and creates nothing in it
+PASS  the editor still starts
+PASS  no location choice is offered
+PASS  and the folder path is the only one left
+PASS  no workspace opened
+PASS  and the failure is reported
+PASS  nothing was created in the browser store
+PASS  no page errors
+
+▶ a browser with neither store says unsupported, and opens no wizard
+PASS  the unsupported notice is shown
+PASS  and the create button is not there
+PASS  no project folder was made
+PASS  no page errors
+
+▶ a quota exceeded on save reaches the user and keeps the edit unsaved
+PASS  the project is open
+PASS  the starting scene is on disk
+PASS  the edit is unsaved
+PASS  the save failure names the error
+PASS  the edit is still unsaved
+PASS  and the unsaved mark is still there
+PASS  the scene file was not replaced
+PASS  no page errors
+
+▶ new project wizard: collects, validates, creates; cancelling writes nothing
+PASS  the wizard opens
+PASS  the title field has focus
+PASS  cancelling creates nothing
+PASS  the address follows the title, transliterated
+PASS  an invalid address is flagged
+PASS  and blocks going on
+PASS  step two offers the starting points
+PASS  light and camera is the default
+PASS  step three needs a folder first
+PASS  the folder name follows the title
+PASS  a taken name is refused with a reason
+PASS  and the wizard stays open
+PASS  the project opens
+PASS  the starting scene has a camera and a light
+PASS  a fresh project is not 'unsaved'
+PASS  the layout is in the new folder
+PASS  the existing folder was left alone
+PASS  the identity is what was typed
+PASS  the scene was written with both objects
+PASS  the camera looks at the scene from the back
+PASS  the wizard project holds the library source
+PASS  the saved wizard scene keeps two objects, one with Rotator
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ project panel: import, save, reload, reopen, delete
+PASS  layout files exist
+PASS  the project reopens from the recent list
+PASS  its saved scene is opened with it
+PASS  deleting asks first
+PASS  delete removes the file from disk
+PASS  textures folder created through the dialog
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ language and theme follow the settings, and survive a reload
+PASS  the start screen is Ukrainian
+PASS  html lang follows
+PASS  light theme applied
+PASS  light background is light
+PASS  menu bar is Ukrainian
+PASS  project panel is Ukrainian
+PASS  five objects use the genitive plural
+PASS  language survives a reload
+PASS  no page errors
+
+▶ preferences: reachable on every screen, language switches live, persists
+PASS  the gear opens Preferences on the start screen
+PASS  asking again does not stack dialogs
+PASS  Esc closes it
+PASS  Ctrl+, opens it
+PASS  the start screen's own switch changes the language
+PASS  Edit → Preferences opens it in the workspace
+PASS  dialog title follows the language
+PASS  menu bar behind it follows too
+PASS  theme changes at once
+PASS  shortcuts list is shown
+PASS  about shows the engine build
+PASS  the open scene survived the language change
+PASS  language and theme persist
+PASS  reset returns to the browser's language and the dark theme
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ dialogs: Esc cancels, Enter confirms, shortcuts stand down
+PASS  rename opens a dialog
+PASS  the field has focus
+PASS  Esc closes without renaming
+PASS  the object survived Delete in the dialog
+PASS  Enter renames
+PASS  an empty name cannot be confirmed
+PASS  no native dialogs were used
+
+▶ an open settles its scene before the workspace accepts edits (C4)
+PASS  the open reaches its script load
+PASS  while it settles, no workspace is shown
+PASS  the workspace opens clean
+PASS  no edit was lost to the settle
+PASS  no phantom object from the gap
+PASS  once open, the shortcut creates
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ a project switch settles before the workspace accepts edits (C4 review R4-G3)
+PASS  the first project is open and settled
+PASS  the switch reaches its script load
+PASS  while the switch settles, no workspace is shown
+PASS  and no menu offers Open Project mid-settle
+PASS  the create shortcut is inert in the gap
+PASS  the second project opens clean
+PASS  the project tag names the new project
+PASS  no phantom object from the gap
+PASS  no edit was lost to the settle
+PASS  a focus check after the switch does not reload the old project's scripts
+PASS  no Console error row
+PASS  once open, the shortcut creates and the object stays
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ scene formats: v1, an absent version and a v2 link all open
+PASS  FmtV1: the scene opens without questions
+PASS  FmtNoVer: the scene opens without questions
+PASS  FmtV2: the scene opens without questions
+PASS  no native dialogs were used
+PASS  no page errors beyond the placeholder warning
+
+▶ scene formats: a newer format and a broken file are refused, the scene stays
+PASS  the scene is open first
+PASS  a v3 file is refused with the too-new message
+PASS  the refusal keeps the open scene
+PASS  the refusal keeps the scene clean
+PASS  not JSON keeps the scene.invalid message
+PASS  not JSON keeps the open scene
+PASS  not a scene keeps the scene.invalid message
+PASS  not a scene keeps the open scene
+PASS  no native dialogs were used
+PASS  no page errors
+
+▶ scene formats: the too-new refusal is translated (uk)
+PASS  uk: the too-new message is Ukrainian
+PASS  uk: the refusal keeps the open scene
+
+▶ navigation: orbit, zoom, dolly, pan, look, fly — the pose never drifts (B1.2)
+PASS  the initial pose is the frozen one
+PASS  orbit keeps the distance to the pivot
+PASS  orbit moves the camera around the pivot (Δx sign)
+PASS  the wheel zooms in
+PASS  zooming leaves the pivot alone
+PASS  Alt+RMB dollies
+PASS  pan moves the pivot
+PASS  pan moves the camera by the same vector
+PASS  pan keeps the forward and the distance
+PASS  looking does not move the camera
+PASS  looking turns the forward
+PASS  RMB + W flies along the forward
+PASS  Shift flies at least three times as fast
+PASS  navigating does not mark the scene unsaved
+PASS  no page errors
+
+▶ orientation cube: cones snap the camera, the centre toggles iso (B1.3)
+PASS  X is clickable on the gizmo
+PASS  X cone: forward is (-1,0,0)
+PASS  Y is clickable on the gizmo
+PASS  Y cone: forward is (0,-1,0)
+PASS  Z is clickable on the gizmo
+PASS  Z cone: forward is (0,0,-1)
+PASS  X is clickable on the gizmo
+PASS  X cone: forward is (-1,0,0)
+PASS  −Z is clickable on the gizmo
+PASS  −Z cone: forward is (0,0,1)
+PASS  the pivot is still the origin
+PASS  Y is clickable on the gizmo
+PASS  Y cone: forward is (0,-1,0)
+PASS  Top view: +Z is above the gizmo centre
+PASS  Top view: +X is right of the gizmo centre
+PASS  the centre click turns the camera orthographic
+PASS  the label reads Iso
+PASS  the corner chip says Iso
+PASS  the framing survives the toggle (<15%)
+PASS  the pose is unchanged by the toggle
+PASS  the centre click turns it back
+PASS  the label reads Persp
+PASS  the cube does not mark the scene unsaved
+PASS  no page errors
+
+▶ transform handles: snapping, global vs local, multi-select, the tools (B1.4)
+PASS  the X arrow is on screen
+PASS  hovering finds the translate arrow
+PASS  a Ctrl drag lands on the 0.5 step
+PASS  and leaves the other axes alone
+PASS  one undo puts the cube back
+PASS  a free drag does not land on the step
+PASS  a Global X drag moves only along world X
+PASS  the object's own X arrow is reachable
+PASS  a Local X drag moves along the object's own X
+PASS  both are selected
+PASS  Pivot puts the handle on the active object
+PASS  Centre puts the handle between the two objects
+PASS  Centre is a different place from Pivot
+PASS  the drag moves both objects by the same delta
+PASS  one undo restores both
+PASS  Q leaves no handle under the pointer
+PASS  the View tool's left button pans
+PASS  Y shows the translate, rotate and scale handles
+PASS  dragging in Y mode moves the object
+PASS  the turn gizmo's Y ring is reachable
+PASS  a snapped turn lands on 15°
+PASS  W selects the move tool
+PASS  E selects the rotate tool
+PASS  R selects the scale tool
+PASS  Q selects the view tool
+PASS  Y selects the transform tool
+PASS  no page errors
+
+▶ selection: box, modifiers, and the orange outline (B1.5)
+PASS  all four cubes are on screen
+PASS  a rectangle selects the objects it covers
+PASS  the Hierarchy agrees
+PASS  Shift + rectangle adds to the selection
+PASS  Ctrl + click removes the clicked object
+PASS  the outline is orange around a selected cube
+PASS  the old green box is gone for meshes
+PASS  a click selects
+PASS  a click on nothing clears
+PASS  the outline is gone once nothing is selected
+PASS  a click selects the object it hit
+PASS  Shift + click adds
+PASS  Shift + click removes again
+PASS  the create marks the scene unsaved
+PASS  the selection changes do not mark the scene unsaved
+PASS  the undo stack's top is still that create (the selection added nothing)
+PASS  no page errors
+
+All checks passed.
+E2E_EXIT=0
+E2E_END=2026-11-21T17:02:51Z
+COUNTS: PASS=501 FAIL=0 SCENARIOS=45
