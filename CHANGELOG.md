@@ -15,6 +15,44 @@ Dates are commit dates. Anything that changes rendered output or a measured numb
 
 ## WebEngineTS — the engine
 
+### 2026-11-19
+
+- **M0.2hr5 — the V1 pixel probe's case 5 now exercises the real Kepler SweptArea order; stale coverage claims corrected.**
+  The M0.2h-era case 5 deactivated the object *before* adding the components — a wake-time-read
+  duplicate of case 3, not the Kepler pattern it claimed to cover. Rewritten: MeshFilter + MeshRenderer
+  added while active, `setActive(false)`, `sharedMesh = Mesh.createCube(2)` while inactive,
+  `setActive(true)` (Kepler assigns `sharedMesh`, not `.mesh`). Harness **5/5 DRAWN** on the HEAD bundle.
+  Measured: deleting `MeshRenderer.onEnable` re-sync alone does NOT fail the case — the push notify
+  (`set sharedMesh` → `_notifyRenderer` → `updateMesh`, no active gate) syncs while inactive; the
+  onEnable re-sync is a redundant safety net. The discriminating mutation deletes **both** mechanisms
+  (≈ pre-M0.2h wake-time-only reads): cases 4+5 `not drawn rgb(0,0,0)`, cases 1-3 DRAWN; restore 5/5.
+  `MeshFilter.ts:18` field comment corrected ("first write" → "first read of {@link mesh}" — the getter
+  clones, the setter stores the reference). Stale "incl. the Kepler SweptArea pattern" claims amended
+  in `M0.2h/report.md`, `V1/notes.md` and the ROADMAP M0.2h cell (historical honesty: annotated, not
+  rewritten). Comment-only engine change — no behavior delta; suite **3026/3026** (185 files),
+  typecheck + build clean. Report `code-foundations/M0.2hr5/report.md`.
+
+- **M0.2hr2 — destroying a MeshFilter undraws immediately; a replacement filter is found; bounds changes reach the renderer.**
+  A destroyed `MeshFilter` kept being drawn (or a replacement was never found — the renderer re-found its
+  filter only when the cache was `null`, not destroyed), and `mesh.bounds = ...` / `mesh.recalculateBounds()`
+  notified no observer, so `renderer.localBounds` kept the extents of the last data write (measured: getter
+  edit ×10 + `recalculateBounds()` → mesh max.x 5, renderer 0.5). `MeshFilter.onDestroy` now notifies the
+  renderer after nulling its meshes (immediate undraw); `updateMesh()` re-finds when the cached filter is
+  destroyed; both bounds paths notify through a notify-only observer loop — no `_needsUpdate`, no geometry
+  rebuild. Known limitation preserved (Unity parity): in-place mutation of the live `bounds` getter needs
+  `recalculateBounds()` or re-assign. Closes M0.2h report limitation #2. 4 regression tests (RED→GREEN);
+  suite **3026/3026** (185 files), typecheck + build clean, adversarial review PASS with independent RED
+  re-execution. Report `code-foundations/M0.2hr2/report.md`.
+
+- **M0.2hr1 — MeshFilter self-assign no longer destroys the assigned mesh (both setters; Unity parity).**
+  `filter.mesh = filter.mesh` (the Unity edit idiom after editing through the getter) and
+  `filter.sharedMesh = filter.mesh` destroyed the very instance being stored — the object undrew and
+  the mesh ended up destroyed; a second filter holding the copy as its `sharedMesh` lost it on the
+  owner's swap. Both setters now keep the instance alive on self-assign (`mesh =` keeps ownership,
+  `sharedMesh =` relinquishes it); a swap to a different mesh or to `null` still destroys the owned
+  instance. 5 regression tests (RED→GREEN); suite **3022/3022** (185 files), typecheck + build clean,
+  adversarial review PASS. Report `code-foundations/M0.2hr1/report.md`.
+
 ### 2026-11-18
 
 - **⚠ measurable — `filter.mesh = m` now draws, in any assignment order (M0.2h).** The
@@ -246,6 +284,36 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 ---
 
 ## testv/virtual-lab — the platform
+### 2026-11-20
+- **M1.2r — plain `docker compose` commands in the self-host guide no longer silently drop the
+  https/editor overlays.** `docs/self-host.md`: the HTTPS and editor sections now tell admins to
+  pin the overlay list in `.env` — `COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml[:docker-compose.editor.yml]`
+  (separator `;` on Windows; live-verified on Docker Compose v5.7.0: `config --services` resolved
+  both files from `.env` alone) — so every plain command (update, rollback, logs, stop, backup)
+  keeps the overlays. Without it, a plain `up -d --build` recreated the stack from
+  `docker-compose.yml` alone: 8443 and `REQUIRE_HTTPS` vanished (`docker-compose.https.yml:19,23`),
+  every Moodle launch failed and bearer tokens were accepted over http again; `/editor/`
+  disappeared and `down` orphaned the editor container. Update step 3 and rollback step 2
+  reference the mechanism (commands stay plain — `.env` is the one source of truth); the restore
+  command's explicit `-f` base+restore pair is kept deliberately (it replaces `COMPOSE_FILE`);
+  «Що нового» dated entry. `scripts/selfhost-check.mjs`: `COMPOSE_FILE` added to the scrubbed
+  compose-interpolated vars (D7 consistency). Verification: new `scripts/test/selfhost-doc.test.mjs`
+  (5 section-scoped doc assertions, no Docker) — RED on the old doc (93 tests, 89 pass, 4 fail),
+  GREEN **93/93**; backend unit **308/308**. No `--https` update leg: the check is fresh-clone
+  only and already overlay-correct on up/teardown. Report `code-foundations/M1.2r/report.md`.
+- **M1.2s — the self-host guide stops overclaiming `/api/health` and gains a rollback procedure.**
+  Doc-only (option (b) of the Claude review of M1.2). `docs/self-host.md`: the identity paragraph
+  now says `git log -1 --oneline` in the checkout identifies the release (the checkout **is** the
+  release — no tags, local rebuild); `/api/health` keeps its real job — liveness (`"db":"connected"`)
+  and restart evidence (`build.startedAt`); `build.version` is the fixed `package.json` `1.0.0` and
+  `build.commit` is null unless `API_COMMIT` is set (nothing sets it) — stated honestly, no build
+  plumbing added. New «Якщо оновлення не вдалося» in «Оновлення»: migrations are forward-only
+  (011 is the point of no return), so rollback = `git checkout <previous commit>` + rebuild +
+  restore of the step-1 backup onto the live stack (`docker-compose.restore.yml` header command
+  adapted: no `-p`, no scratch overlay), dry run first then `--yes`, with destructive/idempotent
+  and data-loss warnings. Commands cross-checked against `restore.mjs`/compose; backend unit
+  **308/308** (no Docker). Report `code-foundations/M1.2s/report.md`.
+
 ### 2026-11-19
 - **The self-host check proves HTTPS and restore (`P5b`).** `npm run selfhost-check --https`
   starts the stack with `docker-compose.https.yml` + a self-signed cert and judges the wire:

@@ -93,7 +93,8 @@ Engine `CHANGELOG.md` *Fixed* bullet; branch pushed.
 - Full suite **3017/3017** (185 files); typecheck **3 configs exit 0**; rollup build
   **exit 0**.
 - Pixel re-verification via the V1 harness against the fixed worktree bundle:
-  **5/5 DRAWN** — the 4 original V1 cases + inactiveAssign+reactivate. Logs
+  **5/5 DRAWN** — the 4 original V1 cases + inactiveAssign+reactivate (probe key
+  renamed keplerOrder+reactivate by M0.2hr5). Logs
   `C:/Users/HuGox/AppData/Local/Temp/opencode/w3/m02-pixel-run1.txt` / `run2.txt`.
 - V1 harness fixes shipped here: `run.mjs` stale-root bug (derives root from
   `import.meta.url`), `setters-m02h.js` added, `V1/notes.md` corrected — Kepler
