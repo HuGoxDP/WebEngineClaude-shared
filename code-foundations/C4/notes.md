@@ -1,10 +1,10 @@
-# C4 — Stage 12: scripts — build notes (W1, in progress)
+# C4 — Stage 12: scripts — build notes (W1, done 2026-11-21)
 
 Task row: `C4` (M4, editor), claimed by W1 as `C4-editor-scripts-and-library`. Plan: `plan.md`
 (phases 1–5); research: `research.md` (D1–D6). The repo's own plan of record is
 `WebEngineTSEditor/docs/unity-editor-plan.md` §3.2 and its Stage 12 box.
 
-**Status:** phases 1–3 + C4r4 landed on the task branch; the debug gate is green (**371/371**, 2026-11-18); phases 1–4 + C4r4 landed on the task branch; phase 4 review + phase 5 (adversarial review, DW-2.3, docs) next.
+**Status:** done — all five phases + the review fix chain (R4, R4-G3) landed on the task branch; final verification PASS @ `2a4fa96` (2026-11-21), full e2e 501/501 over 45 scenarios. See the Report section at the end and `report.md`.
 
 ## Phase 1 — the Code tab (`eaab306`)
 
@@ -352,3 +352,20 @@ Deferred follow-up ⬜ candidates (trace-grounded, not fixed here):
 - `code.file()` buffer survives a switch: the Code tab can still show the previous project's file
   after switching (panel unmounts, signal does not clear). Same family, low severity; a
   `file.set(null)` on switch/close would close it.
+
+## Report (2026-11-21)
+
+Full report: `report.md` (this folder). Final tip `2a4fa96`, verification PASS
+(`.workers/logs/C4-verify-2a4fa96.md`): full e2e **501 PASS / 0 FAIL / 0 skip, 45 scenarios**,
+`E2E_EXIT=0` (16:55→17:02Z); `ng build` exit 0; new pins green — switch-settle :2555 14/14,
+double-save :1437 12/12 incl. the :1484 G2 focus-mid-save check. Full-suite green history:
+371 (11-18) → 475 (11-19) → 486 (11-20) → 501 (11-21), logs in `evidence/`.
+
+ROADMAP ticks on this branch: **C4, C4r1, C4r2, C4r3, C4r4, T2** — every fix verified contained in
+the branch (C4r1: vendored engine + import map removed, `4549b8b` BuildInfo pin; C4r2: `f019ee0` +
+the two read-failure scenarios; C4r3: measured boot 859–932 ms bundled vs ~3000 ms mapped, map
+removed, final boot 846–870 ms — the row's 10-boot median protocol was superseded by removing the
+cause; C4r4: `bf29d14` + `a4c29c2`; T2: `5b973a1`, leaked browser contexts, 192→20463 ms vs
+250–890 ms over 14 opens). New ⬜ follow-ups: **C4r5** (direct pin for the single-flight reload,
+deferred candidate G1 above) and **C4r6** (`code.file()` staleness after a switch, deferred
+candidate above). Review notes N1–N4 stay non-blocking in `review-phase5-r4-g3-recheck.md`.
