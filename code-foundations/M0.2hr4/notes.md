@@ -149,3 +149,56 @@ guessed; both halves are straight consequences of D-1/D-2/D-3.
 
 None. One recorded wording deviation (DW-3.2 above), resolved by the binding
 D-2 rather than by guessing.
+## Phase 4 — adversarial review (record)
+
+`review-phase4-adversarial.md` (this folder): **VERDICT PASS** pinned
+`e494ea1de8deb9999387b086cae3009cf4d3d4ed`. Attacks A1–A8 all PASS (use-count
+lifecycle across every destroy path; stale-recipe writer coverage; alias
+semantics vs all 27 pre-existing tests; LiveMesh codec scoping/index reuse/
+warn-once; SceneSerializer threading with no public signature change; test
+integrity byte-level — zero weakened assertions, `:1976-2074` pins identical,
++44 names exactly; DW-3.2 deviation ruled FAITHFUL under binding D-2; scope
+exactly the 5 planned src + 5 test files). Six non-blocking notes N1–N6
+(per-realm warn-once, `subMeshCount` pre-existing non-writer, in-place array
+mutation contract, user-destroy-of-shared hazard, plan DW-3.2 wording,
+release-at-0 error-per-call). No blocking issues, no fixes required.
+
+## Full gate (verifier window, DW-1.6 / DW-2.6 / DW-3.8)
+
+`.workers/logs/M0.2hr4-verify-e494ea1.md` FINAL section: **PASS @e494ea1** —
+`npm run typecheck` exit 0; `npm test` full vitest **186 files / 3070 tests,
+0 failed**, exit 0; `npm run build` exit 0; junk clean (10 files,
+782 insertions / 62 deletions vs c4a0119); targeted counts 30/31/7/17/158 =
+243; RED-proof for DW-2.5 and DW-3.1 by construction against c4a0119 sources.
+Build-slot wait ≈142 min across two verifier runs (B1 e2e, then C4 post-merge
+e2e held editor-e2e.lock); no lock taken by the verifier, no owner process
+touched.
+
+## Phase 5 — docs (this record)
+
+- Engine commit `607ec2d` `docs(M0.2hr4): changelog mesh alias/identity/lifetime
+  entries and FieldType.Mesh doc` (push `e494ea1..607ec2d`):
+  - CHANGELOG *Fixed*: getter edits survive batching, Instantiate and prefab
+    snapshots (DW-5.1 names every behaviour change).
+  - CHANGELOG *Changed*: sharedMesh alias after `mesh` read (Unity);
+    Instantiate shares meshes by identity incl. primitives; edited primitive
+    saves empty with one warning instead of its unedited recipe; a shared
+    instance is freed only at its last MeshFilter use.
+  - `src/engine/core/reflection/Types.ts` `FieldType.Mesh` doc: "a mesh edited
+    after its factory built it has no recipe any more" + "Instantiate passes
+    meshes by identity". **Comment-only proof:** `git diff -U0` changed lines
+    are all ` * ` doc lines; count of changed non-comment lines = 0 (grep
+    `-vcE '^[+-]\s*\*'` over the +/- lines → `0`). Per dispatch this waives
+    re-verification of the e494ea1 gate for this delta.
+- Shared: merged `origin/main` into the task branch first (27 commits behind;
+  merge `de9c3d0`, no conflicts); appended this record; wrote `report.md`;
+  committed `review-phase4-adversarial.md` (explicit path).
+- **N5 applied:** plan.md DW-3.2 wording corrected at Report per the
+  adversarial A7 ruling — survivor-while-used + release-at-zero, both pinned;
+  the old "the original instance is untouched" phrase replaced with the D-2
+  consequence and a dated correction note. This is the only plan edit.
+- ENGINE-GAPS: nothing to close — the plan/research file no gap entry; the
+  research's follow-up (Behaviour.enabled serialization) was already filed as
+  ROADMAP row SER1 during research.
+- Deviations: only the recorded DW-3.2 wording deviation (phases 1–3 section
+  above; ruled FAITHFUL by A7; plan text now corrected). No STOPs.
