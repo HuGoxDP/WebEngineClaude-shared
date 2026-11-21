@@ -317,3 +317,38 @@ Non-blocking review notes: the 1 MB initial-budget warning is pre-existing (1.99
 error budget); same-label adds within 500 ms coalesce into one undo step (history service, low impact);
 `findGameObject` returns the first name match — duplicate-named objects could re-find the wrong one
 (trace-supported, unexecuted; candidate follow-up row).
+
+### R4-G3 switch settle fix (2026-11-21)
+
+R4 re-review (`review-phase5-r4-recheck.md`) FAIL item 2 confirmed by trace and fixed forward:
+on a project SWITCH, status never left 'open' during `_enter`/browser-create, so the workspace,
+menus and shortcuts stayed live through the new project's `reloadScripts` gap — an Alt+Shift+N
+there created an object `_resetScene` then wiped, and Open Project stayed clickable mid-settle.
+d9943bd's deferred-status mechanism protected only the start-screen path.
+
+Fix (editor, `fix(editor): … (C4 review R4-G3)`):
+- `commands.service.ts` `_enter` + createProject browser branch: `status.set('closed')` before
+  the switch begins — same guard as the start-screen path; `screen()` → 'start', workspace
+  unmounts, shortcuts detach; `_settle` still sets 'open' only at the end.
+- `code-editor.service.ts` `reloadScripts`: `_stamps.clear()` before the re-seed — the previous
+  project's same-named paths must not read as outside edits after a switch (verdict Notes item).
+- `code-editor.service.ts` `save`: stands down while `_checking` — closes the verdict's
+  spurious-ask note (a focus check in flight could read the save's own write before the stamp).
+
+Pins (run.mjs, no runs — lead-managed build window; failing-first by construction on 2400f86):
+- new scenario "a project switch settles before the workspace accepts edits (C4 review R4-G3)":
+  open A (with an extra script B lacks), arm `holdScriptRead`, File → Open Project to B; during
+  the held read: `.work` count 0, menubar gone, Alt+Shift+N inert; after release: B's scene,
+  Saved, no phantom GameObject; a focus event then adds no third reload (stamps cleared);
+  post-settle Alt+Shift+N creates and the object stays. On 2400f86 the workspace stays mounted
+  through the gap, so the `.work`/menubar checks fail and the keypress leaves a wiped-then-absent
+  GameObject trail — red by construction.
+- double-save scenario extended (G2): a focus event inside the same held write→stamp window must
+  not raise the outside-change ask (pins the `_saving` guard on `checkOutsideEdits`).
+
+Deferred follow-up ⬜ candidates (trace-grounded, not fixed here):
+- G1: single-flight `reload()` (shared promise + trailing `_rerun` pass) still has no direct pin —
+  needs a scenario driving two concurrent reload callers (library add during a save's reload).
+- `code.file()` buffer survives a switch: the Code tab can still show the previous project's file
+  after switching (panel unmounts, signal does not clear). Same family, low severity; a
+  `file.set(null)` on switch/close would close it.
