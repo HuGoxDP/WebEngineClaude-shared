@@ -61,3 +61,13 @@ referenced here (not visible from this worktree). Recorded deviations
   `.workers/W2/b1-gizmos-on.png` / `.workers/W2/b1-gizmos-off.png` (DW-6.3).
 - Build notes: `code-foundations/B1/notes-phase6.md` (phase 6 + fold-in), `notes-phase7.md`
   (phase 7 + code landing), this file (phase 8).
+
+## Verify state — PASS #2 recorded; merge sequence proceeding (2026-11-21)
+
+Merged-tip re-run complete at editor tip `c8982ebd8d5b105a9dcf9070b664f9cd455fbc3b`
+(branch merged C4 master `d404658` via `d5d1655`; harness fix `c8982eb`: 3 Chrome launch
+switches in `platform-pixels.mjs`, root cause field-trial/GCM services hanging raw headless
+spawn — see `notes-phase7.md` § "Verify PASS #2"). Merged suite e2e **616 PASS / 0 FAIL /
+51 scenarios**; `e2e:build` **4 fixtures / 0 failed**. PASS file:
+`.workers/logs/B1-verify-c8982ebd8d5b105a9dcf9070b664f9cd455fbc3b.md`. Merge sequence
+(merge.lock → editor merge-push → shared merge-push → primaries ff-only) proceeding.

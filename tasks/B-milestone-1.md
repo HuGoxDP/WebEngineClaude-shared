@@ -35,12 +35,12 @@ if it does not build and run on the platform, the stage is not closed. Add e2e s
 ## B1 — Stage 6: scene and objects *(editor; ~2 weeks; Sonnet; human check for navigation feel)*
 
 **Done 2026-11-21** (branch `B1-component-gizmos`; notes `code-foundations/B1/notes-phase6.md`,
-`notes-phase7.md`, `notes-phase8.md`; B1r–B1r5 folded). Verified 2026-11-21 @ editor tip `37f2a7f`
-(`dcf5926` + verifier fixes `b770b44`, `37f2a7f`): full e2e **433 PASS / 0 FAIL / 29 scenarios**
-(baseline 380), `e2e:build` **4 fixtures / 0 failed** (wizard-project, pixels-lit 0.4980 > 0.3,
-pixels-dark 0.0000 < 0.05, catalog 8 objects), ng build exit 0. PASS file
-`.workers/logs/B1-verify-37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5.md`; merged-tip re-run follows
-before merge.
+`notes-phase7.md`, `notes-phase8.md`; B1r–B1r5 folded). Verified 2026-11-21 (PASS #2) @ editor tip
+`c8982eb` (branch merged C4 master `d404658`; verifier fixes `b770b44`, `37f2a7f`, harness fix
+`c8982eb`): merged suite e2e **616 PASS / 0 FAIL / 51 scenarios**, `e2e:build` **4 fixtures /
+0 failed** (wizard-project, pixels-lit 0.4980 > 0.3, pixels-dark 0.0000 < 0.05, catalog 8 objects),
+ng build exit 0. PASS file
+`.workers/logs/B1-verify-c8982ebd8d5b105a9dcf9070b664f9cd455fbc3b.md`.
 
 | Task | Do | Done when |
 |---|---|---|

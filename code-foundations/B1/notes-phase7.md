@@ -166,3 +166,16 @@ B1r4 checks 9–12 incl. the 8784-vertex readback `last=(138,1,20)`; `noErrors` 
 7/7. Lock RELEASED at end (`wk.sh unlock editor-e2e W2`, exit 0); port 8044 server stopped —
 C4 queue may proceed. Raw logs: `.workers/logs/B1-verify-full-37f2a7f.log` + intermediates
 listed in the PASS file.
+
+### Verify PASS #2 — merged tip (2026-11-21)
+
+Editor branch merged C4's master `d404658` (merge commit `d5d1655`); merged suite e2e
+**616 PASS / 0 FAIL / 51 scenarios**. `e2e:build` pixels-dark hit a 300 s hang → cc-debugging
+root cause: raw headless Chrome spawn hung pre-page-load on field-trial/GCM background
+services racing the network-service restart → fix `c8982eb` (`app/e2e/platform-pixels.mjs`,
++8 lines, 3 Chrome launch switches `--disable-field-trial-config --disable-component-update
+--no-service-autorun`, Playwright-style; harness-only, no test weakened). Repro 12/12 green
+post-fix → full re-run at `c8982ebd8d5b105a9dcf9070b664f9cd455fbc3b`: e2e **616/0, 51
+scenarios**, `e2e:build` **4 fixtures / 0 failed** (wizard `12f9fcf5…`, pixels-lit 0.4980
+`ec9a5d46…`, pixels-dark 0.0000 `514d1189…`, catalog `a0467e71…`). PASS file:
+`.workers/logs/B1-verify-c8982ebd8d5b105a9dcf9070b664f9cd455fbc3b.md`.

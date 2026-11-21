@@ -673,6 +673,11 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
     weakened, full suite re-run after each fix. PASS file
     `.workers/logs/B1-verify-37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5.md`; merged-tip re-run
     follows before merge.
+  - **Verified 2026-11-21 (PASS #2, merged tip)** at `c8982eb` (branch merged C4 master `d404658`
+    via `d5d1655`): merged suite e2e **616 PASS / 0 FAIL / 51 scenarios**, `e2e:build` **4 fixtures /
+    0 failed**; harness fix `c8982eb` — 3 Chrome launch switches in `platform-pixels.mjs`
+    (field-trial/GCM services hung the raw headless spawn; no test weakened). PASS file
+    `.workers/logs/B1-verify-c8982ebd8d5b105a9dcf9070b664f9cd455fbc3b.md`.
 
 ### 2026-11-10
 - **The editor runs the current engine and reads version 2 (A8).** The app takes
