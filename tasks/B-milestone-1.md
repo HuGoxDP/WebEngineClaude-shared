@@ -34,6 +34,10 @@ if it does not build and run on the platform, the stage is not closed. Add e2e s
 
 ## B1 — Stage 6: scene and objects *(editor; ~2 weeks; Sonnet; human check for navigation feel)*
 
+**Done 2026-11-21** (branch `B1-component-gizmos`; notes `code-foundations/B1/notes-phase6.md`,
+`notes-phase7.md`, `notes-phase8.md`; B1r–B1r5 folded). Phase-6 gate full e2e 380/380; the e2e
+re-verify of `dcf5926` is pending the build window.
+
 | Task | Do | Done when |
 |---|---|---|
 | B1.1 3D Object menu | GameObject → 3D Object → Cube, Sphere, Capsule, Cylinder, Plane, Quad via `Mesh.create*`, with `MeshFilter`, `MeshRenderer`, a default `StandardMaterial`. Same in the Hierarchy "+". New object placed in front of the editor camera and selected; one undo step. | e2e: each primitive created, saved, reopened, present; built archive shows a cube on the platform (`e2e:build`). |

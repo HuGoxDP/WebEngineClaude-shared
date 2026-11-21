@@ -641,6 +641,30 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
 
 ## WebEngineTSEditor — the editor
 
+### 2026-11-21
+- **B1 — stage 6 (scene and objects) landed; B1r5 pre-merge review folded.** The Scene view behaves
+  like Unity's: 3D Object menu with the six primitives (Unity placement — roots at the pivot,
+  children at local zero via `setParent(p, false)`), Unity navigation (Alt-orbit, RMB look + WASD/QE
+  fly, MMB pan, wheel zoom, F frame / Shift+F follow), the orientation cube (engine-space arms,
+  centre ortho/persp toggle), Q/W/E/R/Y tools with Pivot/Center, Local/Global and snapping, box
+  selection + orange mask-pass outline, component gizmos + the Gizmos menu (per-type toggles,
+  icons, localStorage view state), scene lighting on by default (D-7), Shaded/Wireframe, grid
+  recentre + step, and the platform pixel fixtures + stage-6 catalog export (`platform-pixels.mjs`,
+  fixture loop in `scenariocreator-check.mjs`). All assertions run through a localStorage-gated
+  debug probe (`wets:debug:probe`), engine-space, absent in normal sessions. B1r5's six findings
+  fixed: uniform Global scale in the combined/Y tool + exclusive scale-zone enabler (`c492918`),
+  Centre scale offsets carried through the seated axes (`c492918`), circle normals measured u×v
+  (`21eefbb`), capsule silhouette 6 circles + 4 side lines (`21eefbb`), gizmo lifecycle
+  clears/dispose (`21eefbb`), and discriminating tests — synthetic Error-severity GL lines through
+  `noErrors` (`dcf5926`) + an 8784-vertex buffer read-back probe (`21eefbb`). Branch
+  `B1-component-gizmos`, commits `ef8f4a4`, `29184a2`, `c492918`, `21eefbb`, `dcf5926`. Phase-6
+  gate: full e2e **380/380**, `e2e:build` wizard fixture green. **e2e re-verify of `dcf5926`
+  pending the build window** (RAM gate); phase-7 run results are marked pending in
+  `code-foundations/B1/notes-phase7.md`. Deviations recorded in `notes-phase8.md` (Plane/Quad
+  without collider — no MeshCollider in the engine; one outline colour; lighting on for every
+  scene, D-7; per-axis scale boxes still drawn, effect uniform; #5 static-only; no platform
+  upload in CI).
+
 ### 2026-11-10
 - **The editor runs the current engine and reads version 2 (A8).** The app takes
   WebEngineTS `0.1.0-local.1794329867` (packed from engine master by hand, editor-only,
