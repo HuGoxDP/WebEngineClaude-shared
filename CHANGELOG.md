@@ -664,6 +664,15 @@ See `WebEngineTS/CHANGELOG.md` for `[0.1.0]` and the running `[Unreleased]` sect
   without collider — no MeshCollider in the engine; one outline colour; lighting on for every
   scene, D-7; per-axis scale boxes still drawn, effect uniform; #5 static-only; no platform
   upload in CI).
+  - **Verified 2026-11-21 (PASS #1)** at editor tip `37f2a7f` (= `dcf5926` + two verifier fixes:
+    `b770b44` gizmo pool growth rounded to whole vertices — fractional `BufferAttribute.count`
+    made `computeBoundingSphere` over-read into NaN; `37f2a7f` platform-pixels outer window
+    656,631 → true 640×480 buffer, measured 624×329 frame loss): ng build exit 0, full e2e
+    **433 PASS / 0 FAIL / 29 scenarios** (baseline 380), `e2e:build` **4 fixtures / 0 failed** —
+    pixels-lit luminance 0.4980 (> 0.3), pixels-dark 0.0000 (< 0.05), catalog 8 objects; no test
+    weakened, full suite re-run after each fix. PASS file
+    `.workers/logs/B1-verify-37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5.md`; merged-tip re-run
+    follows before merge.
 
 ### 2026-11-10
 - **The editor runs the current engine and reads version 2 (A8).** The app takes

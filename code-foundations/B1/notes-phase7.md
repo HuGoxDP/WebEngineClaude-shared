@@ -109,14 +109,60 @@ paths (a 2-line file-scope extension; the plan's file scope did not list it).
 `0.2.0`, W2 engine source is `0.3.0`; per D-14 the platform pixel check renders on SC's bundle
 (`0.2.0`) — that IS the platform artifact today; recorded, not "fixed" (no engine changes).
 
-## Results (filled after the green run)
+## Results (verify PASS #1, 2026-11-21 — tip `37f2a7f`)
 
-- tsc / ng build: (pending verify window — RAM gate)
-- e2e PASS before: 380 (baseline, phase-6 commit). After: (pending verify window — RAM gate)
-- e2e:build fixtures + ZIP sha256 lines: (pending verify window — RAM gate; last known:
-  wizard fixture 6 PASS, zip sha256 `3e63625856db77cc02cd67705169afd2783cacd8135acd03a2f26d64a0376999`;
-  pixels-lit / pixels-dark / catalog were SKIPPED before the phase-7 exports existed)
+Source: `.workers/logs/B1-verify-37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5.md` (authoritative PASS file).
+
+- ng build (production, `--base-href /editor/`): exit **0**; `base href="/editor/"` verified in
+  `dist/browser/index.html`; pre-existing bundle-budget warning only (1.91 MB vs 1.00 MB), no errors.
+- e2e PASS before: 380 (baseline, phase-6 commit). After: **433 PASS / 0 FAIL / 29 scenarios**,
+  exit 0 (+53: phase-7 B1.7 lighting/view 24 + fixture exports 5 + B1r4 proofs 33 + B1r5 harness 7
+  + placement/scale additions). DW-7.1…7.4 scenario 24/24 green; every scenario ends
+  "no page errors" and "no native dialogs were used".
+- e2e:build: **4 fixtures, 0 failed** (DW-7.5/7.6 — all 6 chain checks PASS each):
+  - wizard-project (2 objects): zip sha256 `22835f1d6674956082efb65fc3afca624d6507c0d57b62e0eeafaf6900c5df7e`
+  - pixels-lit (3 objects): zip sha256 `47ece29a35840586e8eebec8e1c659cdc26f2ba9946de789ec444c8051891fab`;
+    luminance=0.4980 rgba=127,127,127,255 at=320,240 → PASS --min 0.3
+  - pixels-dark (2 objects): zip sha256 `ae2f6f3bdcd8a971e13184a895aec628733a5713982120f24d8a99eaeb636f94`;
+    luminance=0.0000 rgba=0,0,0,255 at=320,240 → PASS --max 0.05
+  - catalog (8 objects): zip sha256 `f877aa5b25d41ff2300a6a04d717c1a890704b5909a69817d2d3ef7a0a590980`
+  (ZIPs are non-deterministic across builds — timestamps; the SHA lines above are the final-run evidence.)
 - Deviations: per-axis scale boxes still drawn (effect uniform); B1r5 #5 static-only; the three
   items above.
-- **Tests NOT run** — the code landing above is static-review only; the green run is the
-  verifier's queue.
+- **DW-7.7 full checks green in one run:** ng build 0, e2e 433/0, e2e:build 4/0.
+
+## Verify (2026-11-21)
+
+PASS #1 recorded at editor tip `37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5` (= dispatch tip
+`dcf5926` + two verifier fix commits `b770b44`, `37f2a7f`; pushed, no force). Slot b1-verifier,
+runs 17:43Z–21:01Z, under `editor-e2e.lock` (owner `W2 B1`).
+
+Run history: run1 @`dcf5926` **432 PASS / 1 FAIL** (B1r4 "no page errors" —
+`THREE.BufferGeometry.computeBoundingSphere(): Computed radius is NaN`) → fix `b770b44` →
+run2 stale-serve artifact (same FAIL: python http.server through the NTFS junction kept serving
+the pre-fix bundle; junction replaced with a real copy) → run3 **433/0** → fix `37f2a7f`
+(harness-only) → final rebuild + full re-run **433/0** at `37f2a7f`. Full suite re-run after
+each fix; e2e:build re-run 4/0. **No test, check or threshold weakened.**
+
+Two verifier fixes (evidence-cited):
+1. **`b770b44`** — gizmo pool growth capacity rounded to whole vertices
+   (`app/src/app/scene-view/component-gizmos.ts`, +7/−1). Grown capacity was a power-of-two in
+   *floats* (8784 verts → 26352 floats → 32768), not divisible by 3: three.js
+   `BufferAttribute.count = array.length / itemSize` (three/src/core/BufferAttribute.js:86) =
+   10922.67, and `computeBoundingSphere` loops `i < count`
+   (three/src/core/BufferGeometry.js:767) → last iteration reads past the array end → undefined →
+   NaN radius (triggered by the scene-picker raycaster). Fix: `capacity = Math.ceil(capacity / 3) * 3`
+   (32769 floats, count 10923 integer); drawn verts/drawRange/read-back unchanged; only growth site
+   in src/. Read-back after: `drawn=8784, capacity=10923, last=(138,1,20)`.
+2. **`37f2a7f`** — platform-pixels outer window 656,631 → true 640×480 buffer
+   (`app/e2e/platform-pixels.mjs`, +9/−3, harness-only). Measured (POST-back probe ×3 stable):
+   `--window-size=640,480` sets the OUTER window; Windows headless Chrome frame eats 16×151 px →
+   inner 624×329 → probe pixel (320,240) below the cube → background (lit luminance 0.0000, one
+   run timed out 300 s). Outer 656,631 → inner exactly 640×480 (3/3 runs); lit 0.4980 PASS, dark
+   0.0000 PASS.
+
+B1r5 all six confirmed live: B1.4 tail uniform ratios + seated Centre ArmKid (8 PASS lines);
+B1r4 checks 9–12 incl. the 8784-vertex readback `last=(138,1,20)`; `noErrors` synthetic harness
+7/7. Lock RELEASED at end (`wk.sh unlock editor-e2e W2`, exit 0); port 8044 server stopped —
+C4 queue may proceed. Raw logs: `.workers/logs/B1-verify-full-37f2a7f.log` + intermediates
+listed in the PASS file.

@@ -21,22 +21,26 @@ Gate: Minimal — code-only/docs-only, **no test runs** (RAM gate closed; the ve
   "(pending verify window — RAM gate)" except the 380 baseline.
 - `code-foundations/B1/notes-phase8.md` — this file.
 
-## Pending-verify state
+## Verify state — PASS #1 recorded (2026-11-21)
 
-The last five editor commits (`ef8f4a4`, `29184a2`, `c492918`, `21eefbb`, `dcf5926`) have **not**
-been through `npm run build` / `npm run e2e` — no builds or tests were run in this phase.
-Phase-6 gate (verified green earlier): full e2e **380 PASS / 0 FAIL**; `e2e:build` wizard
-fixture 6 PASS, catalog zip sha256
-`3e63625856db77cc02cd67705169afd2783cacd8135acd03a2f26d64a0376999`; pixels-lit/dark/catalog
-then SKIPped (phase-7 exports not yet authored). The lead updates the ✅ notes after the green
-run. Evidence: `.workers/logs/B1-editor-code-report.md` §6 (verifier queue),
-`.workers/reports/B1-tasklead-report.md`.
+The five phase-8-era editor commits (`ef8f4a4`, `29184a2`, `c492918`, `21eefbb`, `dcf5926`) plus
+two verifier fixes (`b770b44` gizmo pool growth rounded to whole vertices; `37f2a7f`
+platform-pixels outer window → true 640×480 buffer) are verified at editor tip
+`37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5`: ng build exit 0 (`--base-href /editor/`, budget
+warning only); full e2e **433 PASS / 0 FAIL / 29 scenarios** (baseline 380); `e2e:build`
+**4 fixtures, 0 failed** — wizard-project / pixels-lit (luminance 0.4980 > 0.3) / pixels-dark
+(0.0000 < 0.05) / catalog (8 objects), ZIP sha256 lines in `notes-phase7.md` § Results. No test
+weakened; full suite re-run after each fix. Authoritative PASS file:
+`.workers/logs/B1-verify-37f2a7f3ed3d53e0ac942714c4a2bae180ac2ca5.md`; run history and fix
+citations: `notes-phase7.md` § "Verify (2026-11-21)". A merged-tip re-run follows before merge.
+Earlier evidence: `.workers/logs/B1-editor-code-report.md` §6, `.workers/reports/B1-tasklead-report.md`.
 
-## DW-8.1 — parity rows (editor repo part DEFERRED)
+## DW-8.1 — parity rows (editor repo part landing in the same pass)
 
-The stage-6 parity rows live in `WebEngineTSEditor/docs/unity-editor-plan.md` — the **editor
-repo, which this task must not touch** (verify window pending on the editor branch). That part
-of DW-8.1 is deferred to the post-verify docs pass on the editor branch. Recorded deviations
+The stage-6 parity rows live in `WebEngineTSEditor/docs/unity-editor-plan.md` §5 (+ README) —
+the **editor repo, which this shared-repo task must not touch**. That part of DW-8.1 is being
+landed in the same pass by the editor worker on the editor branch; its commit SHA is not
+referenced here (not visible from this worktree). Recorded deviations
 (verbatim from the plan's DW-8.1, matching the editor code report §5):
 
 - **Plane/Quad without collider** — the engine has no MeshCollider.
@@ -48,7 +52,7 @@ of DW-8.1 is deferred to the post-verify docs pass on the editor branch. Recorde
 
 ## DW-8.2 — roadmap row + build notes
 
-- ROADMAP B1 row: done above (✅ + what landed + pending-verify note).
+- ROADMAP B1 row: done above (✅ + what landed + verified-2026-11-21 note replacing the pending one).
 - Probe API: documented in `code-foundations/B1/notes-phase6.md` § "Probe API additions"
   (`gizmoInfo`, `iconCounts`, `transformOf` with `lossyScale` + local TRS, `setComponentEnabled`,
   `gizmoBufferStats`); the probe itself is localStorage-gated
