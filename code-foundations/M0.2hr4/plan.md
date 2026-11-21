@@ -177,7 +177,7 @@ Short version of the decisions:
   - the copy's `sharedMesh` is the same object `m`;
   - the copy's renderer geometry has x = 5 at vertex 0.
   - Fails on `c4a0119`.
-- [ ] DW-3.2: Destroy the original after Instantiate → the copy's mesh `exists()` and the copy draws 24 vertices. Then the copy's own `f.mesh` read → a new object; the original instance is untouched.
+- [ ] DW-3.2: Destroy the original after Instantiate → the copy's mesh `exists()` and the copy draws 24 vertices. Then the copy's own `f.mesh` read → a new object carrying the edit; per binding D-2 that read releases the shared instance to its last use → it is freed (deferred) once no filter holds it. *(Wording corrected at Report per adversarial note N5 / ruling A7: the original wording "the original instance is untouched" contradicts D-2's last-use free; both halves — survivor while a use remains, and release at zero — are pinned. See notes.md.)*
 - [ ] DW-3.3:
   - an unedited `Mesh.createCube()` assigned through `sharedMesh` is shared by the copy (`toBe`);
   - an asset mesh is still `toBe` the AssetDatabase object (`tests/ModelSubAssets.test.ts` green unchanged).
