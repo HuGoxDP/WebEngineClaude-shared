@@ -179,3 +179,15 @@ Counts (DW-1.6 / DW-2.4):
   pins green; verifier scratch run (uncommitted, deleted) additionally proved mixed eras
   both directions dedup and explicit `enabled:false` on either side still differs (5/5).
 - Verdict file: `.workers/logs/SER1-verify-1249957.md`.
+
+## Phase 3 record (docs worker, 2026-11-22) — DW-3.1 done
+
+- Engine `3b71fb3` `docs(SER1): changelog - Behaviour.enabled survives save, load,
+  Instantiate and prefabs (DW-3.1)` — CHANGELOG *Fixed* entry only.
+  Docs-only proof: `git diff 1249957 --stat` = `CHANGELOG.md | 10 ++++++++++`,
+  `1 file changed, 10 insertions(+)` — no src/test change, PASS pin on `1249957` carries over.
+- `report.md` written beside these notes (every DW with evidence and exact test names,
+  commits, the 6 sanctioned fixture sites with file:line, lead rulings applied, deviations).
+- ENGINE-GAPS.md: plan/research name no gap entry; registry has no `enabled` row — left as
+  found, noted in report §Deviations.
+- ROADMAP tick happens in the Report step (separate commit), per plan OUT.
