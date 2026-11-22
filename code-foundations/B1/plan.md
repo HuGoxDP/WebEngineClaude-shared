@@ -86,8 +86,8 @@ the probe API, `viewport.pivot` accessor.
 - [ ] DW-1.1: e2e `3d objects`: for each of the six kinds, from GameObject → 3D Object: one object
   with the right name is selected, `transformOf` = pivot (origin), Ctrl+Z removes it in one step,
   Ctrl+Y brings it back.
-- [ ] DW-1.2: same from Hierarchy "+" and from the context menu of an object (→ child at local zero).
-- [ ] DW-1.3: save → close → reopen: all six present; the saved JSON has `version: 1`, a
+- [x] DW-1.2: same from Hierarchy "+" and from the context menu of an object (→ child at local zero).
+- [x] DW-1.3: save → close → reopen: all six present; the saved JSON has `version: 1`, a
   `PrimitiveMesh` with the D-3 kind/args on each `MeshFilter`, a material on each `MeshRenderer`,
   and the D-3 collider type.
 - [ ] DW-1.4: with a cube at the origin selected and the move tool on, `pixelStats` finds the gizmo's
@@ -226,13 +226,13 @@ child meshes of a selected empty parent get outlined; meshes behind the camera n
 the next frame.
 
 **Done when:**
-- [ ] DW-6.1: e2e: in the "Light and camera" template, `gizmoCounts()` reports cameraFrustum 1 and
+- [x] DW-6.1: e2e: in the "Light and camera" template, `gizmoCounts()` reports cameraFrustum 1 and
   directionalLight 1; unchecking Camera in the Gizmos menu → cameraFrustum 0, light still 1; master
   toggle off → all 0; settings survive a reload.
-- [ ] DW-6.2: a cube's BoxCollider wireframe count 1; PointLight range circles follow `range` edited in
+- [x] DW-6.2: a cube's BoxCollider wireframe count 1; PointLight range circles follow `range` edited in
   the inspector (probe returns the radius).
-- [ ] DW-6.3: screenshots `.shots/b1-gizmos-on.png` and `b1-gizmos-off.png`, attached to the report.
-- [ ] DW-6.4: none of the gizmo objects appears in a saved scene (diff of the scene JSON with gizmos
+- [x] DW-6.3: screenshots `.shots/b1-gizmos-on.png` and `b1-gizmos-off.png`, attached to the report.
+- [x] DW-6.4: none of the gizmo objects appears in a saved scene (diff of the scene JSON with gizmos
   on vs off is empty).
 
 ### Phase 7: Scene lighting, draw modes, grid; platform check; catalog scenario (B1.7)
