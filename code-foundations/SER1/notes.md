@@ -150,3 +150,32 @@ one-sided :570 variant — it pins the regression guard, not the feature.
 - Phase 3 (CHANGELOG, report.md, ROADMAP untouched) — docs worker per plan.
 - Verifier gates: DW-1.6, DW-2.4 (full gate on Phase 2), counts before/after.
 - Lead review: :570 both-operand design note (ATTENTION).
+
+## Verifier record (Full gate, 2026-11-22) — PASS
+
+Merge-forward: `git merge origin/master` (6 incoming M0.2hr4 mesh-alias commits, base
+c4a0119 → master 73c96a6) merged clean, auto-merge of `tests/Serialization.test.ts` only;
+new tip **124995777c99e001e585da3f8d0ef2d123143880**, pushed, worktree clean.
+Overlap risk noted: incoming touched SceneSerializer.ts/ValueSerializer.ts/GameObject.ts
+(mesh identity, not Behaviour fields) and Serialization.test.ts (+92 lines of new tests,
+disjoint from the SER1 fixture hunks) — full suite green confirms no interference.
+
+Counts (DW-1.6 / DW-2.4):
+- Before (origin/master 73c96a6, recorded in `.workers/logs/M0.2hr4-verify-e494ea1.md`,
+  same suite content as the merge tip): **186 files / 3070 tests passed**.
+- After (merged tip 1249957): **188 files / 3084 tests passed**, 0 failed, exit 0.
+  Delta +2 files / +14 tests = BehaviourEnabledSerialization (9) + PrefabEnabledOverride (5). Exactly accounted.
+- `npm run typecheck` exit 0 (build+player+test tsconfigs); `npm run build` exit 0
+  (dist/WebEngineTS.d.ts, player-host.js, player/player.js all created).
+- Per-file: PrefabEnabledOverride 5/5, BehaviourEnabledSerialization 9/9,
+  Serialization 158/158, PrefabInstances 54/54, CinemachinePostSerialization 18/18,
+  ModelSubAssets 14/14; all Prefab* files green (PrefabEditing 64, PrefabIdentity 20,
+  PrefabReferences 16, PrefabComponentIds 4, PrefabRevertUnderHolder 4).
+- DW-2.4 audit: `git diff origin/master...HEAD -- tests/Prefab*.test.ts tests/ModelSubAssets.test.ts`
+  = new PrefabEnabledOverride.test.ts + 3 key-only `enabled: true` additions in
+  PrefabInstances.test.ts (:80, :221, :237); ModelSubAssets byte-identical; no assertion edits.
+  All 6 sanctioned sites verified key-only (also Cinemachine :162 key list, Serialization :439/:455).
+- Lead ruling (1) :570 both-operand normalization verified: both-old dedup + distinct-insert
+  pins green; verifier scratch run (uncommitted, deleted) additionally proved mixed eras
+  both directions dedup and explicit `enabled:false` on either side still differs (5/5).
+- Verdict file: `.workers/logs/SER1-verify-1249957.md`.
