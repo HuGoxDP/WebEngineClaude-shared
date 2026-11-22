@@ -33,6 +33,7 @@ waits on it can proceed.
 | 25 | V2: `LineRenderer.useWorldSpace` default | **`true`**, Unity's default and already the engine's (`LineRenderer.ts:148`) — no change | V2 | **`true`** — delegated (2026-11-11) |
 | 26 | V3: AtomStructure scope — ~36 of 118 elements today | **All 118**, from a cited public source, with a completeness test | V3 | **All 118** — delegated (2026-11-11) |
 | 27 | R9: collect performance telemetry from the platform? | **Yes, minimal and anonymous**: per-session aggregates only (scenario, engine version, first-frame time, frame-time percentiles, a coarse GPU class), no account, no IP, no free-form strings, bounded retention — it also answers decision #4 (real student hardware) without a lab | R9, V4 | **Yes, minimal and anonymous** — delegated (2026-11-11) |
+| 28 | C4r8 DW-2.2: the editor's unknown-component-type check never sees the page's `console.warn` (ScenarioCreator's browser runs with `stdio:"ignore"`) — A1 capture the console in the editor e2e, B fix ScenarioCreator `verify-render`, or C leave it inert? | **A1** — the check goes green inside the repo that owns it; B optional later; C is a check that never fires | C4r8 Phase 2 | **A1** — delegated, provisional (Claude pass 2026-11-23; `decisions/C4r8-DW-2.2.md`, rollback = revert one editor commit) |
 
 Already decided (for reference, do not reopen without a reason): link mode only in project files,
 expanded at Build (Q1, 2026-10-13); component ids scoped like node ids (Q2, 2026-10-13); updating a
