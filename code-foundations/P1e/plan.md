@@ -103,3 +103,16 @@ Execution order: Phase 1 (tests, red) -> Phase 2 (fix + update P1c test) -> Phas
 ## Final check (orchestrator, no scope)
 On the P1c branch in W2: `cd backend && node --test "test/unit/*.test.js"` is green and, at the repo root,
 `node --test scripts/test/*.test.mjs` is green; changed files equal the union of the P1c scope and the phase scopes above.
+
+---
+## Addendum — P1c pre-merge review round 1 (Claude, 2026-11-23)
+`code-foundations/P1c/review-premerge.md` (sha e29775e, open-blocking 3). The same task-lead run on the P1c branch also fixes:
+- **R1-2 (AC-2, spec interface):** `main(argv, {store, out, err})` takes WRITABLE STREAMS (`out.write(string)`), default
+  `process.stdout`/`process.stderr` — not functions. **Done when:** a new test passes `{write}` objects and gets exit 0 /
+  printed JSON for `--dry-run`, exit 2 for a bad issuer; the existing P1c tests that pass functions are updated (they
+  are new files of this branch, not on `origin/ms/1`, so the gate's test guard allows it).
+- **R1-3 (AC-3):** with `--from-moodle`, an explicit `--auth-login-url` / `--auth-token-url` / `--jwks-uri` is not ignored:
+  it is validated like any endpoint (https, issuer's origin) — a foreign host → exit 2, nothing saved; a valid one
+  overrides the Moodle default. **Done when:** a new test with `--from-moodle https://m.example --auth-login-url
+  https://evil.example/x` returns 2 and the fake store saw no save.
+- Non-blocking items of that review are optional; whatever is not fixed goes to DEBT.md (lead notes it in its report).
