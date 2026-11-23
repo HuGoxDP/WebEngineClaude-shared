@@ -1,6 +1,6 @@
 # C4r8 DW-2.2 — how the "unknown component type" check sees page warnings
 
-Decided by the Claude pass 2026-11-23 (delegated, provisional). Question parked in `lead-we-heartbeat.json`
+Decided by the Claude pass 2026-11-23 (delegated, provisional) — superseded the same day by the OWNER's ruling (OWNER-DECISIONS #28: A1 now, B follow-up), which is final. Question parked in `lead-we-heartbeat.json`
 and `.workers/ATTENTION.md` (2026-11-22), now OWNER-DECISIONS #28.
 
 - **Options:** A1 — capture the page console in the editor's own e2e run and feed it to the existing
