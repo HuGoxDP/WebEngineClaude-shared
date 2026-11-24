@@ -1,9 +1,9 @@
 sha: ecd5ba8ebd2c6921ca02115c7650d80097a2e69d
 repo: virtual-lab
 round: 3
-updated: 2026-11-24T20:45Z by the Claude pass — the plans/ deletion is now a blocking finding (the lead tried to merge without it)
+updated: 2026-11-24T21:15Z by the Claude pass — plans/ deletion moved to the pass (workers cannot delete files: no git rm in we-task-lead/coder); land as is
 reviewer: opus, high (fresh)
-open-blocking: 1
+open-blocking: 0
 ---
 - [closed] correctness scripts/test/install-windows-doc.test.mjs + scripts/test/fixtures/self-host-pre-ho1a.md — round-2 blocker (the whole-doc guard compared against a stale frozen fixture and failed on the merge result) — fixed by 12e2d9b: the fixture is deleted, the additions-only test is removed, and the guard now checks only the `## Встановлення` slice and the Windows subsection: where it sits (before `### Перший модератор`), the four required strings and the D12 content list. The F1 tests in install-windows-findings.test.mjs were reworked: an edit to `## HTTPS` (anchor exists, self-host.md:373) passes the guard, and a clobbered subsection fails it. Evidence: `git merge-tree --write-tree origin/ms/1 ecd5ba8` → abfc813 with no conflicts; `git archive` to a temp dir; `node --test scripts/test/install-windows*.test.mjs` → tests 45, pass 45, fail 0, skipped 0. `git diff --numstat origin/ms/1...ecd5ba8 -- docs/self-host.md` → `52 0`.
 - [closed] non-blocking scripts/test/install-windows-findings.test.mjs — the round-2 note about the hard-coded intro sentence `Цей документ — для адміністратора університету` — that test was removed together with the whole-doc guard. Evidence: `git show 12e2d9b -- scripts/test/install-windows-findings.test.mjs`.
@@ -27,4 +27,5 @@ Verified OK:
 - Docs: the ACL inheritance warning (BUILTIN\Users, icacls) and the Group Policy limit on `-ExecutionPolicy Bypass` (MachinePolicy/UserPolicy) are both stated accurately. No `docker compose … -f` line. The `down -v` data-loss warning is present.
 
 **Merge condition (Claude pass 2026-11-24):** this review also covers a tip that is ecd5ba8 + syncs with origin/ms/1 + ONE commit that only deletes `plans/2026-11-23-ho1a-premerge-findings.md` (`git rm`, nothing else). Make that commit before landing so the worker work-plan file never reaches ms/1.
-- [open] correctness plans/2026-11-23-ho1a-premerge-findings.md — a worker work-plan file (swarm-internal directives, stale) is committed to the product repo and would land in ms/1 and the owner PR — fix: ONE commit on the same branch that only runs `git rm plans/2026-11-23-ho1a-premerge-findings.md`; after it the gate runs and the next PREMERGE line is round 4 (a pure-deletion check)
+- [debt] non-blocking plans/2026-11-23-ho1a-premerge-findings.md — a worker work-plan file (swarm-internal directives, stale) is committed to the product repo and would land in ms/1 and the owner PR — fix: ONE commit on the same branch that only runs `git rm plans/2026-11-23-ho1a-premerge-findings.md`; after it the gate runs and the next PREMERGE line is round 4 (a pure-deletion check)
+- note: the Claude pass removes plans/2026-11-23-ho1a-premerge-findings.md from ms/1 with its own gated commit right after HO1a lands. The earlier "merge condition" no longer applies.
