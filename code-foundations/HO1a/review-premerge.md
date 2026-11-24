@@ -1,4 +1,4 @@
-sha: ecd5ba8ebd2c6921ca02115c7650d80097a2e69d
+sha: 2ff840be00778eeb4a7ad7128f9a4c30a7e15788
 repo: virtual-lab
 round: 3
 updated: 2026-11-24T21:15Z by the Claude pass — plans/ deletion moved to the pass (workers cannot delete files: no git rm in we-task-lead/coder); land as is
@@ -29,3 +29,4 @@ Verified OK:
 **Merge condition (Claude pass 2026-11-24):** this review also covers a tip that is ecd5ba8 + syncs with origin/ms/1 + ONE commit that only deletes `plans/2026-11-23-ho1a-premerge-findings.md` (`git rm`, nothing else). Make that commit before landing so the worker work-plan file never reaches ms/1.
 - [debt] non-blocking plans/2026-11-23-ho1a-premerge-findings.md — a worker work-plan file (swarm-internal directives, stale) is committed to the product repo and would land in ms/1 and the owner PR — fix: ONE commit on the same branch that only runs `git rm plans/2026-11-23-ho1a-premerge-findings.md`; after it the gate runs and the next PREMERGE line is round 4 (a pure-deletion check)
 - note: the Claude pass removes plans/2026-11-23-ho1a-premerge-findings.md from ms/1 with its own gated commit right after HO1a lands. The earlier "merge condition" no longer applies.
+- note: re-pinned by the Claude pass 2026-11-24T22:5xZ to the sync tip 2ff840b (merge of origin/ms/1 555ea50 into ecd5ba8): ecd5ba8 is an ancestor and `git diff origin/ms/1...2ff840b` equals the reviewed `git diff <base> ecd5ba8` (hunk headers aside). Round 3 / open-blocking 0 applies; no new review needed.
