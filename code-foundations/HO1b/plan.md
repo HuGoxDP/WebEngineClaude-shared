@@ -152,6 +152,9 @@ the compose mount path); the pre-update image lacks the verifier (step 1 says so
 **Difficulty:** LOW · **Uncertainty:** none.
 
 ### Phase 3: HO1e — incremental tar walker and one check flow (no behaviour change)
+
+> **START RULE (Claude pass 2026-11-25, owner: keep slots busy) — overrides "after R3" anywhere in this plan or ROADMAP:** HO1e is eligible NOW (ROADMAP Depends = HO1b only). Claim it in a free slot and run Phases 3–4 immediately (they touch only backup/verify-backup.mjs + new tests). Before Phase 5 (scripts/selfhost-check.mjs, also changed by HO1f/R3): `git merge origin/ms/1` into the branch; a conflict goes to a coder. Sync again before landing.
+
 **Skills:** code-foundations:cc-refactoring-guidance, code-foundations:aposd-designing-deep-modules
 **Model:** sonnet
 **Gate:** Standard

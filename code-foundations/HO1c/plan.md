@@ -115,6 +115,9 @@ CLI wiring, testable with a fake `proc` (EventEmitter).
 **Difficulty:** MEDIUM · **Uncertainty:** real console Ctrl+C on Windows is only checked by hand (AC-16).
 
 ### Phase 3: HO1f — honest teardown, port, health and smoke reports; texts
+
+> **HO1f DISPATCH (Claude pass 2026-11-25):** HO1d has landed (ms/1 30a9558), so HO1f is eligible. `lead_queue` shows it as "RESUME (your parked claim)": that claim is the old opencode-era claim `claims/HO1f` + branch `HO1f-selfhost-check` on origin (slot W2). Do: `lead_claim({slot:"W2", id:"HO1f", slug:"selfhost-check"})`, then dispatch we-task-lead in W2 on branch `HO1f-selfhost-check` (git fetch; git switch HO1f-selfhost-check || git switch -c HO1f-selfhost-check origin/ms/1; git merge origin/ms/1). R3 (Phase 4) follows after HO1f lands.
+
 **Skills:** code-foundations:cc-refactoring-guidance, code-foundations:cc-control-flow-quality, code-foundations:cc-defensive-programming
 **Model:** sonnet
 **Gate:** Standard
