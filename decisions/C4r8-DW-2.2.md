@@ -19,3 +19,10 @@ and `.workers/ATTENTION.md` (2026-11-22), now OWNER-DECISIONS #28.
   (DW-2.1); run under `editor-e2e.lock` (DW-2.3).
 - **Public behaviour:** none. Test and check tooling only; the engine fix (`609ec32`) is unaffected.
 - **Rollback:** revert the one editor commit; the check falls back to today's inert grep.
+
+## Addendum (MS-2 activation, Claude pass 2026-11-26) — provisional
+
+The gate's test guard refuses any edit to `app/e2e/scenariocreator-check.mjs` (`e2e/` is a test path), so
+the A1 console capture lands with the same mechanism in the **new** file
+`app/e2e/scenariocreator-components.mjs` (MS-2 AC-10); the branch commit `ec4bb7d` is not merged.
+Rollback: move the capture inline once a reviewed test-guard exception exists, and delete the new file.
